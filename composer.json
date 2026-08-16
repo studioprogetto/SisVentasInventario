@@ -1,0 +1,13 @@
+{
+    "name": "nesch/mi_sistema_mvc",
+    "autoload": {
+        "psr-4": {
+            "Nesch\\MiSistemaMvc\\": "src/"
+        }
+    },
+    "require": {
+        "phpoffice/phpspreadsheet": "^5.1",
+         "mpdf/mpdf": "^8.1",
+        "picqer/php-barcode-generator": "^2.2"
+    }
+}

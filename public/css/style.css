@@ -1,0 +1,157 @@
+/* --- Solución para el Footer Pegajoso (Sticky Footer) --- */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+
+/* main { flex-grow: 1; } <-- Ya no es necesario con el nuevo layout */
+.bg-studio {
+    background-color: #1A2A44;
+}
+
+
+.tarjeta-sellos {
+    display: grid;
+    grid-template-columns: repeat(6, 30px);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.sello {
+    font-size: 20px;
+    color: #ccc;
+}
+
+.sello.activo {
+    color: #ff6600;
+}
+
+/* --- ESTILOS PARA EL MENÚ LATERAL (SIDEBAR) --- */
+/* ===== Scrollbar Bonito para el Sidebar ===== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    background-color: #1A2A44;
+    padding: 1rem;
+    overflow-y: auto;
+    color: white;
+    z-index: 1030;
+    transition: transform 0.3s ease-in-out;
+
+    /* Suaviza el scroll */
+    scrollbar-width: thin;
+    /* Para Firefox */
+    scrollbar-color: #495057 #1A2A44;
+    /* thumb | track */
+}
+
+/* Para navegadores basados en WebKit (Chrome, Edge, Safari) */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+    /* ancho del scroll */
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #1A2A44;
+    /* fondo de la pista */
+    border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: #495057;
+    /* color del “pulgarcito” */
+    border-radius: 4px;
+    border: 2px solid #1A2A44;
+    /* espacio alrededor */
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: #6c757d;
+    /* color más claro al pasar el mouse */
+}
+
+
+.main-content {
+    margin-left: 250px;
+    /* Mismo ancho que el sidebar para empujar el contenido */
+    padding: 1rem;
+    width: calc(100% - 250px);
+    flex-grow: 1;
+}
+
+.sidebar .navbar-brand {
+    display: block;
+    text-align: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #495057;
+    padding-bottom: 1rem;
+    color: white;
+    font-weight: bold;
+}
+
+.sidebar .nav-link {
+    color: #adb5bd;
+    padding: 0.75rem 1rem;
+    display: block;
+    border-radius: 0.25rem;
+    text-decoration: none;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background-color: #495057;
+    color: white;
+}
+
+.sidebar .nav-link i {
+    width: 25px;
+    /* Alinea los iconos */
+}
+
+/* Estilos para la cabecera superior (donde irá el perfil) */
+.top-header {
+    background-color: white;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 1.5rem;
+}
+
+/* --- ESTILOS RESPONSIVOS --- */
+.sidebar-toggler {
+    display: none;
+    /* Oculto por defecto en pantallas grandes */
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1050;
+    background: #212529;
+    color: white;
+    border: 1px solid #495057;
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+        /* Ocultar el menú fuera de la pantalla */
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+        /* Mostrar el menú */
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .sidebar-toggler {
+        display: block;
+        /* Mostrar el botón en pantallas pequeñas */
+    }
+}
