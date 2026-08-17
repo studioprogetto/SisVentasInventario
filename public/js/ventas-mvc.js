@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const term = this.value.trim();
         if(term.length < 2){ resultadosBusqueda.innerHTML=''; return; }
 
-        fetch(`/mi_sistema_mvc/public/venta/buscar?term=${encodeURIComponent(term)}`)
+        fetch(`/SisVentasInventario/public/venta/buscar?term=${encodeURIComponent(term)}`)
         .then(r=>r.json())
         .then(data=>{
             resultadosBusqueda.innerHTML='';
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log("Enviando datos:", ventaData); // Para debug
 
-    fetch('/mi_sistema_mvc/public/venta/guardar',{
+    fetch('/SisVentasInventario/public/venta/guardar',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify(ventaData)
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return r.json();
     }).then(data => {
         if(data.success){
-            window.open(`/mi_sistema_mvc/public/venta/ticket/${data.id_venta}`,'_blank');
+            window.open(`/SisVentasInventario/public/venta/ticket/${data.id_venta}`,'_blank');
             // Limpiar carrito y resetear
             carrito = [];
             descuentoManual = 0;
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $("#buscarCliente").autocomplete({
         source:function(request,response){
             $.ajax({
-                url:"/mi_sistema_mvc/public/cliente/buscar",
+                url:"/SisVentasInventario/public/cliente/buscar",
                 dataType:"json",
                 data:{term:request.term},
                 success:function(data){

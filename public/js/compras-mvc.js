@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     buscarInput.addEventListener('keyup', function() {
         const term = this.value;
         // MODIFICADO: la ruta ahora es /compra/buscarProductos
-        fetch(`/mi_sistema_mvc/public/compra/buscarProductos?term=${term}`)
+        fetch(`/SisVentasInventario/public/compra/buscarProductos?term=${term}`)
             .then(response => response.json())
             .then(data => {
                 // ... (la lógica para mostrar resultados no cambia) ...

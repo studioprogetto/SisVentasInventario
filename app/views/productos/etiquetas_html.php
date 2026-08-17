@@ -1,6 +1,6 @@
 <?php
 if (!defined('BASE_URL')) {
-    define('BASE_URL', '/ProyectoWeb/mi_sistema_mvc/public/');
+    define('BASE_URL', '/libreria/SisVentasInventario/public/');
 }
 
 if (!function_exists('getMoneda')) {

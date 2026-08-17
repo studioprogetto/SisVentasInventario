@@ -43,7 +43,7 @@ require_once __DIR__ . '/../../../config/database.php';
             <a class="navbar-brand text-center" href="<?php echo BASE_URL; ?>home">
                 <?php
                 // Ruta del archivo en el servidor
-                $logoPath = $_SERVER['DOCUMENT_ROOT'] . '/ProyectoWeb/mi_sistema_mvc/public/img/logo.png';
+                $logoPath = $_SERVER['DOCUMENT_ROOT'] . '/libreria/SisVentasInventario/public/img/logo.png';
                 // URL accesible desde el navegador
                 $logoUrl = BASE_URL . 'img/logo.png?v=' . time();
 

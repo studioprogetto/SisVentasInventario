@@ -1,8 +1,8 @@
 {
-    "name": "nesch/mi_sistema_mvc",
+    "name": "nesch/SisVentasInventario",
     "autoload": {
         "psr-4": {
-            "Nesch\\MiSistemaMvc\\": "src/"
+            "Nesch\\SisVentasInventario\\": "src/"
         }
     },
     "require": {
