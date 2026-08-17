@@ -1,6 +1,6 @@
 <?php return array(
     'root' => array(
-        'name' => 'nesch/mi_sistema_mvc',
+        'name' => 'nesch/SisVentasInventario',
         'pretty_version' => '1.0.0+no-version-set',
         'version' => '1.0.0.0',
         'reference' => null,
@@ -46,7 +46,7 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'nesch/mi_sistema_mvc' => array(
+        'nesch/SisVentasInventario' => array(
             'pretty_version' => '1.0.0+no-version-set',
             'version' => '1.0.0.0',
             'reference' => null,

@@ -1,7 +1,7 @@
 <?php
 
 function debug_log($data) {
-    $logFile = __DIR__ . 'mi_sistema_mvc/debug.txt';
+    $logFile = __DIR__ . 'SisVentasInventario/debug.txt';
     $date = date('Y-m-d H:i:s');
 
     if (is_array($data) || is_object($data)) {

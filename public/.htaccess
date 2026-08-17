@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /ProyectoWeb/mi_sistema_mvc/public/
+RewriteBase /libreria/SisVentasInventario/public/
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

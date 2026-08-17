@@ -3,7 +3,7 @@
 session_start();
 
 // 🔹 CORREGIR: Definir BASE_URL correctamente
-$base_path = '/ProyectoWeb/mi_sistema_mvc/public/';
+$base_path = '/libreria/SisVentasInventario/public/';
 define('BASE_URL', $base_path);
 
 // Cargar la configuración y la base de datos
