@@ -189,9 +189,9 @@
                         </div>
                     </div>
                     
-                    <div class="calculator-history mt-3">
+                        <div class="calculator-history mt-3">
                         <h6><i class="fas fa-history me-2"></i>Historial</h6>
-                        <div id="history" class="border rounded p-2 bg-light" style="max-height: 150px; overflow-y: auto;"></div>
+                        <div id="history" class="border rounded p-2 bg-light scroll-auto max-h-150"></div>
                     </div>
                 </div>
             </div>

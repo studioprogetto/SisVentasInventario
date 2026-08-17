@@ -81,7 +81,7 @@
                     
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="position: relative; height: 400px;">
+                    <div class="chart-container">
                         <canvas id="graficoVentas"></canvas>
                     </div>
                 </div>

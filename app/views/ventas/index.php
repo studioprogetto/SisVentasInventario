@@ -16,7 +16,7 @@
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                             <input type="text" id="buscar_producto" class="form-control" placeholder="Escribe nombre o código...">
                         </div>
-                        <div id="resultados_busqueda" class="list-group position-absolute w-100" style="z-index: 1050;"></div>
+                        <div id="resultados_busqueda" class="list-group list-group-positioned w-100"></div>
                     </div>
 
                     <!-- 🛒 Carrito -->
@@ -54,7 +54,7 @@
                         <input type="hidden" id="id_cliente">
                     </div>
 
-                    <div id="infoCliente" class="border rounded p-2 mb-3" style="display:none;background:#f9f9f9;">
+                    <div id="infoCliente" class="border rounded p-2 mb-3 d-none bg-light">
                         <p><strong>Cliente:</strong> <span id="nombreCliente"></span></p>
                         <p><strong>DNI:</strong> <span id="dniCliente"></span></p>
                         <p><strong>Sellos:</strong> <span id="sellosCliente"></span></p>
@@ -120,13 +120,13 @@
                 </div>
 
                 <!-- Información de saldo del cliente -->
-                <div id="infoSaldoCliente" class="border rounded p-2 mb-3" style="display:none;">
+                <div id="infoSaldoCliente" class="border rounded p-2 mb-3 d-none">
                     <p class="mb-1"><strong>💰 Saldo Disponible:</strong> <span id="saldoDisponible"><?php echo getMoneda(); ?>0.00</span></p>
                     <small class="text-muted" id="textoAyudaSaldo">Este saldo puede ser usado para pagos futuros</small>
                 </div>
 
                 <!-- Sección para pago mixto con saldo -->
-                <div id="pago_mixto_saldo_div" class="border rounded p-3 mb-3" style="display:none;background:#f0f8ff;">
+                <div id="pago_mixto_saldo_div" class="border rounded p-3 mb-3 d-none bg-light">
                     <h6 class="fw-bold mb-2">💳 Usar Saldo del Cliente</h6>
                     <div class="row g-2">
                         <div class="col-8">
@@ -142,7 +142,7 @@
                 </div>
 
                 <!-- Sección para pago con otros métodos -->
-                <div id="pago_otros_metodos_div" class="border rounded p-3 mb-3" style="display:none;background:#fff3cd;">
+                <div id="pago_otros_metodos_div" class="border rounded p-3 mb-3 d-none bg-light">
                     <h6 class="fw-bold mb-2">💵 Pago con Otros Métodos</h6>
                     <div class="mb-2">
                         <label class="form-label small">Monto a pagar con <span id="metodo_seleccionado_texto">efectivo</span>:</label>
@@ -180,7 +180,7 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-outline" data-bs-dismiss="modal" aria-label="Cancelar">Cancelar</button>
                 <button class="btn btn-primary" id="btn_confirmar_venta"><i class="fas fa-check"></i> Confirmar Venta</button>
             </div>
         </div>
@@ -306,6 +306,15 @@
                 <td>${MONEDA}${subtotal.toFixed(2)}</td>
                 <td><button class="btn btn-danger btn-sm eliminar-btn" data-index="${idx}"><i class="fas fa-trash"></i></button></td>
             `;
+                // Make row focusable for keyboard users
+                tr.tabIndex = 0;
+                tr.addEventListener('keydown', function(e){
+                    if(e.key === 'Enter' || e.key === ' '){
+                        e.preventDefault();
+                        const btn = tr.querySelector('button, a');
+                        if(btn) btn.click();
+                    }
+                });
                 carritoTbody.appendChild(tr);
             });
             calcularTotales();

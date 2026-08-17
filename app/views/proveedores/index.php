@@ -32,18 +32,18 @@
                 <tbody>
                     <?php if ($proveedores && $proveedores->num_rows > 0): ?>
                         <?php while($proveedor = $proveedores->fetch_assoc()): ?>
-                        <tr>
+                        <tr tabindex="0">
                             <td><?php echo htmlspecialchars($proveedor['nombre_proveedor']); ?></td>
                             <td><?php echo htmlspecialchars($proveedor['ruc']); ?></td>
                             <td><?php echo htmlspecialchars($proveedor['telefono']); ?></td>
                             <td><?php echo htmlspecialchars($proveedor['email']); ?></td>
-                            <td>
-                                <span class="badge bg-<?php echo $proveedor['activo'] ? 'success' : 'danger'; ?>">
+                                <td>
+                                <span class="badge <?php echo $proveedor['activo'] ? 'badge-success' : 'badge-danger'; ?>">
                                     <?php echo $proveedor['activo'] ? 'Activo' : 'Inactivo'; ?>
                                 </span>
                             </td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-warning edit-proveedor-btn" 
+                                <td>
+                                	<button type="button" class="btn btn-sm btn-warning edit-proveedor-btn" 
                                         data-bs-toggle="modal" data-bs-target="#proveedorModal"
                                         data-id="<?php echo $proveedor['id_proveedor']; ?>"
                                         data-nombre="<?php echo htmlspecialchars($proveedor['nombre_proveedor']); ?>"
@@ -58,7 +58,7 @@
                                 <?php else: ?>
                                     <a href="<?php echo BASE_URL; ?>proveedor/cambiarEstado/<?php echo $proveedor['id_proveedor']; ?>/1" class="btn btn-sm btn-success" title="Activar"><i class="fas fa-check"></i></a>
                                 <?php endif; ?>
-                            </td>
+                                </td>
                         </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
@@ -73,10 +73,10 @@
 <div class="modal fade" id="proveedorModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="proveedorModalLabel">Agregar Nuevo Proveedor</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+            <div class="modal-header">
+                <h5 class="modal-title" id="proveedorModalLabel">Agregar Nuevo Proveedor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
       <form action="<?php echo BASE_URL; ?>proveedor/guardar" method="POST">
         <div class="modal-body">
             <input type="hidden" name="id_proveedor" id="id_proveedor">
@@ -89,7 +89,7 @@
             <div class="mb-3"><label class="form-label">Dirección</label><textarea class="form-control" name="direccion" id="direccion" rows="2"></textarea></div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" class="btn btn-outline" data-bs-dismiss="modal" aria-label="Cerrar modal">Cerrar</button>
             <button type="submit" class="btn btn-primary">Guardar</button>
         </div>
       </form>
@@ -98,3 +98,17 @@
 </div>
 
 <script src="<?php echo BASE_URL; ?>js/proveedores-mvc.js"></script>
+<script>
+// Allow Enter key on focused table row to trigger the first actionable button/link inside
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.table tbody tr[tabindex]').forEach(function(row){
+        row.addEventListener('keydown', function(e){
+            if(e.key === 'Enter' || e.key === ' '){
+                e.preventDefault();
+                var btn = row.querySelector('button, a');
+                if(btn) btn.click();
+            }
+        });
+    });
+});
+</script>

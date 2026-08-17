@@ -125,7 +125,7 @@
 </div>
 
 <!-- Resultados de búsqueda -->
-<div id="resultadosBusqueda" class="mt-3" style="display: none;">
+<div id="resultadosBusqueda" class="mt-3 d-none">
 </div>
 
 <!-- Modal para Cambio/Devolución -->
@@ -156,7 +156,7 @@
                                 <span class="badge bg-primary" id="totalProductosOriginal">0 productos</span>
                             </div>
                             <div class="card-body">
-                                <div id="productosDevolverContainer" style="max-height: 400px; overflow-y: auto;">
+                                <div id="productosDevolverContainer" class="scroll-auto max-h-400">
                                     <div class="text-center text-muted py-3">
                                         <i class="fas fa-spinner fa-spin"></i> Cargando productos...
                                     </div>
@@ -182,7 +182,7 @@
                                     <input type="text" id="buscarProductoCambio" class="form-control"
                                         placeholder="Buscar productos disponibles...">
                                 </div>
-                                <div id="listaProductosCambio" style="max-height: 350px; overflow-y: auto;">
+                                <div id="listaProductosCambio" class="scroll-auto max-h-350">
                                     <div class="text-center text-muted py-3">
                                         <i class="fas fa-search fa-2x mb-2"></i><br>
                                         Busque productos para agregar
@@ -231,14 +231,14 @@
                 </div>
 
                 <!-- Historial de cambios existentes -->
-                <div class="row mt-4" id="historialCambiosContainer" style="display: none;">
+                <div class="row mt-4 d-none" id="historialCambiosContainer">
                     <div class="col-md-12">
                         <div class="card border-info">
                             <div class="card-header bg-info text-white">
                                 <h6 class="m-0"><i class="fas fa-history me-2"></i>Cambios Anteriores</h6>
                             </div>
                             <div class="card-body">
-                                <div id="listaCambiosExistentes" style="max-height: 200px; overflow-y: auto;">
+                                <div id="listaCambiosExistentes" class="scroll-auto max-h-200">
                                     <!-- Los cambios existentes se cargarán aquí -->
                                 </div>
                             </div>
@@ -250,8 +250,8 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i> Cancelar
                 </button>
-                <button type="button" class="btn btn-info" onclick="mostrarHistorialVenta(ventaActual)"
-                    id="btnVerHistorialCompleto" style="display: none;">
+                <button type="button" class="btn btn-info d-none" onclick="mostrarHistorialVenta(ventaActual)"
+                    id="btnVerHistorialCompleto">
                     <i class="fas fa-history me-1"></i> Ver Historial Completo
                 </button>
                 <button type="button" class="btn btn-danger" onclick="procesarDevolucion()" id="btnProcesarDevolucion">
@@ -529,7 +529,7 @@
                         <small class="text-muted">Vendido: ${producto.cantidad || 0}</small>
                     </div>
                 </div>
-                <div class="mt-2" id="controles-${index}" style="display: none;">
+                    <div class="mt-2 d-none" id="controles-${index}">
                     <label class="form-label small">Cantidad a devolver:</label>
                     <input type="number" class="form-control form-control-sm cantidad-control" 
                            min="1" max="${producto.cantidad_disponible}" value="1"
@@ -806,7 +806,7 @@
                         <small class="text-muted">Stock: ${producto.stock}</small>
                     </div>
                 </div>
-                <div class="mt-2" id="controles-nuevo-${index}" style="display: none;">
+                <div class="mt-2 d-none" id="controles-nuevo-${index}">
                     <label class="form-label small">Cantidad:</label>
                     <input type="number" class="form-control form-control-sm cantidad-control" 
                            min="1" max="${producto.stock}" value="1"

@@ -39,12 +39,12 @@
                             </tr>
                         <?php else: ?>
                             <?php foreach($almacenes as $almacen): ?>
-                            <tr>
+                            <tr tabindex="0">
                                 <td><?php echo $almacen['id']; ?></td>
                                 <td><?php echo htmlspecialchars($almacen['nombre']); ?></td>
                                 <td><?php echo htmlspecialchars($almacen['ubicacion']); ?></td>
                                 <td>
-                                    <span class="badge bg-<?php echo $almacen['activo'] ? 'success' : 'danger'; ?>">
+                                    <span class="badge <?php echo $almacen['activo'] ? 'badge-success' : 'badge-danger'; ?>">
                                         <?php echo $almacen['activo'] ? 'Activo' : 'Inactivo'; ?>
                                     </span>
                                 </td>
@@ -92,7 +92,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="almacenModalLabel">Agregar Almacén</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <form action="<?php echo BASE_URL; ?>almacen/guardar" method="POST" id="almacenForm">
                 <div class="modal-body">
@@ -109,7 +109,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal" aria-label="Cancelar">
                         <i class="fas fa-times me-1"></i> Cancelar
                     </button>
                     <button type="submit" class="btn btn-primary">
@@ -150,5 +150,18 @@ function limpiarFormulario() {
 document.getElementById('almacenForm').addEventListener('submit', function() {
     const modal = bootstrap.Modal.getInstance(document.getElementById('almacenModal'));
     modal.hide();
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.table tbody tr[tabindex]').forEach(function(row){
+        row.addEventListener('keydown', function(e){
+            if(e.key === 'Enter' || e.key === ' '){
+                e.preventDefault();
+                var btn = row.querySelector('button, a');
+                if(btn) btn.click();
+            }
+        });
+    });
 });
 </script>

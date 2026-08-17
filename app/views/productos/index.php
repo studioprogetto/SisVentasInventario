@@ -29,6 +29,20 @@ $viendo_inactivos = strpos($_GET['url'] ?? '', 'inactivos') !== false;
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
+    <!-- Sistema de diseño global -->
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>css/style.css?v=<?php echo time(); ?>">
+
+    <script>
+        (function(){
+            try {
+                var t = localStorage.getItem('theme');
+                if(t){ document.documentElement.setAttribute('data-theme', t); }
+                else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ document.documentElement.setAttribute('data-theme','dark'); }
+            } catch(e){}
+        })();
+    </script>
+    <script src="<?php echo BASE_URL; ?>js/theme.js" defer></script>
+
     <style>
         .dropdown-menu {
             z-index: 2000;
@@ -86,6 +100,8 @@ $viendo_inactivos = strpos($_GET['url'] ?? '', 'inactivos') !== false;
             display: flex;
             flex-direction: column;
             padding: 0.75rem;
+            background: var(--color-surface);
+            color: var(--color-text);
         }
 
         .product-card .card-title {
@@ -106,7 +122,8 @@ $viendo_inactivos = strpos($_GET['url'] ?? '', 'inactivos') !== false;
 
         .product-card .card-footer {
             padding: 0.75rem;
-            background: white;
+            background: var(--color-surface);
+            border-top: 1px solid var(--color-border);
         }
 
         .product-card .card-footer .btn {
@@ -116,7 +133,7 @@ $viendo_inactivos = strpos($_GET['url'] ?? '', 'inactivos') !== false;
 
         .product-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--shadow-md);
         }
 
         .stock-badge {
@@ -170,26 +187,26 @@ $viendo_inactivos = strpos($_GET['url'] ?? '', 'inactivos') !== false;
             top: 100%;
             left: 0;
             right: 0;
-            background: white;
-            border: 1px solid #ddd;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
             border-top: none;
             border-radius: 0 0 8px 8px;
             max-height: 300px;
             overflow-y: auto;
             z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-sm);
             display: none;
         }
 
         .suggestion-item {
             padding: 0.75rem 1rem;
-            border-bottom: 1px solid #f8f9fa;
+            border-bottom: 1px solid var(--color-border);
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: background-color 0.12s ease;
         }
 
         .suggestion-item:hover {
-            background-color: #f8f9fa;
+            background-color: var(--color-surface-2);
         }
 
         .suggestion-name {
@@ -236,7 +253,7 @@ $viendo_inactivos = strpos($_GET['url'] ?? '', 'inactivos') !== false;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f8f9fa;
+            background: var(--color-surface-2);
             padding: 0.5rem;
         }
 
@@ -622,7 +639,7 @@ $viendo_inactivos = strpos($_GET['url'] ?? '', 'inactivos') !== false;
                                         placeholder="https://ejemplo.com/imagen.jpg">
                                 </div>
 
-                                <div class="mb-3" id="eliminarImagenContainer" style="display: none;">
+                                <div class="mb-3 d-none" id="eliminarImagenContainer">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="checkEliminarImagen">
                                         <label class="form-check-label text-danger" for="checkEliminarImagen">
@@ -634,7 +651,7 @@ $viendo_inactivos = strpos($_GET['url'] ?? '', 'inactivos') !== false;
                                 <div class="text-center">
                                     <img id="previewImagen" src=""
                                         alt="Vista previa de imagen"
-                                        style="max-height:180px; display:none; object-fit:contain; border:1px solid #ddd; border-radius:8px; padding:10px; background:#f8f9fa;">
+                                        class="product-image d-none">
                                     <div id="noImagenText" class="text-muted mt-2">
                                         <i class="fas fa-image fa-2x mb-2"></i><br>
                                         Vista previa de imagen

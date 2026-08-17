@@ -118,7 +118,7 @@ if (isset($_SESSION['flash_error'])) {
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </div>
-                                <div id="resultados_busqueda_compra" class="list-group mt-2" style="max-height: 200px; overflow-y: auto; display: none;"></div>
+                                <div id="resultados_busqueda_compra" class="list-group mt-2 search-results d-none"></div>
 
                                 <div class="form-text mt-2">
                                     <small class="text-muted">

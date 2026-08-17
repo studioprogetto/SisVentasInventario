@@ -199,30 +199,30 @@
                             switch ($estado) {
                                 case 'parcialmente_devuelta':
                                     $claseFila = 'table-warning';
-                                    $badgeEstado = '<span class="badge bg-warning text-dark">Parc. Devuelta</span>';
+                                    $badgeEstado = '<span class="badge badge-warning">Parc. Devuelta</span>';
                                     break;
                                 case 'anulada':
                                     $claseFila = 'table-danger';
-                                    $badgeEstado = '<span class="badge bg-danger">Anulada</span>';
+                                    $badgeEstado = '<span class="badge badge-danger">Anulada</span>';
                                     break;
                                 case 'completada':
                                 default:
                                     if ($tieneCambios) {
                                         $claseFila = 'table-warning';
-                                        $badgeEstado = '<span class="badge bg-warning text-dark">Modificada</span>';
+                                        $badgeEstado = '<span class="badge badge-warning">Modificada</span>';
                                     } else {
-                                        $badgeEstado = '<span class="badge bg-success">Completada</span>';
+                                        $badgeEstado = '<span class="badge badge-success">Completada</span>';
                                     }
                                     break;
                             }
                             ?>
-                            <tr class="<?php echo $claseFila; ?>" data-venta-id="<?php echo $venta['id_venta']; ?>"
+                            <tr tabindex="0" class="<?php echo $claseFila; ?>" data-venta-id="<?php echo $venta['id_venta']; ?>"
                                 data-estado="<?php echo $estado; ?>" data-metodo-pago="<?php echo $venta['metodo_pago']; ?>"
                                 data-total="<?php echo $venta['total_venta']; ?>">
                                 <td class="fw-bold text-secondary">
                                     <?php echo $venta['id_venta']; ?>
                                     <?php if ($tieneCambios && $estado === 'completada'): ?>
-                                        <span class="badge bg-warning text-dark ms-1" title="Tiene cambios/devoluciones">
+                                        <span class="badge badge-warning ms-1" title="Tiene cambios/devoluciones">
                                             <i class="fas fa-exchange-alt"></i>
                                         </span>
                                     <?php endif; ?>
@@ -247,7 +247,7 @@
                                 </td>
                                 <td><?php echo htmlspecialchars($venta['cajero']); ?></td>
                                 <td>
-                                    <span class="badge bg-success fs-6">
+                                    <span class="badge badge-success fs-6">
                                         <?php echo getMoneda(); ?> <?php echo number_format($venta['total_venta'], 2); ?>
                                     </span>
                                 </td>
@@ -255,12 +255,12 @@
                                     <?php
                                     $metodo = ucfirst($venta['metodo_pago']);
                                     $color = match ($venta['metodo_pago']) {
-                                        'efectivo' => 'bg-success',
-                                        'plin' => 'bg-info text-dark',
+                                        'efectivo' => 'badge-success',
+                                        'plin' => 'badge-info',
                                         'yape' => 'bg-purple text-white',
                                         'agora' => 'bg-orange text-white',
                                         'transferencia' => 'bg-primary',
-                                        default => 'bg-secondary',
+                                        default => 'badge-secondary',
                                     };
                                     ?>
                                     <span class="badge <?php echo $color; ?>"><?php echo $metodo; ?></span>
@@ -276,7 +276,6 @@
                                         ?>
                                         <span class="observacion-text" data-bs-toggle="tooltip" data-bs-placement="top"
                                             title="<?php echo $observacion; ?>"
-                                            style="cursor: pointer; color: #6c757d; font-style: italic;"
                                             onclick="mostrarObservacionCompleta('<?php echo addslashes($observacion); ?>')">
                                             <?php echo $observacion_corta; ?>
                                         </span>
@@ -335,8 +334,7 @@
                         <h6 class="text-primary mb-3">
                             <i class="fas fa-undo me-1"></i>Productos a Devolver
                         </h6>
-                        <div id="productosDevolverContainer" class="border rounded p-3"
-                            style="max-height: 400px; overflow-y: auto;">
+                        <div id="productosDevolverContainer" class="border rounded p-3 scroll-auto max-h-400">
                             <!-- Productos de la venta original -->
                         </div>
                     </div>
@@ -344,7 +342,7 @@
                         <h6 class="text-success mb-3">
                             <i class="fas fa-cart-plus me-1"></i>Nuevos Productos
                         </h6>
-                        <div class="border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                        <div class="border rounded p-3 scroll-auto max-h-400">
                             <div class="input-group mb-3">
                                 <input type="text" id="buscarProductoCambio" class="form-control"
                                     placeholder="Buscar producto...">
@@ -404,7 +402,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal" aria-label="Cancelar">
                     <i class="fas fa-times me-1"></i> Cancelar
                 </button>
                 <button type="button" class="btn btn-warning" id="btnProcesarCambio" onclick="procesarCambio()">
@@ -420,11 +418,11 @@
 
 <style>
     .bg-purple {
-        background-color: #6f42c1 !important;
+        background-color: var(--color-yape) !important;
     }
 
     .bg-orange {
-        background-color: #fd7e14 !important;
+        background-color: var(--color-agora) !important;
     }
 
     .table-hover tbody tr:nth-child(odd) {
@@ -847,7 +845,7 @@
                             <small class="text-muted">Vendido: ${producto.cantidad || 0}</small>
                         </div>
                     </div>
-                    <div class="mt-2" id="controles-${index}" style="display: none;">
+                    <div class="mt-2 d-none" id="controles-${index}">
                         <label class="form-label small">Cantidad a devolver:</label>
                         <input type="number" class="form-control form-control-sm cantidad-control" 
                                min="1" max="${producto.cantidad_disponible}" value="1"
@@ -915,7 +913,7 @@
                             <small class="text-muted">Stock: ${producto.stock}</small>
                         </div>
                     </div>
-                    <div class="mt-2" id="controles-nuevo-${index}" style="display: none;">
+                    <div class="mt-2 d-none" id="controles-nuevo-${index}">
                         <label class="form-label small">Cantidad:</label>
                         <input type="number" class="form-control form-control-sm cantidad-control" 
                                min="1" max="${producto.stock}" value="1"
@@ -1404,6 +1402,19 @@
             });
         });
     });
+
+// Keyboard handlers for table rows: Enter/Space triggers first action
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('#tablaVentas tbody tr[tabindex]').forEach(function(row){
+        row.addEventListener('keydown', function(e){
+            if(e.key === 'Enter' || e.key === ' '){
+                e.preventDefault();
+                var btn = row.querySelector('button, a');
+                if(btn) btn.click();
+            }
+        });
+    });
+});
 
     // 🔹 CORREGIDO: Función para generar reporte - MÉTODOS DE PAGO ACTUALIZADOS
     async function generarReporte() {

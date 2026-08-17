@@ -30,7 +30,7 @@
                 <tbody>
                     <?php if (isset($compras) && $compras->num_rows > 0): ?>
                         <?php while ($compra = $compras->fetch_assoc()): ?>
-                            <tr>
+                            <tr tabindex="0">
                                 <td><?php echo (int)$compra['id_compra']; ?></td>
                                 <td><?php echo htmlspecialchars($compra['nombre_proveedor']); ?></td>
                                 <td><?php echo date('d/m/Y', strtotime($compra['fecha_compra'])); ?></td>
@@ -38,17 +38,17 @@
                                 <td>
                                     <?php
                                     $estado = strtolower($compra['estado']);
-                                    $clase_badge = 'bg-secondary';
+                                    $clase_badge = 'badge-secondary';
                                     $texto_estado = ucfirst($estado);
 
                                     if ($estado === 'solicitada') {
-                                        $clase_badge = 'bg-warning text-dark';
+                                        $clase_badge = 'badge-warning';
                                         $texto_estado = 'Solicitada';
                                     } elseif ($estado === 'recibida') {
-                                        $clase_badge = 'bg-success';
+                                        $clase_badge = 'badge-success';
                                         $texto_estado = 'Recibida';
                                     } elseif ($estado === 'pagada') {
-                                        $clase_badge = 'bg-info text-dark';
+                                        $clase_badge = 'badge-info';
                                         $texto_estado = 'Pagada';
                                     }
                                     ?>
@@ -64,7 +64,7 @@
                                             <i class="fas fa-check"></i> 
                                         </a>
                                     <?php else: ?>
-                                        <button class="btn btn-sm btn-secondary" disabled title="No disponible o ya recibida">
+                                        <button class="btn btn-sm btn-outline" disabled title="No disponible o ya recibida" aria-disabled="true">
                                             <i class="fas fa-ban"></i>
                                         </button>
                                     <?php endif; ?>
@@ -108,4 +108,17 @@
             });
         });
     });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.table tbody tr[tabindex]').forEach(function(row){
+        row.addEventListener('keydown', function(e){
+            if(e.key === 'Enter' || e.key === ' '){
+                e.preventDefault();
+                var btn = row.querySelector('button, a');
+                if(btn) btn.click();
+            }
+        });
+    });
+});
 </script>

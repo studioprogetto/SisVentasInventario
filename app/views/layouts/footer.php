@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="<?php echo BASE_URL; ?>js/theme.js"></script>
 <script src="<?php echo BASE_URL; ?>js/scripts.js"></script>
 
 <script>
@@ -61,6 +62,24 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(actualizarHora, 1000);
 });
 
+</script>
+
+<script>
+// Aplica `width` a progress bars que usan `data-percentage`.
+function applyProgressWidths(root=document){
+    root.querySelectorAll('.progress-bar[data-percentage]').forEach(function(pb){
+        var val = pb.getAttribute('data-percentage');
+        if(val !== null){
+            var num = parseFloat(val) || 0;
+            pb.style.width = Math.min(Math.max(num, 0), 100) + '%';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function(){ applyProgressWidths(document); });
+
+// Expose for dynamic updates
+window.applyProgressWidths = applyProgressWidths;
 </script>
 
 </body>

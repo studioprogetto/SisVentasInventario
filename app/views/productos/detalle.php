@@ -368,8 +368,8 @@ foreach ($almacenes as $alm) {
                                 <div class="text-center">
                                     <img id="previewImagen" src="<?php echo htmlspecialchars($imgSrc); ?>" 
                                          alt="Vista previa de imagen"
-                                         style="max-height:180px; <?php echo (!empty($producto['imagen_path']) || !empty($producto['imagen_url'])) ? '' : 'display:none;' ?> object-fit:contain; border:1px solid #ddd; border-radius:8px; padding:10px; background:#f8f9fa;">
-                                    <div id="noImagenText" class="text-muted mt-2" style="<?php echo (empty($producto['imagen_path']) && empty($producto['imagen_url'])) ? '' : 'display:none;' ?>">
+                                         class="product-image <?php echo (empty($producto['imagen_path']) && empty($producto['imagen_url'])) ? 'd-none' : ''; ?>">
+                                    <div id="noImagenText" class="text-muted mt-2 <?php echo (!empty($producto['imagen_path']) || !empty($producto['imagen_url'])) ? 'd-none' : ''; ?>">
                                         <i class="fas fa-image fa-2x mb-2"></i><br>
                                         Vista previa de imagen
                                     </div>
