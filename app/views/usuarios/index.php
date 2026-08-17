@@ -107,18 +107,18 @@
 </div>
 
 <style>
-    /* Colores gradiente y sombra en tabla */
+    /* Colores gradiente y sombra en tabla - mapear a tokens */
     .bg-gradient-primary {
-        background: linear-gradient(135deg, #6f42c1, #7952cc);
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-600));
     }
 
     .table-hover tbody tr:nth-child(odd) {
-        background-color: rgba(111,66,193,0.05);
+        background-color: color-mix(in srgb, var(--color-primary) 4%, transparent);
     }
     .table-hover tbody tr:hover {
-        background-color: rgba(111,66,193,0.15);
+        background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
         transform: scale(1.01);
-        transition: all 0.2s ease-in-out;
+        transition: all 0.12s ease-in-out;
     }
 
     .badge {

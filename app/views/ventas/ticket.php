@@ -152,7 +152,7 @@
             $activo = $i <= $cantidad;
             $color = $activo ? '#d4af37' : '#ccc';
             $stroke = $activo ? '#b8860b' : '#999';
-            $html .= '<div style="width:24px;height:24px;margin:3px;">
+                $html .= '<div class="ticket-square">
             <svg viewBox="0 0 24 24" width="24" height="24">
                 <circle cx="12" cy="12" r="10" fill="' . $color . '" stroke="' . $stroke . '" stroke-width="1"></circle>
                 <text x="12" y="12" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle" dominant-baseline="middle">' . $i . '</text>
@@ -173,7 +173,7 @@
 
     <div class="ticket" id="ticket">
         <div class="text-center mb-2">
-            <img src="<?php echo BASE_URL; ?>img/logo.png" alt="Logo" style="height: 45px;">
+            <img src="<?php echo BASE_URL; ?>img/logo.png" alt="Logo" class="ticket-logo">
             <h5 class="mt-2 mb-0"><?php echo htmlspecialchars(getConfig('nombre_tienda')); ?></h5>
             <small>
                 RUC: <?php echo htmlspecialchars(getConfig('ruc')); ?><br>

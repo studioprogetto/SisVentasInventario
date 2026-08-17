@@ -1,3 +1,335 @@
+/* ========================================================
+     Diseño global: tokens, componentes y responsive system
+     Reescrito para mantener consistencia y modo claro/oscuro
+     ======================================================== */
+
+/* -------- Tokens (tema claro por defecto) -------- */
+:root {
+    /* Color system */
+    --color-bg:  #f6f7fb;
+    --color-surface: #ffffff;
+    --color-surface-2: #f1f3f7;
+    --color-primary: #0d6efd; /* azul corporativo */
+    --color-primary-600: #0b5ed7;
+    --color-secondary: #6c757d; /* neutro */
+    --color-text: #0f1724;
+    --color-muted: #6b7280;
+    --color-border: #e6e9ef;
+    --color-success: #198754;
+    --color-warning: #ffb020;
+    --color-danger:  #dc3545;
+    --color-info: #0dcaf0;
+    /* Payment method / accent tokens */
+    --color-yape: #6f42c1;
+    --color-agora: #fd7e14;
+
+    /* Surfaces */
+    --shadow-sm: 0 1px 2px rgba(16,24,40,0.04);
+    --shadow-md: 0 6px 18px rgba(16,24,40,0.08);
+    --radius-1: 6px;
+    --radius-2: 10px;
+
+    /* Typography */
+    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+    /* Fluid typography using clamp - adapts across XS→XXL */
+    --text-base: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem); /* ~15.2px - 16.8px */
+    --text-sm: clamp(0.78rem, 0.72rem + 0.2vw, 0.95rem);
+    --text-lg: clamp(1.05rem, 1rem + 0.5vw, 1.35rem);
+
+    /* Spacing scale */
+    --space-1: 0.25rem;
+    /* Spacing scale with slight fluidity */
+    --space-1: clamp(0.2rem, 0.25rem + 0.1vw, 0.35rem);
+    --space-2: clamp(0.4rem, 0.45rem + 0.15vw, 0.65rem);
+    --space-3: clamp(0.65rem, 0.7rem + 0.2vw, 0.9rem);
+    --space-4: clamp(0.9rem, 1rem + 0.3vw, 1.4rem);
+    --space-5: clamp(1.2rem, 1.35rem + 0.4vw, 1.9rem);
+
+    /* Breakpoints */
+    --bp-xs: 0px;
+    --bp-sm: 576px;
+    --bp-md: 768px;
+    --bp-lg: 992px;
+    --bp-xl: 1200px;
+    --bp-xxl: 1400px;
+}
+
+/* -------- Dark theme tokens override -------- */
+:root[data-theme="dark"] {
+    --color-bg:  #0b1220;
+    --color-surface: #0f1724;
+    --color-surface-2: #0b1320;
+    --color-primary: #4ea8ff;
+    --color-primary-600: #3b86e6;
+    --color-secondary: #9aa3b2;
+    --color-text: #e6eef8;
+    --color-muted: #98a0ab;
+    --color-border: rgba(255,255,255,0.06);
+    --color-success: #2ec77a;
+    --color-warning: #ffb454;
+    --color-danger: #ff6b6b;
+    --color-info: #66e0ff;
+    --color-yape: #9b7fe6;
+    --color-agora: #ff9b4a;
+
+    --shadow-sm: none;
+    --shadow-md: none;
+}
+
+/* Respect system preference if user hasn't chosen */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+        color-scheme: dark;
+        --color-bg:  #0b1220;
+        --color-surface: #0f1724;
+        --color-text: #e6eef8;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+/* Base layout */
+html,body { height: 100%; }
+body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    color: var(--color-text);
+    background: var(--color-bg);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+}
+
+/* Main content wrapper */
+.main-content { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* Container limits for very wide screens */
+.container-wide { width: 100%; max-width: 1400px; margin: 0 auto; padding: 0 var(--space-4); }
+/* Make container max-width fluid for ultrawide screens */
+.container-wide { max-width: clamp(960px, 90vw, 1800px); }
+
+/* Top header */
+.top-header {
+    display:flex; align-items:center; gap:var(--space-3);
+    padding: clamp(.4rem, .6vw, .9rem) clamp(.6rem, 2vw, 1.25rem);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--color-surface, #fff) 0%, var(--color-surface-2) 100%));
+    border-bottom: 1px solid var(--color-border);
+}
+/* App title/time color inside header */
+#app-title { color: var(--color-muted); font-size: var(--text-sm); }
+
+/* User dropdown in header */
+.top-header .dropdown .nav-link { color: var(--color-text); }
+.top-header .dropdown .dropdown-menu { background: var(--color-surface); border:1px solid var(--color-border); }
+.top-header .dropdown .dropdown-item { color: var(--color-text); }
+
+/* Marca local para elementos existentes (footer u otros) */
+.bg-studio { background: linear-gradient(90deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 50%, var(--color-secondary) 100%)); color: white; }
+
+.brand { display:flex; align-items:center; gap:.5rem; font-weight:var(--fw-semibold); }
+.brand img { height:36px; width:auto; }
+.brand-logo { max-height:40px; height:auto; }
+.top-actions { margin-left:auto; display:flex; gap:.5rem; align-items:center; }
+
+/* Theme toggle button */
+.btn-theme-toggle {
+    background: transparent; border: 1px solid var(--color-border); color:var(--color-text);
+    padding: .35rem .6rem; border-radius: 8px; display:inline-flex; align-items:center; gap:.5rem;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed; inset: 0 auto 0 0; left:0; top:0; bottom:0;
+    width: clamp(200px, 18vw, 300px); background: var(--color-surface); border-right:1px solid var(--color-border);
+    padding: var(--space-4); box-shadow: var(--shadow-md); overflow:auto; z-index:1030;
+}
+.sidebar .nav-link { color:var(--color-muted); padding:.6rem .75rem; border-radius:6px; display:flex; align-items:center; gap:.6rem; text-decoration:none; }
+.sidebar .nav-link.active, .sidebar .nav-link:hover { background: var(--color-surface-2); color:var(--color-text); }
+
+/* Sidebar scrollbar gentle */
+.sidebar { scrollbar-width: thin; }
+.sidebar::-webkit-scrollbar { width:8px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius:6px; }
+
+/* Main content spacing when sidebar present */
+.content-area { margin-left: 250px; padding: var(--space-4); width: calc(100% - 250px); }
+
+/* Responsive: collapse sidebar on small screens */
+@media (max-width: 991.98px) {
+    .sidebar { transform: translateX(-110%); transition: transform .28s ease-in-out; }
+    .sidebar.active { transform: translateX(0); }
+    .content-area { margin-left:0; width:100%; padding: var(--space-3); }
+    .sidebar-toggler { display:inline-flex; position:fixed; top:12px; left:12px; z-index:1050; }
+}
+
+/* When sidebar width changes, content-area should adapt */
+@media (min-width: 992px) {
+    .content-area { margin-left: clamp(200px, 18vw, 300px); width: calc(100% - clamp(200px, 18vw, 300px)); }
+}
+
+/* Buttons */
+.btn { font-weight: var(--fw-medium); border-radius: 8px; padding: .5rem .75rem; }
+.btn-primary { background: var(--color-primary); color: white; border: none; }
+.btn-primary:focus { outline: 3px solid color-mix(in srgb, var(--color-primary) 20%, transparent); }
+.btn-outline { background: transparent; border:1px solid var(--color-border); color:var(--color-text); }
+.btn-ghost { background: transparent; border: none; color:var(--color-text); }
+
+/* Semantic button variants using tokens */
+.btn-secondary { background: var(--color-surface); color: var(--color-text); border:1px solid var(--color-border); }
+.btn-success { background: var(--color-success); color: white; border: none; }
+.btn-danger  { background: var(--color-danger); color: white; border: none; }
+
+.btn-secondary:focus, .btn-outline:focus { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 10%, transparent); }
+
+/* Form elements */
+input, select, textarea { font-family: inherit; font-size: var(--text-base); color:var(--color-text); background:var(--color-surface); border:1px solid var(--color-border); padding: clamp(.45rem, .6vw, .7rem) clamp(.5rem, 1vw, .9rem); border-radius:8px; }
+select:focus, input:focus, textarea:focus { outline: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent); border-color: var(--color-primary-600); }
+select.form-select { padding: .5rem .75rem; }
+label { display:block; font-size:var(--text-sm); color:var(--color-muted); margin-bottom:.35rem; }
+
+/* Tables: responsive adaptation */
+.table { width:100%; border-collapse:collapse; background:transparent; }
+.table thead th { text-align:left; font-weight:var(--fw-medium); color:var(--color-muted); font-size:var(--text-sm); padding:.6rem .75rem; border-bottom:1px solid var(--color-border); }
+.table tbody td { padding:.6rem .75rem; border-bottom:1px dashed var(--color-border); font-size:var(--text-sm); }
+
+/* Table header surface and contrast */
+.table thead { background: transparent; }
+.table thead th { background: var(--color-surface-2); color: var(--color-text); }
+
+/* For very small screens transform table into card list */
+@media (max-width: 576px) {
+    .table-responsive { overflow:auto; -webkit-overflow-scrolling:touch; }
+    .table thead { display:none; }
+    .table tbody td { display:block; width:100%; box-sizing:border-box; }
+    .table tbody tr { display:block; margin-bottom: var(--space-3); background:var(--color-surface); padding:var(--space-3); border-radius:8px; box-shadow:var(--shadow-sm); }
+}
+
+/* Cards */
+.card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-2); padding:var(--space-4); box-shadow:var(--shadow-sm); }
+.card-title { font-size: var(--text-lg); font-weight:var(--fw-semibold); margin-bottom:.5rem; }
+
+/* Modal overrides to use design surfaces */
+.modal-content { background: var(--color-surface); color: var(--color-text); border-radius: 12px; border: 1px solid var(--color-border); }
+.modal-header, .modal-footer { border-color: var(--color-border); }
+
+/* Utility classes moved from inline styles to CSS for consistency */
+.observacion-text { cursor: pointer; color: var(--color-muted); font-style: italic; }
+.product-image { max-height: 180px; object-fit: contain; border: 1px solid color-mix(in srgb, var(--color-border) 60%, var(--color-surface)); border-radius: 8px; padding: 10px; background: var(--color-surface-2); display: inline-block; }
+.max-h-400 { max-height: 400px; }
+.scroll-auto { overflow-y: auto; }
+.list-group-positioned { position: absolute; z-index: 1050; width: 100%; }
+.ticket-logo { height: 45px; }
+.ticket-square { width:24px; height:24px; margin:3px; display:inline-block; }
+
+/* Map common Bootstrap bg/text utilities to tokens so dark mode respects them */
+.bg-primary { background: var(--color-primary) !important; color: var(--color-surface) !important; }
+.text-white { color: var(--color-surface) !important; }
+.bg-success { background: var(--color-success) !important; color: var(--color-surface) !important; }
+.bg-warning { background: var(--color-warning) !important; color: color-mix(in srgb, var(--color-text) 8%, var(--color-text)) !important; }
+.bg-danger { background: var(--color-danger) !important; color: var(--color-surface) !important; }
+.bg-info { background: var(--color-info) !important; color: var(--color-surface) !important; }
+.bg-light { background: var(--color-surface-2) !important; color: var(--color-text) !important; }
+.bg-dark { background: var(--color-surface) !important; color: var(--color-text) !important; }
+
+/* Ensure text-muted also maps token */
+.text-muted { color: var(--color-muted) !important; }
+
+/* Common search results container */
+.search-results { max-height: 200px; overflow-y: auto; }
+
+/* Chart container sizing moved from inline styles */
+.chart-container { position: relative; height: 400px; border-radius: 8px; background: linear-gradient(135deg, var(--color-surface-2) 0%, var(--color-surface) 100%); }
+
+/* Additional utility sizes */
+.max-h-150 { max-height: 150px; }
+.max-h-400 { max-height: 400px; }
+.scroll-auto { overflow-y: auto; }
+
+.max-h-350 { max-height: 350px; }
+.max-h-200 { max-height: 200px; }
+
+/* Small progress bar */
+.progress-small { height: 8px; }
+
+/* Product thumbnail in reports */
+.product-thumb { max-height: 100px; object-fit: cover; width: 100%; display: block; }
+
+/* Avatar thumbnail */
+.avatar-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
+
+/* Placeholder image utility */
+.product-image-placeholder { display: none; }
+
+/* Profile logo styling */
+.profile-logo { max-height: 50px; background: var(--color-surface-2); padding: 5px; border-radius: 5px; display: inline-block; }
+
+/* Large icon utility */
+.icon-large { font-size: 4rem; }
+
+/* Badges and alerts */
+.badge { display:inline-block; padding:.2rem .45rem; font-size:.75rem; border-radius:999px; background:var(--color-surface-2); color:var(--color-text); }
+.alert { padding:.6rem .75rem; border-radius:8px; border:1px solid var(--color-border); background:var(--color-surface-2); }
+.alert.success { border-color: color-mix(in srgb,var(--color-success) 20%, var(--color-border)); color:var(--color-success); }
+.alert.error { border-color: color-mix(in srgb,var(--color-danger) 20%, var(--color-border)); color:var(--color-danger); }
+
+/* Badge variants that map to design tokens (use instead of hard-coded bg-* classes) */
+.badge-success { background: color-mix(in srgb, var(--color-success) 12%, var(--color-surface)); color: var(--color-success); }
+.badge-danger  { background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface)); color: var(--color-danger); }
+.badge-warning { background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface)); color: var(--color-warning); }
+.badge-info    { background: color-mix(in srgb, var(--color-info) 12%, var(--color-surface)); color: var(--color-info); }
+.badge-secondary { background: var(--color-surface-2); color: var(--color-text); }
+
+/* table-dark mapped to tokens so header uses surface-2 instead of hardcoded dark */
+.table-dark thead tr { background: var(--color-surface-2); }
+.table-dark thead th { color: var(--color-text); }
+
+/* Modals: basic accessible styles (depends on existing modal markup) */
+.modal-surface { background: var(--color-surface); color:var(--color-text); border-radius:10px; box-shadow:var(--shadow-md); padding:var(--space-4); max-width:900px; width:100%; }
+
+/* Utilities */
+.text-muted { color:var(--color-muted); }
+.visually-hidden { position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
+
+/* Focus visible for keyboard navigation */
+:focus { outline: none; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-primary) 18%, transparent); border-radius:6px; }
+
+/* Stronger focus for interactive controls */
+.btn:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-primary) 14%, transparent); }
+
+/* Make table rows show a clear focus state when navigated via keyboard */
+.table tbody tr { transition: background .12s ease, box-shadow .12s ease; }
+.table tbody tr:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent); background: color-mix(in srgb, var(--color-surface-2) 6%, var(--color-surface)); }
+
+/* Small helper: constrained content width for ultrawide displays */
+.content-constrained { max-width: 1200px; margin: 0 auto; }
+
+/* Tiny helpers for spacing and alignment */
+.d-grid { display:grid; gap:var(--space-3); }
+.flex-between { display:flex; justify-content:space-between; align-items:center; }
+
+/* Pagination */
+.pagination { display:flex; gap:.35rem; list-style:none; padding:0; margin:0; }
+.pagination li a { padding:.4rem .6rem; border-radius:6px; border:1px solid var(--color-border); display:inline-block; }
+
+/* Tooltip minimal */
+.tooltip { background:var(--color-surface-2); color:var(--color-text); padding:.35rem .5rem; border-radius:6px; border:1px solid var(--color-border); }
+
+/* Prevent accidental horizontal overflow */
+html,body { overflow-x: hidden; }
+
+/* Small adjustments to existing class names used in project */
+.sidebar-toggler { display:none; }
+.navbar-brand p { margin:0; font-size:.75rem; color:var(--color-muted); }
+
+/* End of design system */
 /* --- Solución para el Footer Pegajoso (Sticky Footer) --- */
 body {
     display: flex;
@@ -8,7 +340,7 @@ body {
 
 /* main { flex-grow: 1; } <-- Ya no es necesario con el nuevo layout */
 .bg-studio {
-    background-color: #1A2A44;
+    background-color: var(--color-primary);
 }
 
 
@@ -21,11 +353,11 @@ body {
 
 .sello {
     font-size: 20px;
-    color: #ccc;
+    color: var(--color-muted);
 }
 
 .sello.activo {
-    color: #ff6600;
+    color: var(--color-warning);
 }
 
 /* --- ESTILOS PARA EL MENÚ LATERAL (SIDEBAR) --- */
@@ -36,17 +368,17 @@ body {
     left: 0;
     bottom: 0;
     width: 250px;
-    background-color: #1A2A44;
+    background-color: var(--color-surface);
     padding: 1rem;
     overflow-y: auto;
-    color: white;
+    color: var(--color-text);
     z-index: 1030;
     transition: transform 0.3s ease-in-out;
 
     /* Suaviza el scroll */
     scrollbar-width: thin;
     /* Para Firefox */
-    scrollbar-color: #495057 #1A2A44;
+    scrollbar-color: var(--color-muted) var(--color-surface);
     /* thumb | track */
 }
 
@@ -57,21 +389,21 @@ body {
 }
 
 .sidebar::-webkit-scrollbar-track {
-    background: #1A2A44;
+    background: var(--color-surface);
     /* fondo de la pista */
     border-radius: 4px;
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-    background-color: #495057;
+    background-color: var(--color-muted);
     /* color del “pulgarcito” */
     border-radius: 4px;
-    border: 2px solid #1A2A44;
+    border: 2px solid var(--color-surface);
     /* espacio alrededor */
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover {
-    background-color: #6c757d;
+    background-color: color-mix(in srgb, var(--color-muted) 80%, var(--color-border));
     /* color más claro al pasar el mouse */
 }
 
@@ -88,14 +420,14 @@ body {
     display: block;
     text-align: center;
     margin-bottom: 1rem;
-    border-bottom: 1px solid #495057;
+    border-bottom: 1px solid var(--color-border);
     padding-bottom: 1rem;
-    color: white;
+    color: var(--color-text);
     font-weight: bold;
 }
 
 .sidebar .nav-link {
-    color: #adb5bd;
+    color: var(--color-muted);
     padding: 0.75rem 1rem;
     display: block;
     border-radius: 0.25rem;
@@ -104,8 +436,8 @@ body {
 
 .sidebar .nav-link:hover,
 .sidebar .nav-link.active {
-    background-color: #495057;
-    color: white;
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
 }
 
 .sidebar .nav-link i {
@@ -115,9 +447,9 @@ body {
 
 /* Estilos para la cabecera superior (donde irá el perfil) */
 .top-header {
-    background-color: white;
+    background-color: var(--color-surface);
     padding: 0.5rem 1rem;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--color-border);
     margin-bottom: 1.5rem;
 }
 
@@ -129,9 +461,9 @@ body {
     top: 15px;
     left: 15px;
     z-index: 1050;
-    background: #212529;
-    color: white;
-    border: 1px solid #495057;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
 }
 
 @media (max-width: 992px) {
@@ -155,3 +487,52 @@ body {
         /* Mostrar el botón en pantallas pequeñas */
     }
 }
+
+/* Ensure .table-responsive provides horizontal scroll on larger screens when needed */
+.table-responsive { width: 100%; overflow:auto; -webkit-overflow-scrolling: touch; }
+
+/* ==================================================
+   Theme enforcement overrides
+   These rules use tokens with !important to override
+   view-scoped hard-coded colors so the theme toggle
+   visibly affects tables, cards and panels.
+   ==================================================*/
+
+/* Generic surfaces */
+section, aside, header, footer, .card, .panel, .box, .ticket, .panel-body, .panel-header {
+    background: var(--color-surface) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
+}
+
+/* Tables and lists */
+.table, .table-responsive, .table thead, .table tbody tr, .list-group-item {
+    background: var(--color-surface) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
+}
+
+/* Inputs and form controls */
+input, select, textarea, .form-input {
+    background: var(--white) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
+}
+
+/* Small elements that were often hard-coded */
+.badge, .alert, .product-image, .product-thumb, .profile-logo {
+    background: var(--color-surface-2) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
+}
+
+/* Buttons using semantic colors should still keep their tokenized backgrounds */
+.btn-primary { background: var(--color-primary) !important; color: var(--color-surface) !important; }
+.btn-success { background: var(--color-success) !important; color: var(--color-surface) !important; }
+.btn-danger  { background: var(--color-danger) !important; color: var(--color-surface) !important; }
+
+/* Ensure overlays and badges on hero keep contrast */
+.hero-badge { background: color-mix(in srgb, var(--color-surface) 14%, transparent) !important; color: var(--color-surface) !important; border-color: color-mix(in srgb, var(--color-surface) 35%, transparent) !important; }
+
+/* Force SVG presentation attributes to follow currentColor so icons adapt to theme */
+svg [fill], svg [stroke] { fill: currentColor !important; stroke: currentColor !important; }

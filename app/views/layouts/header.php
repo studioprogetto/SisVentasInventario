@@ -20,6 +20,16 @@ require_once __DIR__ . '/../../../config/database.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión de Inventario y Ventas</title>
+    <!-- Tema: inicializar preferencia antes de cargar CSS para evitar parpadeo -->
+    <script>
+        (function(){
+            try {
+                var t = localStorage.getItem('theme');
+                if(t){ document.documentElement.setAttribute('data-theme', t); }
+                else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ document.documentElement.setAttribute('data-theme','dark'); }
+            } catch(e) { /* ignore */ }
+        })();
+    </script>
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome -->
@@ -49,7 +59,7 @@ require_once __DIR__ . '/../../../config/database.php';
 
                 if (file_exists($logoPath)):
                 ?>
-                    <img src="<?php echo $logoUrl; ?>" alt="Logo" class="img-fluid" style="max-height: 40px;">
+                    <img src="<?php echo $logoUrl; ?>" alt="Logo" class="img-fluid brand-logo">
                 <?php else: ?>
                     <i class="fas fa-store"></i>
                     <?php echo htmlspecialchars(getConfig('nombre_tienda') ?? 'Studio & Progetto'); ?>
@@ -133,9 +143,12 @@ require_once __DIR__ . '/../../../config/database.php';
     <div class="main-content d-flex flex-column min-vh-100">
         <?php if (!empty($_SESSION['id_usuario'])): ?>
             <header class="top-header d-flex justify-content-end align-items-center p-2">
-                <div class="me-auto text-white fw-bold">
+                <div class="me-auto fw-bold" id="app-title">
                     <span id="hora-local"></span>
                     <span id="avisohora" class="fw-bold ms-2"></span>
+                </div>
+                <div class="top-actions">
+                    <button id="themeToggle" class="btn-theme-toggle" aria-pressed="false" aria-label="Alternar modo claro/oscuro">🌙</button>
                 </div>
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -154,4 +167,4 @@ require_once __DIR__ . '/../../../config/database.php';
         <?php endif; ?>
 
         <!-- Aquí empieza el contenido dinámico -->
-        <main class="flex-grow-1">
+        <main class="flex-grow-1 content-area"> 

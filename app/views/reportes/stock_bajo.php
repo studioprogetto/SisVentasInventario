@@ -29,12 +29,11 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-4">
+                                            <div class="col-4">
                                             <img src="<?php echo $p['imagen_display']; ?>" 
-                                                 class="img-fluid rounded product-image" 
-                                                 alt="<?php echo htmlspecialchars($p['nombre']); ?>"
-                                                 style="max-height: 100px; object-fit: cover; width: 100%;"
-                                                 onerror="handleImageError(this)">
+                                                class="img-fluid rounded product-thumb" 
+                                                alt="<?php echo htmlspecialchars($p['nombre']); ?>"
+                                                onerror="handleImageError(this)">
                                         </div>
                                         <div class="col-8">
                                             <div class="mb-2">
@@ -55,18 +54,18 @@
                                     </div>
                                 </div>
                                 <div class="card-footer bg-transparent">
-                                    <div class="progress" style="height: 8px;">
+                                    <div class="progress progress-small">
                                         <?php 
                                         $porcentaje = $p['stock_minimo'] > 0 ? ($p['stock'] / $p['stock_minimo']) * 100 : 0;
                                         $porcentaje = min($porcentaje, 100);
                                         $clase_progress = $porcentaje <= 25 ? 'bg-danger' : ($porcentaje <= 50 ? 'bg-warning' : 'bg-success');
                                         ?>
                                         <div class="progress-bar <?php echo $clase_progress; ?>" 
-                                             role="progressbar" 
-                                             style="width: <?php echo $porcentaje; ?>%"
-                                             aria-valuenow="<?php echo $porcentaje; ?>" 
-                                             aria-valuemin="0" 
-                                             aria-valuemax="100">
+                                            role="progressbar"
+                                            data-percentage="<?php echo $porcentaje; ?>"
+                                            aria-valuenow="<?php echo $porcentaje; ?>" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100">
                                         </div>
                                     </div>
                                     <small class="text-muted d-block text-center mt-1">
@@ -107,11 +106,10 @@
                                     <tr class="table-warning">
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="<?php echo $p['imagen_display']; ?>" 
-                                                     class="rounded me-2 product-image" 
-                                                     alt="<?php echo htmlspecialchars($p['nombre']); ?>"
-                                                     style="width: 40px; height: 40px; object-fit: cover;"
-                                                     onerror="handleImageError(this)">
+                                                   <img src="<?php echo $p['imagen_display']; ?>" 
+                                                       class="rounded me-2 avatar-thumb" 
+                                                       alt="<?php echo htmlspecialchars($p['nombre']); ?>"
+                                                       onerror="handleImageError(this)">
                                                 <?php echo htmlspecialchars($p['nombre']); ?>
                                             </div>
                                         </td>
@@ -136,7 +134,7 @@
             <?php else: ?>
                 <div class="text-center py-5">
                     <div class="mb-4">
-                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                        <i class="fas fa-check-circle text-success icon-large"></i>
                     </div>
                     <h4 class="text-success">¡Felicidades!</h4>
                     <p class="text-muted">No hay productos con bajo stock en este momento.</p>

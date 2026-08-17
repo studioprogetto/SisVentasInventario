@@ -41,7 +41,7 @@
                 $logoUrl = '<?php echo BASE_URL; ?>img/logo.png?v=' . time(); 
                 if (file_exists($logoPath)):
             ?>
-            <img src="<?php echo $logoUrl; ?>" alt="Logo Actual" style="max-height: 50px; background-color: #333; padding: 5px; border-radius: 5px;">
+            <img src="<?php echo $logoUrl; ?>" alt="Logo Actual" class="profile-logo">
             <?php else: ?>
             <p class="text-muted">No se ha subido un logo.</p>
             <?php endif; ?>

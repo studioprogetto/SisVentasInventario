@@ -360,7 +360,7 @@ $margen_ganancia = $valor_total_costo > 0 ? ($ganancia_potencial / $valor_total_
                                                     class="product-image"
                                                     alt="<?php echo htmlspecialchars($p['nombre']); ?>"
                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                                <div class="product-image-placeholder" style="display: none;">
+                                                <div class="product-image-placeholder">
                                                     <i class="fas fa-image"></i>
                                                 </div>
                                             </td>

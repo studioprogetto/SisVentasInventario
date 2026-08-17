@@ -136,7 +136,7 @@
                 <p id="mensajeActualizacion">Calculando datos reales desde las ventas...</p>
                 <div class="progress mb-3">
                     <div id="barraProgreso" class="progress-bar progress-bar-striped progress-bar-animated" 
-                         role="progressbar" style="width: 0%"></div>
+                        role="progressbar" data-percentage="0"></div>
                 </div>
             </div>
         </div>
@@ -222,7 +222,9 @@ document.addEventListener('DOMContentLoaded', function() {
         card.addEventListener('mouseenter', function() {
             this.style.transform = 'translateY(-5px)';
             this.style.transition = 'all 0.3s ease';
-            this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+            // Usar token CSS para sombra, con fallback
+            const shadow = getComputedStyle(document.documentElement).getPropertyValue('--shadow-md') || '0 8px 25px rgba(0,0,0,0.12)';
+            this.style.boxShadow = shadow;
         });
         
         card.addEventListener('mouseleave', function() {
