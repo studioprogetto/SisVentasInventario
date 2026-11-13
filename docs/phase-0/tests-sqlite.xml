@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\phpunit.xml" tests="19" assertions="246" errors="0" failures="0" skipped="0" time="2.133747">
+    <testsuite name="Unit" tests="1" assertions="40" errors="0" failures="0" skipped="0" time="0.011571">
+      <testsuite name="Tests\Unit\ArchitectureTest" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Unit\ArchitectureTest.php" tests="1" assertions="40" errors="0" failures="0" skipped="0" time="0.011571">
+        <testcase name="test_new_application_has_no_legacy_runtime_dependencies" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Unit\ArchitectureTest.php" line="11" class="Tests\Unit\ArchitectureTest" classname="Tests.Unit.ArchitectureTest" assertions="40" time="0.011571"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="Feature" tests="18" assertions="206" errors="0" failures="0" skipped="0" time="2.122176">
+      <testsuite name="Tests\Feature\AuthenticationTest" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\AuthenticationTest.php" tests="7" assertions="46" errors="0" failures="0" skipped="0" time="1.786270">
+        <testcase name="test_guests_are_redirected_and_login_has_a_csrf_field" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\AuthenticationTest.php" line="12" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="8" time="0.337391"/>
+        <testcase name="test_existing_username_and_hash_authenticate_without_rewriting_password" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\AuthenticationTest.php" line="19" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="13" time="0.052660"/>
+        <testcase name="test_inactive_account_cannot_authenticate" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\AuthenticationTest.php" line="31" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="5" time="0.235840"/>
+        <testcase name="test_permission_revocation_takes_effect_without_session_snapshot" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\AuthenticationTest.php" line="38" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="4" time="0.031310"/>
+        <testcase name="test_disabled_account_loses_its_session" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\AuthenticationTest.php" line="46" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="5" time="0.024038"/>
+        <testcase name="test_login_attempts_are_rate_limited" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\AuthenticationTest.php" line="56" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="8" time="1.081361"/>
+        <testcase name="test_mutation_without_csrf_is_rejected_by_real_web_middleware" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\AuthenticationTest.php" line="64" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="3" time="0.023670"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\CategoriaArchitectureTest" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\CategoriaArchitectureTest.php" tests="5" assertions="36" errors="0" failures="0" skipped="0" time="0.161657">
+        <testcase name="test_policy_blocks_authenticated_user_without_permission" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\CategoriaArchitectureTest.php" line="12" class="Tests\Feature\CategoriaArchitectureTest" classname="Tests.Feature.CategoriaArchitectureTest" assertions="5" time="0.029022"/>
+        <testcase name="test_real_permission_allows_validated_create_and_update_without_extra_fields" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\CategoriaArchitectureTest.php" line="19" class="Tests\Feature\CategoriaArchitectureTest" classname="Tests.Feature.CategoriaArchitectureTest" assertions="9" time="0.035830"/>
+        <testcase name="test_duplicate_blank_and_array_names_are_rejected" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\CategoriaArchitectureTest.php" line="30" class="Tests\Feature\CategoriaArchitectureTest" classname="Tests.Feature.CategoriaArchitectureTest" assertions="12" time="0.037592"/>
+        <testcase name="test_read_only_mode_prevents_writes_and_get_does_not_mutate" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\CategoriaArchitectureTest.php" line="40" class="Tests\Feature\CategoriaArchitectureTest" classname="Tests.Feature.CategoriaArchitectureTest" assertions="5" time="0.031001"/>
+        <testcase name="test_category_name_is_escaped_when_rendered" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\CategoriaArchitectureTest.php" line="49" class="Tests\Feature\CategoriaArchitectureTest" classname="Tests.Feature.CategoriaArchitectureTest" assertions="5" time="0.028211"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\DatabaseSafetyTest" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\DatabaseSafetyTest.php" tests="1" assertions="3" errors="0" failures="0" skipped="0" time="0.013002">
+        <testcase name="test_migration_command_is_blocked_before_creating_repository_outside_testing" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\DatabaseSafetyTest.php" line="13" class="Tests\Feature\DatabaseSafetyTest" classname="Tests.Feature.DatabaseSafetyTest" assertions="3" time="0.013002"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\ModelMappingTest" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\ModelMappingTest.php" tests="4" assertions="114" errors="0" failures="0" skipped="0" time="0.118658">
+        <testcase name="test_every_entity_maps_to_existing_columns_and_relationships" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\ModelMappingTest.php" line="18" class="Tests\Feature\ModelMappingTest" classname="Tests.Feature.ModelMappingTest" assertions="103" time="0.046117"/>
+        <testcase name="test_sales_and_products_resolve_their_real_foreign_keys" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\ModelMappingTest.php" line="42" class="Tests\Feature\ModelMappingTest" classname="Tests.Feature.ModelMappingTest" assertions="5" time="0.028224"/>
+        <testcase name="test_composite_exchange_rate_cannot_be_saved_as_an_id_model" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\ModelMappingTest.php" line="55" class="Tests\Feature\ModelMappingTest" classname="Tests.Feature.ModelMappingTest" assertions="3" time="0.023111"/>
+        <testcase name="test_schema_guard_refuses_the_business_database_even_in_testing" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\ModelMappingTest.php" line="61" class="Tests\Feature\ModelMappingTest" classname="Tests.Feature.ModelMappingTest" assertions="3" time="0.021206"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\SchemaLifecycleTest" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\SchemaLifecycleTest.php" tests="1" assertions="7" errors="0" failures="0" skipped="0" time="0.042589">
+        <testcase name="test_baseline_migrates_rolls_back_and_migrates_again_only_in_test_database" file="C:\xampp\htdocs\ProyectoWeb\mi_sistema_mvc\laravel\tests\Feature\SchemaLifecycleTest.php" line="13" class="Tests\Feature\SchemaLifecycleTest" classname="Tests.Feature.SchemaLifecycleTest" assertions="7" time="0.042589"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

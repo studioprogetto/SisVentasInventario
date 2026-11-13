@@ -1,0 +1,74 @@
+<?php
+
+use App\Http\Controllers\Backups\BackupController;
+use App\Http\Controllers\Currency\ExchangeRateController;
+use App\Http\Controllers\Masters\MasterController;
+use App\Http\Controllers\Operations\OperationController;
+use App\Http\Controllers\Operations\PageController;
+use App\Http\Controllers\Operations\PosController;
+use App\Http\Controllers\Products\LabelController;
+use App\Http\Controllers\Products\ProductController;
+use App\Http\Controllers\Reports\ReportController;
+use App\Http\Controllers\Settings\BusinessSettingsController;
+use App\Http\Controllers\Users\ProfileController;
+use App\Http\Controllers\Users\UserController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('venta', [PageController::class, 'pos'])->middleware('can:ventas_crear')->name('sales.pos');
+Route::middleware(['can:ventas_crear', 'throttle:120,1'])->group(function (): void {
+    Route::get('pos/items', [PosController::class, 'items'])->name('pos.items');
+    Route::get('pos/clientes/{id}', [PosController::class, 'client'])->whereNumber('id')->name('pos.client');
+});
+Route::get('pos/imagenes/{id}', [PosController::class, 'image'])->whereNumber('id')->middleware('can:ventas_crear')->name('pos.image');
+Route::post('venta/cotizar', [OperationController::class, 'quote'])->middleware('can:ventas_crear')->name('sales.quote');
+Route::get('venta/historial', [PageController::class, 'history'])->middleware('can:ventas_ver_listado')->name('sales.history');
+Route::get('venta/ticket/{id}', [PageController::class, 'sale'])->whereNumber('id')->name('sales.ticket');
+Route::get('venta/buscar', [PageController::class, 'search'])->middleware(['can:ventas_crear', 'throttle:120,1'])->name('sales.search');
+Route::get('compra', [PageController::class, 'purchases'])->middleware('can:compras_ver_lista')->name('purchases.index');
+Route::get('transferencia', [PageController::class, 'transfers'])->middleware('can:transferencias_crear')->name('transfers.index');
+Route::get('caja', [PageController::class, 'cash'])->middleware('can:caja_gestionar')->name('cash.index');
+Route::get('producto', [ProductController::class, 'index'])->middleware('can:productos_ver_lista')->name('products.index');
+Route::get('producto/{product}/imagen', [ProductController::class, 'image'])->whereNumber('product')->middleware('can:productos_ver_lista')->name('products.image');
+Route::get('producto/generarEtiquetas', LabelController::class)->middleware('can:productos_ver_lista')->name('products.labels');
+Route::get('producto/{id}/kardex', [ProductController::class, 'ledger'])->whereNumber('id')->middleware('can:productos_ver_detalle')->name('products.ledger');
+Route::get('usuario', [UserController::class, 'index'])->middleware('can:usuarios_ver_lista')->name('users.index');
+Route::get('perfil', [ProfileController::class, 'index'])->name('profile.index');
+Route::get('configuracion', [BusinessSettingsController::class, 'index'])->middleware('can:admin_gestionar_roles')->name('settings.business');
+Route::get('tipocambio', [ExchangeRateController::class, 'index'])->middleware('can:tipocambio_ver_lista')->name('rates.index');
+Route::get('buscar-items', [PageController::class, 'search'])->middleware('throttle:120,1')->name('items.search');
+Route::get('cliente/buscar', [PageController::class, 'clients'])->middleware('throttle:120,1')->name('clients.search');
+Route::get('reporte', [ReportController::class, 'index'])->name('reports.index');
+Route::get('reporte/{type}', [ReportController::class, 'show'])->name('reports.show');
+Route::get('caja/backups', [BackupController::class, 'index'])->middleware('can:backups_gestionar')->name('backups.index');
+Route::get('caja/backups/{name}', [BackupController::class, 'download'])->middleware('can:backups_gestionar')->name('backups.download');
+Route::get('{maestro}', [MasterController::class, 'index'])->whereIn('maestro', array_keys(config('masters')))->name('masters.index');
+
+Route::middleware('writable')->group(function (): void {
+    Route::post('perfil/guardar', [ProfileController::class, 'save'])->name('profile.save');
+    Route::post('perfil/subirLogo', [ProfileController::class, 'upload'])->middleware('can:admin_gestionar_roles')->name('profile.logo');
+    Route::post('configuracion/guardar', [BusinessSettingsController::class, 'save'])->middleware('can:admin_gestionar_roles')->name('settings.business.save');
+    Route::post('configuracion/logo', [BusinessSettingsController::class, 'uploadLogo'])->middleware('can:admin_gestionar_roles')->name('settings.business.logo');
+    Route::post('caja/backups', [BackupController::class, 'create'])->middleware('can:backups_gestionar')->name('backups.create');
+    Route::post('venta/guardar', [OperationController::class, 'sale'])->middleware('can:ventas_crear')->name('sales.store');
+    Route::post('venta/procesarDevolucion', [OperationController::class, 'refund'])->middleware('can:ventas_devolver')->name('sales.return');
+    Route::post('venta/procesarCambio', [OperationController::class, 'exchange'])->middleware(['can:ventas_devolver', 'can:ventas_crear'])->name('sales.exchange');
+    Route::post('compra/guardar', [OperationController::class, 'purchase'])->middleware('can:compras_crear')->name('purchases.store');
+    Route::post('compra/recibir/{id}', [OperationController::class, 'receive'])->whereNumber('id')->middleware('can:compras_recibir')->name('purchases.receive');
+    Route::post('transferencia/guardar', [OperationController::class, 'transfer'])->middleware('can:transferencias_crear')->name('transfers.store');
+    Route::post('transferencia/{id}/estado', [OperationController::class, 'transition'])->whereNumber('id')->middleware('can:transferencias_crear')->name('transfers.transition');
+    Route::post('inventario/ajustar', [OperationController::class, 'adjust'])->middleware('can:inventario_ajustar')->name('inventory.adjust');
+    Route::post('caja/abrir', [OperationController::class, 'cash'])->middleware('can:caja_gestionar')->name('cash.open');
+    Route::post('caja/cerrar', [OperationController::class, 'cash'])->middleware('can:caja_gestionar')->name('cash.close');
+    Route::post('caja/agregarMovimiento', [OperationController::class, 'cash'])->middleware('can:caja_gestionar')->name('cash.movement');
+    Route::post('producto/guardar', [ProductController::class, 'save'])->middleware('can:productos_crear')->name('products.store');
+    Route::put('producto/{id}', [ProductController::class, 'save'])->whereNumber('id')->middleware('can:productos_editar')->name('products.update');
+    Route::patch('producto/{id}/estado', [ProductController::class, 'state'])->whereNumber('id')->middleware('can:productos_cambiar_estado')->name('products.state');
+    Route::post('usuario/guardar', [UserController::class, 'save'])->middleware('can:usuarios_crear_editar')->name('users.store');
+    Route::put('usuario/{id}', [UserController::class, 'save'])->whereNumber('id')->middleware('can:usuarios_crear_editar')->name('users.update');
+    Route::patch('usuario/{id}/estado', [UserController::class, 'state'])->whereNumber('id')->middleware('can:usuarios_cambiar_estado')->name('users.state');
+    Route::put('roles/{id}/permisos', [UserController::class, 'permissions'])->whereNumber('id')->middleware('can:admin_gestionar_roles')->name('roles.permissions');
+    Route::post('tipocambio/guardar', [ExchangeRateController::class, 'save'])->middleware('can:tipocambio_gestionar')->name('rates.store');
+    Route::post('{maestro}/guardar', [MasterController::class, 'save'])->whereIn('maestro', array_keys(config('masters')))->name('masters.store');
+    Route::put('{maestro}/{id}', [MasterController::class, 'save'])->whereIn('maestro', array_keys(config('masters')))->whereNumber('id')->name('masters.update');
+    Route::patch('{maestro}/{id}/estado', [MasterController::class, 'state'])->whereIn('maestro', array_keys(config('masters')))->whereNumber('id')->name('masters.state');
+});

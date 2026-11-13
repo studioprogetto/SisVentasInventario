@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "width": 320,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "width": 640,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "status": 200,
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

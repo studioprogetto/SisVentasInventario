@@ -31,36 +31,61 @@ document.addEventListener('DOMContentLoaded', function() {
     const aplicarDescuentoBtn = document.getElementById('aplicar_descuento');
     const descuentoSellosSpan = document.getElementById('descuento_sellos_span');
     const descuentoManualSpan = document.getElementById('descuento_manual_span');
+    let productSearchTimer = null;
+    let productSearchController = null;
 
     // ------------------------------
     // --- BÚSQUEDA DE PRODUCTOS ---
     // ------------------------------
-    buscarInput.addEventListener('keyup', function() {
+    buscarInput.addEventListener('input', function() {
         const term = this.value.trim();
-        if(term.length < 2){ resultadosBusqueda.innerHTML=''; return; }
+        clearTimeout(productSearchTimer);
 
-        fetch(`/mi_sistema_mvc/public/venta/buscar?term=${encodeURIComponent(term)}`)
-        .then(r=>r.json())
-        .then(data=>{
-            resultadosBusqueda.innerHTML='';
-            if(data.length){
-                data.forEach(p=>{
-                    const item=document.createElement('a');
-                    item.href='#';
-                    item.className='list-group-item list-group-item-action';
-                    item.textContent=`${p.nombre} - Stock: ${p.stock} - ${MONEDA}${parseFloat(p.precio_venta).toFixed(2)}`;
-                    item.addEventListener('click', e=>{
-                        e.preventDefault();
-                        agregarAlCarrito(p);
-                        buscarInput.value='';
-                        resultadosBusqueda.innerHTML='';
-                    });
-                    resultadosBusqueda.appendChild(item);
-                });
-            }else{
-                resultadosBusqueda.innerHTML='<span class="list-group-item">No se encontraron productos</span>';
+        if (term.length < 2) {
+            resultadosBusqueda.innerHTML = '';
+            if (productSearchController) {
+                productSearchController.abort();
+                productSearchController = null;
             }
-        }).catch(err=>console.error(err));
+            return;
+        }
+
+        productSearchTimer = setTimeout(() => {
+            if (productSearchController) {
+                productSearchController.abort();
+            }
+            productSearchController = new AbortController();
+
+            fetch(`/mi_sistema_mvc/public/venta/buscar?term=${encodeURIComponent(term)}`, { signal: productSearchController.signal })
+                .then(r => {
+                    if (!r.ok) throw new Error('Error en la búsqueda');
+                    return r.json();
+                })
+                .then(data => {
+                    resultadosBusqueda.innerHTML = '';
+                    if (data.length) {
+                        data.forEach(p => {
+                            const item = document.createElement('a');
+                            item.href = '#';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = `${p.nombre} - Stock: ${p.stock} - ${MONEDA}${parseFloat(p.precio_venta).toFixed(2)}`;
+                            item.addEventListener('click', e => {
+                                e.preventDefault();
+                                agregarAlCarrito(p);
+                                buscarInput.value = '';
+                                resultadosBusqueda.innerHTML = '';
+                            });
+                            resultadosBusqueda.appendChild(item);
+                        });
+                    } else {
+                        resultadosBusqueda.innerHTML = '<span class="list-group-item">No se encontraron productos</span>';
+                    }
+                })
+                .catch(err => {
+                    if (err.name === 'AbortError') return;
+                    console.error(err);
+                });
+        }, 300);
     });
 
     function agregarAlCarrito(item){
@@ -248,9 +273,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // ------------------------------
     // --- AUTOCOMPLETE CLIENTES ---
     // ------------------------------
+    let clienteSearchXhr = null;
     $("#buscarCliente").autocomplete({
         source:function(request,response){
-            $.ajax({
+            if (clienteSearchXhr) {
+                clienteSearchXhr.abort();
+            }
+
+            clienteSearchXhr = $.ajax({
                 url:"/mi_sistema_mvc/public/cliente/buscar",
                 dataType:"json",
                 data:{term:request.term},
@@ -258,10 +288,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     const opciones=[{label:"Venta genérica",value:"Venta genérica",id:null,dni:"-",sellos:0}]
                         .concat(data.map(item=>({label:item.nombre_cliente+" ("+item.documento_identidad+")",value:item.nombre_cliente,id:item.id_cliente,dni:item.documento_identidad,sellos:item.sellos})));
                     response(opciones);
+                },
+                error:function(xhr, status){
+                    if (status !== 'abort') {
+                        response([]);
+                    }
                 }
             });
         },
-        minLength:0,
+        minLength:1,
+        delay:300,
         select:function(event,ui){
             idClienteSelect.value=ui.item.id;
             nombreClienteSpan.textContent=ui.item.value;

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Slider Infinito — Controls Responsive</title>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/css/bootstrap.min.css">
+  <style>
+    :root {
+      --red: #ef233c;
+      --darkred: #c00424;
+      --platinum: #e5e5e5;
+      --black: #2b2d42;
+      --white: #fff;
+      --thumb: #edf2f4;
+      --control-bg: rgba(43,45,66,0.85);
+      --control-size: 48px;
+      --control-gap: 12px;
+    }
+
+    * { box-sizing: border-box; padding:0; margin:0; }
+    body { font:16px/24px "Rubik",sans-serif; color:var(--black); background:var(--platinum); margin:50px 0; }
+    .container { max-width:1400px; padding:0 15px; margin:0 auto; }
+    h2 { font-size:32px; margin-bottom:1em; }
+
+    /* Slider */
+    .slider-wrap { position: relative; }
+    .cards {
+      display: flex;
+      gap: 10px;
+      padding: 25px 0;
+      list-style: none;
+      overflow-x: auto;             /* keep scroll behaviour for snapping & smooth scroll */
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      cursor: grab;
+      margin: 0;
+      padding-left: 0.5px; /* tiny offset to avoid left visual cut in some browsers */
+    }
+    .cards:active { cursor: grabbing; }
+
+    /* hide native scrollbar (cross-browser) */
+    .cards {
+      scrollbar-width: none; /* firefox */
+      -ms-overflow-style: none; /* IE 10+ */
+    }
+    .cards::-webkit-scrollbar { display: none; } /* webkit */
+
+    .card {
+      display:flex;
+      flex-direction:column;
+      flex: 0 0 100%;
+      min-width: 220px;
+      padding:20px;
+      background:var(--white);
+      border-radius:12px;
+      box-shadow:0 5px 15px rgba(0,0,0,.15);
+      scroll-snap-align: start;
+      transition: all .2s;
+    }
+    .card:hover { color:var(--white); background:var(--red); }
+    .card .card-title{ font-size:20px; }
+    .card .card-content{ margin:20px 0; max-width:85%; }
+    .card .card-link-wrapper{ margin-top:auto; }
+    .card .card-link{ display:inline-block; text-decoration:none; color:white; background:var(--red); padding:6px 12px; border-radius:8px; transition:background .2s; }
+    .card:hover .card-link{ background:var(--darkred); }
+
+    /* Responsive card size */
+    @media (min-width:500px){ .card{ flex-basis: calc(50% - 10px); } }
+    @media (min-width:700px){ .card{ flex-basis: calc((100% / 3) - 20px); } }
+    @media (min-width:1100px){ .card{ flex-basis: calc(25% - 30px); } }
+
+    /* Controls (desktop: side arrows; mobile: bottom small buttons) */
+    .controls {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(-50%);
+      pointer-events: none; /* let children override */
+    }
+
+    .control-btn {
+      pointer-events: auto;
+      position: absolute;
+      width: var(--control-size);
+      height: var(--control-size);
+      border-radius: 50%;
+      background: var(--control-bg);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+      cursor: pointer;
+      transition: transform .16s, background .12s;
+      z-index: 10;
+    }
+    .control-btn:active { transform: scale(.98); }
+    .control-btn:focus { outline: 2px solid rgba(255,255,255,.18); }
+
+    /* left / right positions */
+    .control-prev { left: var(--control-gap); }
+    .control-next { right: var(--control-gap); }
+
+    /* Mobile: move controls to bottom center as compact buttons */
+    @media (max-width: 700px) {
+      .controls { top: auto; bottom: 8px; transform: none; display:flex; justify-content:center; gap:12px; }
+      .control-btn { position: static; width: 40px; height: 40px; border-radius: 8px; }
+      .control-prev, .control-next { left: auto; right: auto; }
+    }
+
+    /* small aesthetic for icons */
+    .control-icon { font-size: 18px; line-height: 1; user-select: none; }
+
+    /* footer */
+    .page-footer { position: fixed; right:0; bottom:50px; display:flex; align-items:center; padding:5px; z-index:1; }
+    .page-footer a { display:flex; margin-left:4px; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Slider Infinito — Controles Responsive</h2>
+
+    <div class="slider-wrap" id="sliderWrap">
+      <ul class="cards" id="cardsContainer" aria-label="Productos">
+        <!-- Mantén aquí tus cards originales; el script clonará automáticamente estas mismas al final -->
+        <li class="card"><div><h3 class="card-title">Service 1</h3><div class="card-content"><p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 2</h3><div class="card-content"><p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab repudiandae magnam harum natus fuga et repellat in maiores.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 3</h3><div class="card-content"><p>Phasellus ultrices lorem vel bibendum ultricies. In hendrerit nulla a ante dapibus pulvinar eu eget quam.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 4</h3><div class="card-content"><p>Aenean posuere mauris quam, pellentesque auctor mi bibendum nec. Sed scelerisque lacus nisi, quis auctor lorem ornare vel.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 5</h3><div class="card-content"><p>Vestibulum pharetra fringilla felis sit amet tempor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras et arcu sit amet est consequat feugiat. Nam ut sapien pulvinar.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 6</h3><div class="card-content"><p>Donec ut tincidunt nisl. Vivamus eget eros id elit feugiat mollis. Nam sed sem quis libero finibus tempor.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 7</h3><div class="card-content"><p>Aliquam eget nisl auctor, sollicitudin ipsum at, dignissim ligula. Donec tincidunt in elit et pellentesque. Integer posuere metus ac massa mollis euismod.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 8</h3><div class="card-content"><p>Vivamus eget eros id elit feugiat mollis. Nam sed sem quis libero finibus tempor.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 9</h3><div class="card-content"><p>Duis id congue turpis. Donec sodales porta felis, nec ultricies ante. Nam placerat vitae metus sit amet tempor. Aliquam ac dictum est.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 10</h3><div class="card-content"><p>Pellentesque eget eros eget justo efficitur fermentum.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 11</h3><div class="card-content"><p>Phasellus posuere nec nibh ut tincidunt. Aenean mollis turpis non eros posuere, at luctus leo hendrerit. Integer non libero sapien.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+        <li class="card"><div><h3 class="card-title">Service 12</h3><div class="card-content"><p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Vestibulum ornare metus ac lectus scelerisque volutpat.</p></div></div><div class="card-link-wrapper"><a href="#" class="card-link">Learn More</a></div></li>
+      </ul>
+
+      <!-- Controls -->
+      <div class="controls" aria-hidden="false">
+        <button class="control-btn control-prev" id="prevBtn" aria-label="Anterior">
+          <span class="control-icon" aria-hidden="true">&#10094;</span>
+        </button>
+        <button class="control-btn control-next" id="nextBtn" aria-label="Siguiente">
+          <span class="control-icon" aria-hidden="true">&#10095;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <span>made by </span>
+    <a href="https://georgemartsoukos.com/" target="_blank" rel="noopener">
+      <img width="24" height="24" src="https://assets.codepen.io/162656/george-martsoukos-small-logo.svg" alt="Logo">
+    </a>
+  </footer>
+
+  <script>
+    (function () {
+      const container = document.getElementById('cardsContainer');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      if (!container) return;
+
+      const AUTOPLAY_DELAY = 2200;
+      let timerId = null;
+      let isPaused = false;
+      let isUserInteracting = false;
+      const originalCards = Array.from(container.children);
+      const originalCount = originalCards.length;
+      if (originalCount === 0) return;
+
+      // clone to make infinite track
+      originalCards.forEach(node => {
+        const clone = node.cloneNode(true);
+        clone.classList.add('clone');
+        container.appendChild(clone);
+      });
+
+      const cards = Array.from(container.querySelectorAll('.card'));
+      let originalScrollWidth = null;
+
+      function updateMeasurements() {
+        // la mitad del scrollWidth es la pista original (original + clones)
+        originalScrollWidth = container.scrollWidth / 2;
+      }
+
+      function leftOf(card) {
+        // offset relative to container left
+        return card.offsetLeft - container.offsetLeft;
+      }
+
+      function nearestIndexFromScroll() {
+        const scrollLeft = container.scrollLeft;
+        let closest = 0;
+        let minDiff = Infinity;
+        cards.forEach((c, i) => {
+          const diff = Math.abs(scrollLeft - leftOf(c));
+          if (diff < minDiff) { minDiff = diff; closest = i; }
+        });
+        return closest;
+      }
+
+      // scroll to a given index (cards array)
+      let index = 0;
+      function scrollToIndex(i, behavior = 'smooth') {
+        i = Math.max(0, Math.min(cards.length - 1, i));
+        index = i;
+        const left = leftOf(cards[i]);
+        container.scrollTo({ left, behavior });
+      }
+
+      // loop adjustment when we pass the original width
+      function handleLoop() {
+        if (originalScrollWidth == null) return;
+        if (container.scrollLeft >= originalScrollWidth) {
+          // move back by originalScrollWidth without animation -> effectively same visuals but in original block
+          container.scrollLeft -= originalScrollWidth;
+        } else if (container.scrollLeft < 0) {
+          container.scrollLeft += originalScrollWidth;
+        }
+      }
+
+      // autoplay next by one card
+      function next() {
+        if (isPaused || isUserInteracting) return;
+        // compute from current visible index
+        let cur = nearestIndexFromScroll();
+        let target = cur + 1;
+        scrollToIndex(target, 'smooth');
+      }
+
+      // autoplay prev by one card (handles seamless backward)
+      function prev() {
+        if (isPaused || isUserInteracting) return;
+        // if we're near start of original block, jump forward first so we can move back smoothly
+        if (container.scrollLeft <= 0) {
+          // move to mirror position in cloned half
+          container.scrollLeft += originalScrollWidth;
+        }
+        let cur = nearestIndexFromScroll();
+        let target = Math.max(0, cur - 1);
+        scrollToIndex(target, 'smooth');
+      }
+
+      // events to keep loop consistent on scroll
+      let loopDebounce = null;
+      container.addEventListener('scroll', () => {
+        // keep loop seamless (instant adjust) but debounce a little for perf
+        if (loopDebounce) clearTimeout(loopDebounce);
+        loopDebounce = setTimeout(() => {
+          handleLoop();
+          index = nearestIndexFromScroll();
+        }, 30);
+      }, { passive: true });
+
+      // autoplay control
+      function startAuto() { stopAuto(); timerId = setInterval(next, AUTOPLAY_DELAY); }
+      function stopAuto() { if (timerId) { clearInterval(timerId); timerId = null; } }
+      function pause() { isPaused = true; stopAuto(); }
+      function resume() { if (!isPaused) { return; } isPaused = false; startAuto(); }
+
+      // pointer/touch interactions
+      container.addEventListener('pointerdown', (e) => { isUserInteracting = true; pause(); }, { passive: true });
+      window.addEventListener('pointerup', () => {
+        if (isUserInteracting) {
+          isUserInteracting = false;
+          index = nearestIndexFromScroll();
+          setTimeout(() => { if (!isPaused) startAuto(); }, 300);
+        }
+      });
+
+      container.addEventListener('touchstart', () => { isUserInteracting = true; pause(); }, { passive: true });
+      container.addEventListener('touchend', () => {
+        isUserInteracting = false;
+        index = nearestIndexFromScroll();
+        setTimeout(() => { if (!isPaused) startAuto(); }, 300);
+      }, { passive: true });
+
+      // hover pause
+      container.addEventListener('mouseenter', pause);
+      container.addEventListener('mouseleave', () => { if (!isUserInteracting) startAuto(); });
+
+      // visibility
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) pause(); else if (!isUserInteracting) startAuto();
+      });
+
+      // control button handlers
+      prevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        pause();
+        prev();
+        // resume shortly after
+        setTimeout(() => { if (!isPaused) startAuto(); }, 600);
+      });
+      nextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        pause();
+        next();
+        setTimeout(() => { if (!isPaused) startAuto(); }, 600);
+      });
+
+      // keyboard accessibility: left/right while focus inside slider
+      container.setAttribute('tabindex', '0');
+      container.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') { e.preventDefault(); pause(); prev(); setTimeout(() => startAuto(), 600); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); pause(); next(); setTimeout(() => startAuto(), 600); }
+      });
+
+      // recompute on resize
+      window.addEventListener('resize', () => {
+        setTimeout(() => {
+          updateMeasurements();
+          handleLoop();
+        }, 120);
+      });
+
+      // init
+      requestAnimationFrame(() => {
+        updateMeasurements();
+        container.scrollLeft = 0;
+        startAuto();
+      });
+
+      // expose API (opcional)
+      window.infiniteCardsSlider = {
+        pause: () => { pause(); },
+        resume: () => { isPaused = true; resume(); },
+        next: () => { next(); },
+        prev: () => { prev(); }
+      };
+    })();
+  </script>
+</body>
+</html>
+
+
+
+
+<?php
+// Asegúrate que $productosMasComprados está definido y contiene los productos
+// Cada $producto debería tener al menos: nombre, precio_venta, total_cantidad
+?>
+<section class="productosPopulares bg-dark text-white mt-7 pt-5 py-5">
+  <div class="container">
+    <h2 class="fw-bold fs-1 text-center reveal mb-4 pb-4">Productos Más Comprados</h2>
+
+    <!-- Slider integrado -->
+    <div class="slider-wrap" id="sliderWrap">
+      <ul class="cards" id="cardsContainer" aria-label="Productos">
+        <?php if (!empty($productosMasComprados)): ?>
+          <?php foreach ($productosMasComprados as $producto): 
+            // preparar ruta de imagen como en tu código original
+            $imgPath = "imagenes/sin_imagen.jpg";
+            $nombreArchivo = preg_replace('/\s+/', '_', strtolower($producto['nombre']));
+            if (file_exists("imagenes/imagenes productos/$nombreArchivo.jpg")) {
+                $imgPath = "imagenes/imagenes productos/$nombreArchivo.jpg";
+            }
+          ?>
+            <li class="card">
+              <div class="product-card-inner" style="display:flex;flex-direction:column;height:100%;">
+                <div class="product-image text-center" style="flex:0 0 auto;">
+                  <img src="<?= $imgPath ?>" alt="<?= htmlspecialchars($producto['nombre']) ?>" class="img-fluid rounded" style="max-width:100%; max-height:180px; object-fit:cover;">
+                </div>
+
+                <div class="product-info" style="padding:12px; flex:1 1 auto; display:flex; flex-direction:column;">
+                  <h3 class="product-title fw-semibold" style="font-size:1.05rem; margin-bottom:6px;"><?= htmlspecialchars($producto['nombre']) ?></h3>
+                  <div class="product-price mt-1" style="font-weight:700;">S/ <?= number_format($producto['precio_venta'], 2) ?></div>
+                  <div class="product-stats mt-2" style="font-size:.9rem; color:rgba(0,0,0,.7); margin-top:6px;">
+                    <div class="product-stat"><i class="fas fa-shopping-cart"></i> <?= (int)$producto['total_cantidad'] ?> compras</div>
+                  </div>
+
+                  <div style="margin-top:auto; padding-top:8px;">
+                    <a href="productos.php" class="btn btn-primary d-block mx-auto mt-3">
+                      <i class="fas fa-eye me-1"></i> Ver Producto
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </li>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <li class="card">
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;">
+              <p class="text-center text-muted">No hay productos con ventas registradas.</p>
+            </div>
+          </li>
+        <?php endif; ?>
+      </ul>
+
+      <!-- Controls -->
+      <div class="controls" aria-hidden="false">
+        <button class="control-btn control-prev" id="prevBtn" aria-label="Anterior">
+          <span class="control-icon" aria-hidden="true">&#10094;</span>
+        </button>
+        <button class="control-btn control-next" id="nextBtn" aria-label="Siguiente">
+          <span class="control-icon" aria-hidden="true">&#10095;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Styles necesarios (añádelos en tu CSS principal o dejalos aquí) -->
+<style>
+  :root{
+    --control-bg: rgba(43,45,66,0.85);
+    --control-size:48px;
+    --control-gap:12px;
+    --card-width:270px;
+    --card-height:406px;
+  }
+
+  /* reset/ajustes */
+  .productosPopulares .container { max-width:1400px; }
+  .productosPopulares h2 { color: #fff; }
+
+  /* slider */
+  .slider-wrap { position: relative; margin-top:10px; }
+  .cards {
+    display:flex;
+    gap:10px;
+    padding:18px 6px;
+    list-style:none;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;
+    cursor:grab;
+    margin:0;
+  }
+  .cards:active { cursor:grabbing; }
+
+  /* hide native scrollbar */
+  .cards { scrollbar-width:none; -ms-overflow-style:none; }
+  .cards::-webkit-scrollbar{ display:none; }
+
+  /* card fixed box-sizing and size (requested) */
+  .card {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: var(--card-width);
+    height: var(--card-height);
+    padding: 12px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.12);
+    scroll-snap-align: start;
+    transition: transform .18s;
+    color: #222;
+  }
+
+  .card:hover { transform: translateY(-4px); }
+
+  /* inner elements */
+  .product-image img { width:100%; height:180px; object-fit:cover; border-radius:8px; }
+  .product-title { font-size:1rem; margin:6px 0; color:#111; }
+  .product-price { color:#111; margin-bottom:6px; }
+  .product-stats { color:#666; font-size:.9rem; }
+
+  /* Controls */
+  .controls {
+    position:absolute;
+    top:50%;
+    left:0;
+    right:0;
+    transform:translateY(-50%);
+    pointer-events:none;
+  }
+  .control-btn {
+    pointer-events:auto;
+    position:absolute;
+    width:var(--control-size);
+    height:var(--control-size);
+    border-radius:50%;
+    background:var(--control-bg);
+    color:white;
+    border:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);
+    cursor:pointer;
+    transition:transform .12s;
+    z-index:10;
+  }
+  .control-btn:active{ transform:scale(.98); }
+  .control-prev{ left: var(--control-gap); }
+  .control-next{ right: var(--control-gap); }
+  .control-icon{ font-size:18px; user-select:none; }
+
+  /* responsive: en pantallas pequeñas colocamos controles abajo y reducimos tarjetas algo */
+  @media (max-width: 900px){
+    :root { --card-width:240px; --card-height:370px; }
+  }
+  @media (max-width:700px){
+    .controls { top:auto; bottom:8px; transform:none; display:flex; justify-content:center; gap:12px; }
+    .control-btn { position:static; width:40px; height:40px; border-radius:8px; }
+    :root { --card-width:200px; --card-height:360px; }
+  }
+
+  /* si usas iconos fontawesome, asegúrate de incluir la librería o quita los <i> */
+</style>
+
+<!-- Script del slider (adaptado de tu ejemplo) -->
+<script>
+  (function () {
+    const container = document.getElementById('cardsContainer');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    if (!container) return;
+
+    const AUTOPLAY_DELAY = 2200;
+    let timerId = null;
+    let isPaused = false;
+    let isUserInteracting = false;
+    const originalCards = Array.from(container.children);
+    const originalCount = originalCards.length;
+    if (originalCount === 0) return;
+
+    // clone to make infinite track
+    originalCards.forEach(node => {
+      const clone = node.cloneNode(true);
+      clone.classList.add('clone');
+      container.appendChild(clone);
+    });
+
+    const cards = Array.from(container.querySelectorAll('.card'));
+    let originalScrollWidth = null;
+
+    function updateMeasurements() {
+      originalScrollWidth = container.scrollWidth / 2;
+    }
+
+    function leftOf(card) {
+      return card.offsetLeft - container.offsetLeft;
+    }
+
+    function nearestIndexFromScroll() {
+      const scrollLeft = container.scrollLeft;
+      let closest = 0;
+      let minDiff = Infinity;
+      cards.forEach((c, i) => {
+        const diff = Math.abs(scrollLeft - leftOf(c));
+        if (diff < minDiff) { minDiff = diff; closest = i; }
+      });
+      return closest;
+    }
+
+    let index = 0;
+    function scrollToIndex(i, behavior = 'smooth') {
+      i = Math.max(0, Math.min(cards.length - 1, i));
+      index = i;
+      const left = leftOf(cards[i]);
+      container.scrollTo({ left, behavior });
+    }
+
+    function handleLoop() {
+      if (originalScrollWidth == null) return;
+      if (container.scrollLeft >= originalScrollWidth) {
+        container.scrollLeft -= originalScrollWidth;
+      } else if (container.scrollLeft < 0) {
+        container.scrollLeft += originalScrollWidth;
+      }
+    }
+
+    function next() {
+      if (isPaused || isUserInteracting) return;
+      let cur = nearestIndexFromScroll();
+      let target = cur + 1;
+      scrollToIndex(target, 'smooth');
+    }
+
+    function prev() {
+      if (isPaused || isUserInteracting) return;
+      if (container.scrollLeft <= 0) {
+        container.scrollLeft += originalScrollWidth;
+      }
+      let cur = nearestIndexFromScroll();
+      let target = Math.max(0, cur - 1);
+      scrollToIndex(target, 'smooth');
+    }
+
+    let loopDebounce = null;
+    container.addEventListener('scroll', () => {
+      if (loopDebounce) clearTimeout(loopDebounce);
+      loopDebounce = setTimeout(() => {
+        handleLoop();
+        index = nearestIndexFromScroll();
+      }, 30);
+    }, { passive: true });
+
+    function startAuto() { stopAuto(); timerId = setInterval(next, AUTOPLAY_DELAY); }
+    function stopAuto() { if (timerId) { clearInterval(timerId); timerId = null; } }
+    function pause() { isPaused = true; stopAuto(); }
+    function resume() { if (!isPaused) return; isPaused = false; startAuto(); }
+
+    container.addEventListener('pointerdown', (e) => { isUserInteracting = true; pause(); }, { passive: true });
+    window.addEventListener('pointerup', () => {
+      if (isUserInteracting) {
+        isUserInteracting = false;
+        index = nearestIndexFromScroll();
+        setTimeout(() => { if (!isPaused) startAuto(); }, 300);
+      }
+    });
+
+    container.addEventListener('touchstart', () => { isUserInteracting = true; pause(); }, { passive: true });
+    container.addEventListener('touchend', () => {
+      isUserInteracting = false;
+      index = nearestIndexFromScroll();
+      setTimeout(() => { if (!isPaused) startAuto(); }, 300);
+    }, { passive: true });
+
+    container.addEventListener('mouseenter', pause);
+    container.addEventListener('mouseleave', () => { if (!isUserInteracting) startAuto(); });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) pause(); else if (!isUserInteracting) startAuto();
+    });
+
+    prevBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      pause();
+      prev();
+      setTimeout(() => { if (!isPaused) startAuto(); }, 600);
+    });
+    nextBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      pause();
+      next();
+      setTimeout(() => { if (!isPaused) startAuto(); }, 600);
+    });
+
+    container.setAttribute('tabindex', '0');
+    container.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); pause(); prev(); setTimeout(() => startAuto(), 600); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); pause(); next(); setTimeout(() => startAuto(), 600); }
+    });
+
+    window.addEventListener('resize', () => {
+      setTimeout(() => {
+        updateMeasurements();
+        handleLoop();
+      }, 120);
+    });
+
+    requestAnimationFrame(() => {
+      updateMeasurements();
+      container.scrollLeft = 0;
+      startAuto();
+    });
+
+    window.infiniteCardsSlider = {
+      pause: () => { pause(); },
+      resume: () => { isPaused = true; resume(); },
+      next: () => { next(); },
+      prev: () => { prev(); }
+    };
+  })();
+</script>

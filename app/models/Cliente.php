@@ -59,7 +59,13 @@ class Cliente
 
     public function buscar($term)
     {
-        $term = "%" . $term . "%";
+        $term = trim((string)$term);
+        if ($term === '') {
+            return $this->db->query("SELECT c.id_cliente, c.nombre_cliente, c.documento_identidad, c.sellos, COALESCE(sc.saldo, 0) as saldo FROM clientes c LEFT JOIN saldos_clientes sc ON c.id_cliente = sc.id_cliente WHERE c.activo = 1 LIMIT 0");
+        }
+
+        $termLike = $term . "%";
+        $termContains = "%" . $term . "%";
         $stmt = $this->db->prepare("
             SELECT 
                 c.id_cliente, 
@@ -73,7 +79,7 @@ class Cliente
             ORDER BY c.nombre_cliente ASC
             LIMIT 10
         ");
-        $stmt->bind_param("ss", $term, $term);
+        $stmt->bind_param("ss", $termLike, $termContains);
         $stmt->execute();
         return $stmt->get_result();
     }

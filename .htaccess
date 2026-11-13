@@ -1,0 +1,7 @@
+Options -Indexes
+
+# The current application stays at public/. Keep private files out of HTTP.
+<FilesMatch "(?i)(^\.env|^composer\.(json|lock)$|\.(sql|log|phar|zip)$|^debug\.(php|txt)$)">
+    Require all denied
+</FilesMatch>
+RedirectMatch 404 /\.(git|codex|agents)(/|$)

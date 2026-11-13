@@ -1,0 +1,1 @@
+<button type="button" class="theme-toggle icon-button" data-theme-toggle aria-label="Activar modo oscuro" title="Cambiar apariencia"><span class="theme-sun"><x-icon name="sun"/></span><span class="theme-moon"><x-icon name="moon"/></span><span class="theme-label">Apariencia</span></button>

@@ -1,0 +1,11 @@
+/tools/composer.phar
+/tools/composer.sha256
+/.env
+/config/local.php
+/config/catalog-local.php
+*.log
+/backups/*.sql
+/docs/phase-0/baseline.json
+/tools/python/
+/docs/validation/browser-profile/
+/docs/validation/test-server.json

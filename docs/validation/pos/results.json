@@ -1,0 +1,62 @@
+{
+  "checks": [
+    {
+      "debounce_ms": 3011,
+      "requests": 1
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "width": 375,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "width": 1800,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "width": 375,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "width": 1280,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "width": 1800,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "sale": true,
+  "client_card": true,
+  "warehouse_filter": true
+}

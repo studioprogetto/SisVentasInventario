@@ -1,0 +1,517 @@
+{
+  "responsive": [
+    {
+      "path": "home",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta/historial",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "producto",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "servicio",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "categoria",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "almacen",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "transferencia",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "compra",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "proveedor",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "cliente",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "caja",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "reporte",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "usuario",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipocambio",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipomoneda",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "catalogo",
+      "width": 320,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "home",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta/historial",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "producto",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "servicio",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "categoria",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "almacen",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "transferencia",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "compra",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "proveedor",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "cliente",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "caja",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "reporte",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "usuario",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipocambio",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipomoneda",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "catalogo",
+      "width": 375,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "home",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta/historial",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "producto",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "servicio",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "categoria",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "almacen",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "transferencia",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "compra",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "proveedor",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "cliente",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "caja",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "reporte",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "usuario",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipocambio",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipomoneda",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "catalogo",
+      "width": 640,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "home",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta/historial",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "producto",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "servicio",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "categoria",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "almacen",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "transferencia",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "compra",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "proveedor",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "cliente",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "caja",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "reporte",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "usuario",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipocambio",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipomoneda",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "catalogo",
+      "width": 768,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "home",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "venta/historial",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "producto",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "servicio",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "categoria",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "almacen",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "transferencia",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "compra",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "proveedor",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "cliente",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "caja",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "reporte",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "usuario",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipocambio",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "tipomoneda",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    },
+    {
+      "path": "catalogo",
+      "width": 1280,
+      "status": 200,
+      "horizontal_overflow": false
+    }
+  ],
+  "errors": [],
+  "xlsx_rows": 2,
+  "pdf_pages": 1
+}

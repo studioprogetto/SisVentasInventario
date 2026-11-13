@@ -1,0 +1,16 @@
+{
+    "business_counts": {
+        "productos": 1378,
+        "ventas": 5428,
+        "compras": 8,
+        "usuarios": 4,
+        "clientes": 48
+    },
+    "stock_mismatches": 6,
+    "negative_stock": 0,
+    "legacy_missing_currency": 5428,
+    "legacy_unreconciled_credits": 3,
+    "public_reader_denied_0": true,
+    "public_reader_denied_1": true,
+    "passed": false
+}

@@ -1,0 +1,10 @@
+@extends('layouts.app')
+@section('content')
+<h1>Usuarios y permisos</h1>
+@can('usuarios_crear_editar')<details class="card"><summary>Nuevo usuario</summary><form method="POST" action="{{ route('users.store') }}" class="form-grid">@csrf
+@include('users.form',['user'=>null])<button type="submit" class="btn btn-success">Crear usuario</button></form></details>@endcan
+<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+@foreach($users as $user)<tr><td>{{ $user->nombre_completo }}</td><td>{{ $user->username }}</td><td>{{ $user->rol?->nombre_rol }}</td><td>{{ $user->activo ? 'Activo' : 'Inactivo' }}</td><td>@can('usuarios_crear_editar')<details><summary>Editar</summary><form method="POST" action="{{ route('users.update',$user->getKey()) }}" class="form-grid">@csrf @method('PUT') @include('users.form')<button type="submit" class="btn btn-success">Guardar</button></form></details>@endcan@can('usuarios_cambiar_estado')<form method="POST" action="{{ route('users.state',$user->getKey()) }}">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $user->activo ? 0 : 1 }}"><button class="{{ $user->activo ? 'btn btn-danger' : 'btn btn-success' }}">{{ $user->activo ? 'Desactivar' : 'Activar' }}</button></form>@endcan</td></tr>@endforeach</tbody></table></div>{{ $users->links() }}
+@can('admin_gestionar_roles')<h2>Permisos por rol</h2>@foreach($roles as $role)<details class="card"><summary>{{ $role->nombre_rol }}</summary><form method="POST" action="{{ route('roles.permissions',$role->id_rol) }}">@csrf @method('PUT')<input type="hidden" name="permisos" value=""><div class="form-grid">@foreach($permissions as $permission)<label><input type="checkbox" name="permisos[]" value="{{ $permission->id_permiso }}" @checked($role->permisos->contains('id_permiso',$permission->id_permiso))>{{ $permission->nombre_permiso }}</label>@endforeach</div><button type="submit" class="btn btn-success">Guardar permisos</button></form></details>@endforeach
+@endcan
+@endsection

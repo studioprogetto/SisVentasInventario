@@ -48,29 +48,35 @@ class Compra
     // En models/Compra.php
     public function buscarProductos($term, $id_almacen = null)
     {
-        $searchTerm = "%{$term}%";
+        $term = trim((string)$term);
+        if ($term === '') {
+            return $this->db->query("SELECT p.id_producto, p.nombre, p.precio_compra, p.id_almacen FROM productos p WHERE p.activo = 1 LIMIT 0");
+        }
+
+        $termLike = $term . "%";
+        $termContains = "%" . $term . "%";
 
         if ($id_almacen) {
-            // Buscar productos en un almacén específico
             $stmt = $this->db->prepare("
-            SELECT p.id_producto, p.nombre, p.precio_compra, p.id_almacen 
-            FROM productos p 
-            WHERE (p.nombre LIKE ? OR p.codigo_barra LIKE ?) 
-            AND p.activo = 1 
-            AND (p.id_almacen = ? OR p.id_almacen IS NULL)
-            LIMIT 10
-        ");
-            $stmt->bind_param("ssi", $searchTerm, $searchTerm, $id_almacen);
+                SELECT p.id_producto, p.nombre, p.precio_compra, p.id_almacen
+                FROM productos p
+                WHERE p.activo = 1
+                  AND (p.nombre LIKE ? OR p.codigo_barra LIKE ? OR p.codigo_barra = ?)
+                  AND (p.id_almacen = ? OR p.id_almacen IS NULL)
+                ORDER BY p.nombre ASC
+                LIMIT 10
+            ");
+            $stmt->bind_param("sssi", $termLike, $termContains, $term, $id_almacen);
         } else {
-            // Buscar en todos los almacenes
             $stmt = $this->db->prepare("
-            SELECT p.id_producto, p.nombre, p.precio_compra, p.id_almacen 
-            FROM productos p 
-            WHERE (p.nombre LIKE ? OR p.codigo_barra LIKE ?) 
-            AND p.activo = 1 
-            LIMIT 10
-        ");
-            $stmt->bind_param("ss", $searchTerm, $searchTerm);
+                SELECT p.id_producto, p.nombre, p.precio_compra, p.id_almacen
+                FROM productos p
+                WHERE p.activo = 1
+                  AND (p.nombre LIKE ? OR p.codigo_barra LIKE ? OR p.codigo_barra = ?)
+                ORDER BY p.nombre ASC
+                LIMIT 10
+            ");
+            $stmt->bind_param("sss", $termLike, $termContains, $term);
         }
 
         $stmt->execute();

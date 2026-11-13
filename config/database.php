@@ -10,28 +10,33 @@ $config = [
     'direccion' => ' Calle Las Gemas 626 Urb. Santa Inés 
                     Trujillo - La Libertad',
     'horario_atencion' => 'Lun - Vie: 8:00-20:30   
-                             Sáb: 8:00-20:30'
+                             Sáb: 8:00-20:30',
 ];
 
-function getConfig($key) {
+function getConfig($key)
+{
     global $config;
+
     return $config[$key] ?? null;
 }
 
-function getMoneda() {
-    if (isset($_SESSION['moneda_usuario']) && !empty($_SESSION['moneda_usuario'])) {
+function getMoneda()
+{
+    if (isset($_SESSION['moneda_usuario']) && ! empty($_SESSION['moneda_usuario'])) {
         return $_SESSION['moneda_usuario'];
     }
+
     return getConfig('moneda');
 }
 // --- FIN DE LA CONFIGURACIÓN GLOBAL ---
 
-
 // --- CONFIGURACIÓN DE LA BASE DE DATOS ---
-define('DB_HOST', 'localhost'); // El puerto :3306 es el nativo, se puede omitir si es el estándar
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'tienda_sistema');
+$connectionSettings = require __DIR__.'/connection.php';
+define('DB_HOST', $connectionSettings['HOST']);
+define('DB_USER', $connectionSettings['USER']);
+define('DB_PASS', $connectionSettings['PASS']);
+define('DB_NAME', $connectionSettings['NAME']);
+unset($connectionSettings);
 
 // Habilitar que mysqli lance excepciones en lugar de simples advertencias
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -39,39 +44,42 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 try {
     // Intentamos establecer la conexión
     $conexion = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-    $conexion->set_charset("utf8");
+    $conexion->set_charset('utf8');
 
 } catch (mysqli_sql_exception $e) {
     // 1. Registrar el error en el archivo log interno del servidor (silencioso para el cliente)
-    error_log("Fallo crítico en Base de Datos: " . $e->getMessage() . " en " . $e->getFile() . " línea " . $e->getLine());
-    
+    error_log('Fallo crítico en Base de Datos: '.$e->getMessage().' en '.$e->getFile().' línea '.$e->getLine());
+
     // 2. Enviar un código de estado HTTP 503 (Servicio No Disponible)
     http_response_code(503);
-    
+
     // 3. Mostrar una interfaz limpia y controlada al usuario en lugar de romper el sistema
     mostrarPantallaMantenimiento();
     exit();
 }
 
-
 // --- FUNCIONES DE CONTROL / UTILIDADES ---
 
-function redirigir($url) {
-    header("Location: " . $url);
+function redirigir($url)
+{
+    header('Location: '.$url);
     exit();
 }
 
-function tienePermiso($permiso) {
+function tienePermiso($permiso)
+{
     if (isset($_SESSION['permisos']) && in_array($permiso, $_SESSION['permisos'])) {
         return true;
     }
+
     return false;
 }
 
 /**
  * Renderiza una vista amigable de contingencia si la BD no responde.
  */
-function mostrarPantallaMantenimiento() {
+function mostrarPantallaMantenimiento()
+{
     ?>
     <!DOCTYPE html>
     <html lang="es">

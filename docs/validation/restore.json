@@ -1,0 +1,36 @@
+{
+    "passed": true,
+    "backup": "backup-20261113-134940-SNa8T7S9yU.sql",
+    "sha256": "c648ac5663ba913b485c08c884c2e775f032847abbf3282d0a14bebfa55a3903",
+    "counts": {
+        "productos": {
+            "source": 1378,
+            "restored": 1378
+        },
+        "ventas": {
+            "source": 5425,
+            "restored": 5425
+        },
+        "detalle_ventas": {
+            "source": 11398,
+            "restored": 11398
+        },
+        "compras": {
+            "source": 8,
+            "restored": 8
+        },
+        "usuarios": {
+            "source": 4,
+            "restored": 4
+        },
+        "clientes": {
+            "source": 48,
+            "restored": 48
+        },
+        "existencias": {
+            "source": 1378,
+            "restored": 1378
+        }
+    },
+    "temporary_database_removed": true
+}

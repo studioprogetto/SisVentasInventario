@@ -1,0 +1,63 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "path": "",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "mi_sistema_mvc/laravel/public/auth/login",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "mi_sistema_mvc/laravel/public/catalogo",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "mi_sistema_mvc/laravel/public/api/catalogo/categorias",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "mi_sistema_mvc/laravel/public/sitemap.xml",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "robots.txt",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "mi_sistema_mvc/config/database.php",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "path": "mi_sistema_mvc/laravel/.env",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "path": "mi_sistema_mvc/docs/INFORME_FINAL.md",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "path": "mi_sistema_mvc/backups/",
+      "status": 403,
+      "expected": 403
+    },
+    {
+      "path": "mi_sistema_mvc/.git/config",
+      "status": 404,
+      "expected": [
+        403,
+        404
+      ]
+    }
+  ]
+}

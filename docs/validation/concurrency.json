@@ -1,0 +1,17 @@
+{
+    "workers": 2,
+    "accepted": 1,
+    "rejected": 1,
+    "stock": 0,
+    "units_sold": 1,
+    "passed": true,
+    "cases": {
+        "last_unit": true,
+        "single_receipt": true,
+        "single_dispatch": true,
+        "single_transfer_receipt": true,
+        "single_cash_close": true,
+        "single_cash_open": true,
+        "idempotent_concurrent_sale": true
+    }
+}

@@ -1,0 +1,1860 @@
+{
+    "almacenes": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "nombre",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(100)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "ubicacion",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "activo",
+                "DATA_TYPE": "tinyint",
+                "COLUMN_TYPE": "tinyint(1)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "1",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `almacenes` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `nombre` varchar(100) NOT NULL,\n  `ubicacion` varchar(255) DEFAULT NULL,\n  `activo` tinyint(1) NOT NULL DEFAULT 1,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "auditoria_cambios": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_auditoria",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_venta_original",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_venta_nueva",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_cambio",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_cliente",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "tipo_operacion",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('cambio','devolucion')",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "monto_original",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "monto_nuevo",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "saldo_generado",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "observacion",
+                "DATA_TYPE": "text",
+                "COLUMN_TYPE": "text",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_auditoria",
+                "DATA_TYPE": "datetime",
+                "COLUMN_TYPE": "datetime",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `auditoria_cambios` (\n  `id_auditoria` int(11) NOT NULL AUTO_INCREMENT,\n  `id_venta_original` int(11) NOT NULL,\n  `id_venta_nueva` int(11) DEFAULT NULL,\n  `id_cambio` int(11) NOT NULL,\n  `id_cliente` int(11) NOT NULL,\n  `tipo_operacion` enum('cambio','devolucion') NOT NULL,\n  `monto_original` decimal(10,2) NOT NULL,\n  `monto_nuevo` decimal(10,2) DEFAULT 0.00,\n  `saldo_generado` decimal(10,2) DEFAULT 0.00,\n  `observacion` text DEFAULT NULL,\n  `fecha_auditoria` datetime NOT NULL,\n  PRIMARY KEY (`id_auditoria`),\n  KEY `id_venta_original` (`id_venta_original`),\n  KEY `id_cambio` (`id_cambio`),\n  KEY `id_cliente` (`id_cliente`),\n  CONSTRAINT `auditoria_cambios_ibfk_1` FOREIGN KEY (`id_venta_original`) REFERENCES `ventas` (`id_venta`),\n  CONSTRAINT `auditoria_cambios_ibfk_2` FOREIGN KEY (`id_cambio`) REFERENCES `cambios_ventas` (`id_cambio`),\n  CONSTRAINT `auditoria_cambios_ibfk_3` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "cambios_ventas": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_cambio",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_venta_original",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_venta_nueva",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_cliente",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "tipo",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('cambio','devolucion')",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "monto_saldo",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "estado",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('pendiente','completado','cancelado')",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "'pendiente'",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "observacion",
+                "DATA_TYPE": "text",
+                "COLUMN_TYPE": "text",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_cambio",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `cambios_ventas` (\n  `id_cambio` int(11) NOT NULL AUTO_INCREMENT,\n  `id_venta_original` int(11) NOT NULL,\n  `id_venta_nueva` int(11) DEFAULT NULL,\n  `id_cliente` int(11) NOT NULL,\n  `tipo` enum('cambio','devolucion') NOT NULL,\n  `monto_saldo` decimal(10,2) DEFAULT 0.00,\n  `estado` enum('pendiente','completado','cancelado') DEFAULT 'pendiente',\n  `observacion` text DEFAULT NULL,\n  `fecha_cambio` timestamp NOT NULL DEFAULT current_timestamp(),\n  PRIMARY KEY (`id_cambio`),\n  KEY `idx_cambios_venta_original` (`id_venta_original`),\n  KEY `idx_cambios_venta_nueva` (`id_venta_nueva`),\n  KEY `idx_cambios_cliente` (`id_cliente`),\n  KEY `idx_cambios_estado` (`estado`),\n  CONSTRAINT `cambios_ventas_ibfk_1` FOREIGN KEY (`id_venta_original`) REFERENCES `ventas` (`id_venta`),\n  CONSTRAINT `cambios_ventas_ibfk_2` FOREIGN KEY (`id_venta_nueva`) REFERENCES `ventas` (`id_venta`),\n  CONSTRAINT `cambios_ventas_ibfk_3` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`)\n) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "categorias": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_categoria",
+                "DATA_TYPE": "bigint",
+                "COLUMN_TYPE": "bigint(20)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "nombre",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(100)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "UNI",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "activo",
+                "DATA_TYPE": "tinyint",
+                "COLUMN_TYPE": "tinyint(1)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "1",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `categorias` (\n  `id_categoria` bigint(20) NOT NULL AUTO_INCREMENT,\n  `nombre` varchar(100) NOT NULL,\n  `activo` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',\n  PRIMARY KEY (`id_categoria`),\n  UNIQUE KEY `nombre` (`nombre`)\n) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "clientes": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_cliente",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "nombre_cliente",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(150)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "documento_identidad",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(20)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "UNI",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "telefono",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(20)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "email",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(100)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "direccion",
+                "DATA_TYPE": "text",
+                "COLUMN_TYPE": "text",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "activo",
+                "DATA_TYPE": "tinyint",
+                "COLUMN_TYPE": "tinyint(1)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "1",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "sellos",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "total_compras",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "0",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "tarjetas_llenas",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "0",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `clientes` (\n  `id_cliente` int(11) NOT NULL AUTO_INCREMENT,\n  `nombre_cliente` varchar(150) NOT NULL,\n  `documento_identidad` varchar(20) DEFAULT NULL,\n  `telefono` varchar(20) DEFAULT NULL,\n  `email` varchar(100) DEFAULT NULL,\n  `direccion` text DEFAULT NULL,\n  `activo` tinyint(1) NOT NULL DEFAULT 1,\n  `sellos` int(11) DEFAULT 0,\n  `total_compras` int(11) NOT NULL DEFAULT 0,\n  `tarjetas_llenas` int(11) NOT NULL DEFAULT 0,\n  PRIMARY KEY (`id_cliente`),\n  UNIQUE KEY `documento_identidad` (`documento_identidad`),\n  KEY `idx_documento_identidad` (`documento_identidad`)\n) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "compras": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_compra",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_proveedor",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_almacen",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_usuario",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_compra",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "total_compra",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_recepcion",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "estado",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('solicitada','recibida','pagada')",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "'solicitada'",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `compras` (\n  `id_compra` int(11) NOT NULL AUTO_INCREMENT,\n  `id_proveedor` int(11) NOT NULL,\n  `id_almacen` int(11) DEFAULT NULL,\n  `id_usuario` int(11) NOT NULL,\n  `fecha_compra` timestamp NOT NULL DEFAULT current_timestamp(),\n  `total_compra` decimal(10,2) NOT NULL,\n  `fecha_recepcion` timestamp NULL DEFAULT NULL,\n  `estado` enum('solicitada','recibida','pagada') NOT NULL DEFAULT 'solicitada',\n  PRIMARY KEY (`id_compra`),\n  KEY `id_proveedor` (`id_proveedor`),\n  KEY `id_usuario` (`id_usuario`),\n  CONSTRAINT `compras_ibfk_1` FOREIGN KEY (`id_proveedor`) REFERENCES `proveedores` (`id_proveedor`),\n  CONSTRAINT `compras_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)\n) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "detalles_cambio": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_detalle",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_cambio",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_producto",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "cantidad",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "precio",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "tipo",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('devolucion','nuevo')",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `detalles_cambio` (\n  `id_detalle` int(11) NOT NULL AUTO_INCREMENT,\n  `id_cambio` int(11) NOT NULL,\n  `id_producto` int(11) NOT NULL,\n  `cantidad` int(11) NOT NULL,\n  `precio` decimal(10,2) NOT NULL,\n  `tipo` enum('devolucion','nuevo') NOT NULL,\n  PRIMARY KEY (`id_detalle`),\n  KEY `id_cambio` (`id_cambio`),\n  KEY `idx_cambio` (`id_cambio`),\n  KEY `idx_producto` (`id_producto`),\n  CONSTRAINT `detalles_cambio_ibfk_1` FOREIGN KEY (`id_cambio`) REFERENCES `cambios_ventas` (`id_cambio`) ON DELETE CASCADE,\n  CONSTRAINT `detalles_cambio_ibfk_2` FOREIGN KEY (`id_cambio`) REFERENCES `cambios_ventas` (`id_cambio`) ON DELETE CASCADE,\n  CONSTRAINT `detalles_cambio_ibfk_3` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`) ON DELETE CASCADE\n) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "detalle_compras": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_detalle_compra",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_compra",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_producto",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "cantidad",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "costo_unitario",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `detalle_compras` (\n  `id_detalle_compra` int(11) NOT NULL AUTO_INCREMENT,\n  `id_compra` int(11) NOT NULL,\n  `id_producto` int(11) NOT NULL,\n  `cantidad` int(11) NOT NULL,\n  `costo_unitario` decimal(10,2) NOT NULL,\n  PRIMARY KEY (`id_detalle_compra`),\n  KEY `id_compra` (`id_compra`),\n  KEY `id_producto` (`id_producto`),\n  CONSTRAINT `detalle_compras_ibfk_1` FOREIGN KEY (`id_compra`) REFERENCES `compras` (`id_compra`) ON DELETE CASCADE,\n  CONSTRAINT `detalle_compras_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`)\n) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "detalle_servicio": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_servicio_realizado",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_servicio",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_cliente",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "cantidad",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "1.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "precio_total",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha",
+                "DATA_TYPE": "datetime",
+                "COLUMN_TYPE": "datetime",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "estado",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('Pendiente','Finalizado','Cancelado')",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "'Pendiente'",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `detalle_servicio` (\n  `id_servicio_realizado` int(11) NOT NULL AUTO_INCREMENT,\n  `id_servicio` int(11) NOT NULL,\n  `id_cliente` int(11) NOT NULL,\n  `cantidad` decimal(10,2) NOT NULL DEFAULT 1.00,\n  `precio_total` decimal(10,2) NOT NULL,\n  `fecha` datetime NOT NULL DEFAULT current_timestamp(),\n  `estado` enum('Pendiente','Finalizado','Cancelado') NOT NULL DEFAULT 'Pendiente',\n  PRIMARY KEY (`id_servicio_realizado`),\n  KEY `idx_servicio` (`id_servicio`),\n  KEY `idx_cliente` (`id_cliente`),\n  KEY `idx_fecha_estado` (`fecha`,`estado`),\n  CONSTRAINT `detalle_servicio_ibfk_1` FOREIGN KEY (`id_servicio`) REFERENCES `servicios` (`id_servicio`),\n  CONSTRAINT `detalle_servicio_ibfk_2` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "detalle_ventas": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_detalle_venta",
+                "DATA_TYPE": "bigint",
+                "COLUMN_TYPE": "bigint(20)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_venta",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_producto",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_servicio",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "tipo_item",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "cantidad",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "precio_unitario",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "descuento",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `detalle_ventas` (\n  `id_detalle_venta` bigint(20) NOT NULL AUTO_INCREMENT,\n  `id_venta` int(11) NOT NULL,\n  `id_producto` int(11) DEFAULT NULL,\n  `id_servicio` int(11) DEFAULT NULL,\n  `tipo_item` varchar(255) DEFAULT NULL,\n  `cantidad` int(11) NOT NULL,\n  `precio_unitario` decimal(10,2) NOT NULL,\n  `descuento` decimal(10,2) DEFAULT NULL,\n  PRIMARY KEY (`id_detalle_venta`),\n  KEY `id_venta` (`id_venta`),\n  KEY `id_producto` (`id_producto`),\n  KEY `id_servicio` (`id_servicio`),\n  CONSTRAINT `detalle_ventas_ibfk_1` FOREIGN KEY (`id_venta`) REFERENCES `ventas` (`id_venta`) ON DELETE CASCADE,\n  CONSTRAINT `detalle_ventas_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`)\n) ENGINE=InnoDB AUTO_INCREMENT=11522 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "movimientos_caja": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_movimiento_caja",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_turno",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_usuario",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "tipo_movimiento",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('ingreso','egreso')",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "monto",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "descripcion",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `movimientos_caja` (\n  `id_movimiento_caja` int(11) NOT NULL AUTO_INCREMENT,\n  `id_turno` int(11) NOT NULL,\n  `id_usuario` int(11) NOT NULL,\n  `tipo_movimiento` enum('ingreso','egreso') NOT NULL,\n  `monto` decimal(10,2) NOT NULL,\n  `descripcion` varchar(255) NOT NULL,\n  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),\n  PRIMARY KEY (`id_movimiento_caja`),\n  KEY `id_turno` (`id_turno`),\n  KEY `id_usuario` (`id_usuario`),\n  CONSTRAINT `movimientos_caja_ibfk_1` FOREIGN KEY (`id_turno`) REFERENCES `turnos_caja` (`id_turno`),\n  CONSTRAINT `movimientos_caja_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "movimientos_inventario": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_movimiento",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_producto",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_almacen",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "tipo_movimiento",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('compra','venta','devolucion','ajuste_positivo','ajuste_negativo','transferencia_salida','transferencia_entrada')",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "cantidad",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "stock_anterior",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "stock_nuevo",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_usuario",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "referencia_id",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `movimientos_inventario` (\n  `id_movimiento` int(11) NOT NULL AUTO_INCREMENT,\n  `id_producto` int(11) NOT NULL,\n  `id_almacen` int(11) DEFAULT NULL,\n  `tipo_movimiento` enum('compra','venta','devolucion','ajuste_positivo','ajuste_negativo','transferencia_salida','transferencia_entrada') NOT NULL,\n  `cantidad` int(11) NOT NULL,\n  `stock_anterior` int(11) NOT NULL,\n  `stock_nuevo` int(11) NOT NULL,\n  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),\n  `id_usuario` int(11) NOT NULL,\n  `referencia_id` int(11) DEFAULT NULL COMMENT 'ID de la venta, compra o ajuste relacionado',\n  PRIMARY KEY (`id_movimiento`),\n  KEY `id_producto` (`id_producto`),\n  KEY `id_usuario` (`id_usuario`),\n  KEY `fk_movimiento_almacen` (`id_almacen`),\n  CONSTRAINT `fk_movimiento_almacen` FOREIGN KEY (`id_almacen`) REFERENCES `almacenes` (`id`),\n  CONSTRAINT `movimientos_inventario_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`),\n  CONSTRAINT `movimientos_inventario_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)\n) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "movimiento_servicio": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_movimiento_servicio",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_servicio_realizado",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "tipo_movimiento",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('Cobro','Pago','Consumo de insumo')",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "monto",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha",
+                "DATA_TYPE": "datetime",
+                "COLUMN_TYPE": "datetime",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "descripcion",
+                "DATA_TYPE": "text",
+                "COLUMN_TYPE": "text",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `movimiento_servicio` (\n  `id_movimiento_servicio` int(11) NOT NULL AUTO_INCREMENT,\n  `id_servicio_realizado` int(11) NOT NULL,\n  `tipo_movimiento` enum('Cobro','Pago','Consumo de insumo') NOT NULL,\n  `monto` decimal(10,2) NOT NULL,\n  `fecha` datetime NOT NULL DEFAULT current_timestamp(),\n  `descripcion` text DEFAULT NULL,\n  PRIMARY KEY (`id_movimiento_servicio`),\n  KEY `idx_servicio_realizado` (`id_servicio_realizado`),\n  KEY `idx_tipo_fecha` (`tipo_movimiento`,`fecha`),\n  CONSTRAINT `movimiento_servicio_ibfk_1` FOREIGN KEY (`id_servicio_realizado`) REFERENCES `detalle_servicio` (`id_servicio_realizado`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "permisos": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_permiso",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "nombre_permiso",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(100)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "UNI",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "descripcion",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `permisos` (\n  `id_permiso` int(11) NOT NULL AUTO_INCREMENT,\n  `nombre_permiso` varchar(100) NOT NULL COMMENT 'Ej: productos_crear, ventas_ver_reporte',\n  `descripcion` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`id_permiso`),\n  UNIQUE KEY `nombre_permiso` (`nombre_permiso`)\n) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "productos": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_producto",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "codigo_barra",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(100)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "UNI",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "nombre",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "descripcion",
+                "DATA_TYPE": "text",
+                "COLUMN_TYPE": "text",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_categoria",
+                "DATA_TYPE": "bigint",
+                "COLUMN_TYPE": "bigint(20)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_almacen",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_proveedor_preferido",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "precio_compra",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "precio_venta",
+                "DATA_TYPE": "double",
+                "COLUMN_TYPE": "double",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "stock",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "0",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "stock_minimo",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "5",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "activo",
+                "DATA_TYPE": "tinyint",
+                "COLUMN_TYPE": "tinyint(1)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "1",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_creacion",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_actualizacion",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": "on update current_timestamp()"
+            },
+            {
+                "COLUMN_NAME": "imagen_path",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "imagen_url",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(511)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `productos` (\n  `id_producto` int(11) NOT NULL AUTO_INCREMENT,\n  `codigo_barra` varchar(100) DEFAULT NULL,\n  `nombre` varchar(255) DEFAULT NULL,\n  `descripcion` text DEFAULT NULL,\n  `id_categoria` bigint(20) DEFAULT NULL,\n  `id_almacen` int(11) DEFAULT NULL,\n  `id_proveedor_preferido` int(11) DEFAULT NULL,\n  `precio_compra` decimal(10,2) NOT NULL DEFAULT 0.00,\n  `precio_venta` double DEFAULT NULL,\n  `stock` int(11) NOT NULL DEFAULT 0,\n  `stock_minimo` int(11) NOT NULL DEFAULT 5,\n  `activo` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',\n  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),\n  `fecha_actualizacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  `imagen_path` varchar(255) DEFAULT NULL,\n  `imagen_url` varchar(511) DEFAULT NULL,\n  PRIMARY KEY (`id_producto`),\n  UNIQUE KEY `codigo_barra` (`codigo_barra`),\n  KEY `id_categoria` (`id_categoria`),\n  KEY `id_proveedor_preferido` (`id_proveedor_preferido`),\n  KEY `id_almacen` (`id_almacen`),\n  KEY `idx_activo_nombre` (`activo`,`nombre`),\n  KEY `idx_categoria` (`id_categoria`),\n  KEY `idx_almacen` (`id_almacen`),\n  KEY `idx_stock` (`stock`,`stock_minimo`)\n) ENGINE=InnoDB AUTO_INCREMENT=1392 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "proveedores": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_proveedor",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "nombre_proveedor",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(150)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "ruc",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(20)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "UNI",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "telefono",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(20)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "email",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(100)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "direccion",
+                "DATA_TYPE": "text",
+                "COLUMN_TYPE": "text",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "activo",
+                "DATA_TYPE": "tinyint",
+                "COLUMN_TYPE": "tinyint(1)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "1",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `proveedores` (\n  `id_proveedor` int(11) NOT NULL AUTO_INCREMENT,\n  `nombre_proveedor` varchar(150) NOT NULL,\n  `ruc` varchar(20) DEFAULT NULL,\n  `telefono` varchar(20) DEFAULT NULL,\n  `email` varchar(100) DEFAULT NULL,\n  `direccion` text DEFAULT NULL,\n  `activo` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',\n  PRIMARY KEY (`id_proveedor`),\n  UNIQUE KEY `ruc` (`ruc`)\n) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "roles": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_rol",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "nombre_rol",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(50)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "UNI",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `roles` (\n  `id_rol` int(11) NOT NULL AUTO_INCREMENT,\n  `nombre_rol` varchar(50) NOT NULL COMMENT 'Ej: Administrador, Cajero, Almacenista',\n  PRIMARY KEY (`id_rol`),\n  UNIQUE KEY `nombre_rol` (`nombre_rol`)\n) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "rol_permiso": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_rol",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_permiso",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `rol_permiso` (\n  `id_rol` int(11) NOT NULL,\n  `id_permiso` int(11) NOT NULL,\n  PRIMARY KEY (`id_rol`,`id_permiso`),\n  KEY `id_permiso` (`id_permiso`),\n  CONSTRAINT `rol_permiso_ibfk_1` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`id_rol`) ON DELETE CASCADE,\n  CONSTRAINT `rol_permiso_ibfk_2` FOREIGN KEY (`id_permiso`) REFERENCES `permisos` (`id_permiso`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "saldos_clientes": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_saldo",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_cliente",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "saldo",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_actualizacion",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": "on update current_timestamp()"
+            },
+            {
+                "COLUMN_NAME": "estado",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('pendiente','utilizado','reembolsado','completado')",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "'pendiente'",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `saldos_clientes` (\n  `id_saldo` int(11) NOT NULL AUTO_INCREMENT,\n  `id_cliente` int(11) NOT NULL,\n  `saldo` decimal(10,2) DEFAULT 0.00,\n  `fecha_actualizacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  `estado` enum('pendiente','utilizado','reembolsado','completado') DEFAULT 'pendiente',\n  PRIMARY KEY (`id_saldo`),\n  KEY `idx_saldos_cliente` (`id_cliente`),\n  CONSTRAINT `saldos_clientes_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`)\n) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "servicios": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_servicio",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "nombre",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(150)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "descripcion",
+                "DATA_TYPE": "text",
+                "COLUMN_TYPE": "text",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "precio_venta",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "activo",
+                "DATA_TYPE": "tinyint",
+                "COLUMN_TYPE": "tinyint(1)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "1",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_creacion",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_actualizacion",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": "on update current_timestamp()"
+            }
+        ],
+        "ddl": "CREATE TABLE `servicios` (\n  `id_servicio` int(11) NOT NULL AUTO_INCREMENT,\n  `nombre` varchar(150) NOT NULL,\n  `descripcion` text DEFAULT NULL,\n  `precio_venta` decimal(10,2) NOT NULL,\n  `activo` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',\n  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),\n  `fecha_actualizacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`id_servicio`)\n) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "tipo_cambio": {
+        "columns": [
+            {
+                "COLUMN_NAME": "fecha",
+                "DATA_TYPE": "date",
+                "COLUMN_TYPE": "date",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_moneda",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "tipo_moneda",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(3)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "valor_soles",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,4)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `tipo_cambio` (\n  `fecha` date NOT NULL,\n  `id_moneda` int(11) NOT NULL,\n  `tipo_moneda` varchar(3) NOT NULL,\n  `valor_soles` decimal(10,4) NOT NULL,\n  PRIMARY KEY (`fecha`,`id_moneda`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "tipo_moneda": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "descripcion",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(50)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "simbolo",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(5)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "activo",
+                "DATA_TYPE": "tinyint",
+                "COLUMN_TYPE": "tinyint(1)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "1",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `tipo_moneda` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(50) NOT NULL,\n  `simbolo` varchar(5) NOT NULL,\n  `activo` tinyint(1) NOT NULL DEFAULT 1,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "turnos_caja": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_turno",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_usuario",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_apertura",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "monto_inicial",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_cierre",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "monto_final_sistema",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "monto_final_real",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "diferencia",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "estado",
+                "DATA_TYPE": "enum",
+                "COLUMN_TYPE": "enum('abierto','cerrado')",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "'abierto'",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "num_ventas",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "total_ingresos",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(12,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "efectivo",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(12,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "yape",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(12,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "agora",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(12,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "plin",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(12,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "transferencia",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(12,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "total_bruto",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(12,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "total_neto",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(12,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "ganancia",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(12,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0.00",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `turnos_caja` (\n  `id_turno` int(11) NOT NULL AUTO_INCREMENT,\n  `id_usuario` int(11) NOT NULL,\n  `fecha_apertura` timestamp NOT NULL DEFAULT current_timestamp(),\n  `monto_inicial` decimal(10,2) NOT NULL,\n  `fecha_cierre` timestamp NULL DEFAULT NULL,\n  `monto_final_sistema` decimal(10,2) DEFAULT NULL COMMENT 'Total calculado de ventas en efectivo',\n  `monto_final_real` decimal(10,2) DEFAULT NULL COMMENT 'Total contado físicamente',\n  `diferencia` decimal(10,2) DEFAULT NULL COMMENT 'Sobrante o faltante',\n  `estado` enum('abierto','cerrado') NOT NULL DEFAULT 'abierto',\n  `num_ventas` int(11) DEFAULT 0,\n  `total_ingresos` decimal(12,2) DEFAULT 0.00,\n  `efectivo` decimal(12,2) DEFAULT 0.00,\n  `yape` decimal(12,2) DEFAULT 0.00,\n  `agora` decimal(12,2) DEFAULT 0.00,\n  `plin` decimal(12,2) DEFAULT 0.00,\n  `transferencia` decimal(12,2) DEFAULT 0.00,\n  `total_bruto` decimal(12,2) DEFAULT 0.00,\n  `total_neto` decimal(12,2) DEFAULT 0.00,\n  `ganancia` decimal(12,2) DEFAULT 0.00,\n  PRIMARY KEY (`id_turno`),\n  KEY `id_usuario` (`id_usuario`)\n) ENGINE=InnoDB AUTO_INCREMENT=253 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "usuarios": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_usuario",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "nombre_completo",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(100)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "username",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(50)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "UNI",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "password",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_rol",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "moneda",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(5)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "'$'",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "activo",
+                "DATA_TYPE": "tinyint",
+                "COLUMN_TYPE": "tinyint(1)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "1",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_creacion",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `usuarios` (\n  `id_usuario` int(11) NOT NULL AUTO_INCREMENT,\n  `nombre_completo` varchar(100) NOT NULL,\n  `username` varchar(50) NOT NULL,\n  `password` varchar(255) NOT NULL COMMENT 'Guardar siempre contraseñas hasheadas',\n  `id_rol` int(11) NOT NULL,\n  `moneda` varchar(5) NOT NULL DEFAULT '$' COMMENT 'Símbolo de la moneda preferida',\n  `activo` tinyint(1) NOT NULL DEFAULT 1,\n  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),\n  PRIMARY KEY (`id_usuario`),\n  UNIQUE KEY `username` (`username`),\n  KEY `id_rol` (`id_rol`)\n) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "ventas": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_venta",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_cliente",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_usuario",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_turno",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_caja",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_venta",
+                "DATA_TYPE": "timestamp",
+                "COLUMN_TYPE": "timestamp",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": "current_timestamp()",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "total_venta",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "descuento_sellos",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "descuento_manual",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "metodo_pago",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "observacion",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "estado",
+                "DATA_TYPE": "varchar",
+                "COLUMN_TYPE": "varchar(255)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "numero_cliente",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "es_cambio",
+                "DATA_TYPE": "tinyint",
+                "COLUMN_TYPE": "tinyint(1)",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "0",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `ventas` (\n  `id_venta` int(11) NOT NULL AUTO_INCREMENT,\n  `id_cliente` int(11) DEFAULT NULL COMMENT 'Puede ser nulo para ventas genéricas',\n  `id_usuario` int(11) NOT NULL,\n  `id_turno` int(11) DEFAULT NULL,\n  `id_caja` int(11) DEFAULT NULL,\n  `fecha_venta` timestamp NOT NULL DEFAULT current_timestamp(),\n  `total_venta` decimal(10,2) NOT NULL,\n  `descuento_sellos` decimal(10,2) DEFAULT NULL,\n  `descuento_manual` decimal(10,2) DEFAULT NULL,\n  `metodo_pago` varchar(255) DEFAULT NULL,\n  `observacion` varchar(255) DEFAULT NULL,\n  `estado` varchar(255) DEFAULT NULL,\n  `numero_cliente` int(11) NOT NULL,\n  `es_cambio` tinyint(1) DEFAULT 0,\n  PRIMARY KEY (`id_venta`),\n  KEY `id_cliente` (`id_cliente`),\n  KEY `id_usuario` (`id_usuario`)\n) ENGINE=InnoDB AUTO_INCREMENT=5564 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    },
+    "ventas_anuladas": {
+        "columns": [
+            {
+                "COLUMN_NAME": "id_anulacion",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "PRI",
+                "EXTRA": "auto_increment"
+            },
+            {
+                "COLUMN_NAME": "id_venta_original",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_cliente",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "monto_reembolsado",
+                "DATA_TYPE": "decimal",
+                "COLUMN_TYPE": "decimal(10,2)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "motivo",
+                "DATA_TYPE": "text",
+                "COLUMN_TYPE": "text",
+                "IS_NULLABLE": "YES",
+                "COLUMN_DEFAULT": "NULL",
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "id_cambio",
+                "DATA_TYPE": "int",
+                "COLUMN_TYPE": "int(11)",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "MUL",
+                "EXTRA": ""
+            },
+            {
+                "COLUMN_NAME": "fecha_anulacion",
+                "DATA_TYPE": "datetime",
+                "COLUMN_TYPE": "datetime",
+                "IS_NULLABLE": "NO",
+                "COLUMN_DEFAULT": null,
+                "COLUMN_KEY": "",
+                "EXTRA": ""
+            }
+        ],
+        "ddl": "CREATE TABLE `ventas_anuladas` (\n  `id_anulacion` int(11) NOT NULL AUTO_INCREMENT,\n  `id_venta_original` int(11) NOT NULL,\n  `id_cliente` int(11) NOT NULL,\n  `monto_reembolsado` decimal(10,2) NOT NULL,\n  `motivo` text DEFAULT NULL,\n  `id_cambio` int(11) NOT NULL,\n  `fecha_anulacion` datetime NOT NULL,\n  PRIMARY KEY (`id_anulacion`),\n  KEY `id_venta_original` (`id_venta_original`),\n  KEY `id_cambio` (`id_cambio`),\n  KEY `id_cliente` (`id_cliente`),\n  CONSTRAINT `ventas_anuladas_ibfk_1` FOREIGN KEY (`id_venta_original`) REFERENCES `ventas` (`id_venta`),\n  CONSTRAINT `ventas_anuladas_ibfk_2` FOREIGN KEY (`id_cambio`) REFERENCES `cambios_ventas` (`id_cambio`),\n  CONSTRAINT `ventas_anuladas_ibfk_3` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
+    }
+}

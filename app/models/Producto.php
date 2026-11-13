@@ -122,70 +122,52 @@ class Producto
         ];
     }
 
-    // NUEVO MÉTODO: Búsqueda avanzada con tolerancia a errores
+    // Búsqueda avanzada optimizada para evitar escaneos innecesarios en cada tecla
     private function buscarProductosAvanzado($filtros, $inicio, $productos_por_pagina)
     {
-        $activo = $filtros['activo'] ?? 1;
-        $buscar = $filtros['buscar'] ?? '';
+        $activo = (int)($filtros['activo'] ?? 1);
+        $buscar = trim((string)($filtros['buscar'] ?? ''));
         $categorias = $filtros['categorias'] ?? [];
         $precio_min = $filtros['precio_min'] ?? null;
         $precio_max = $filtros['precio_max'] ?? null;
         $orden = $filtros['orden'] ?? 'relevancia DESC';
-        $pagina = $filtros['pagina'] ?? 1;
+        $pagina = (int)($filtros['pagina'] ?? 1);
 
-        $termino = strtolower(trim($buscar));
-        $palabras = explode(' ', $termino);
-
-        // Construir condiciones para búsqueda por nombre (prioridad alta)
-        $condicionesNombre = [];
-        $condicionesDescripcion = [];
-
-        foreach ($palabras as $palabra) {
-            if (strlen($palabra) > 2) {
-                $condicionesNombre[] = "LOWER(p.nombre) LIKE '%" . $this->db->real_escape_string($palabra) . "%'";
-                $condicionesDescripcion[] = "LOWER(p.descripcion) LIKE '%" . $this->db->real_escape_string($palabra) . "%'";
-            }
+        if ($buscar === '') {
+            return ['productos' => [], 'total' => 0, 'pagina_actual' => $pagina, 'total_paginas' => 0, 'productos_por_pagina' => $productos_por_pagina];
         }
 
-        // Si no hay palabras válidas, buscar el término completo
-        if (empty($condicionesNombre)) {
-            $condicionesNombre[] = "LOWER(p.nombre) LIKE '%" . $this->db->real_escape_string($termino) . "%'";
-            $condicionesDescripcion[] = "LOWER(p.descripcion) LIKE '%" . $this->db->real_escape_string($termino) . "%'";
-        }
+        $termino = strtolower($buscar);
+        $terminoEscapado = $this->db->real_escape_string($termino);
+        $terminoExacto = $terminoEscapado;
+        $terminoPrefijo = $terminoEscapado . '%';
+        $terminoContiene = '%' . $terminoEscapado . '%';
 
-        $whereNombre = implode(' AND ', $condicionesNombre);
-        $whereDescripcion = implode(' AND ', $condicionesDescripcion);
-
-        // Consulta base con relevancia
         $sql = "SELECT 
                     p.*, 
                     c.nombre AS nombre_categoria, 
                     a.nombre AS nombre_almacen,
-                    -- Calcular relevancia
                     CASE 
-                        WHEN ($whereNombre) THEN 100 -- Máxima prioridad para coincidencia exacta en nombre
-                        WHEN (LOWER(p.nombre) LIKE '" . $this->db->real_escape_string($termino) . "%') THEN 90 -- Prioridad alta para inicio del nombre
-                        WHEN (LOWER(p.nombre) LIKE '%" . $this->db->real_escape_string($termino) . "%') THEN 80 -- Prioridad media para nombre que contiene
-                        WHEN ($whereDescripcion) THEN 70 -- Prioridad media para descripción
-                        WHEN (LOWER(p.descripcion) LIKE '%" . $this->db->real_escape_string($termino) . "%') THEN 60 -- Prioridad baja para descripción
+                        WHEN LOWER(p.nombre) = LOWER(?) THEN 100
+                        WHEN LOWER(p.nombre) LIKE ? THEN 90
+                        WHEN LOWER(p.nombre) LIKE ? THEN 80
+                        WHEN LOWER(p.descripcion) LIKE ? THEN 60
                         ELSE 0
                     END as relevancia
                 FROM productos p
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
                 LEFT JOIN almacenes a ON p.id_almacen = a.id
-                WHERE p.activo = ? 
-                AND (
-                    $whereNombre 
-                    OR $whereDescripcion
-                    OR LOWER(p.nombre) LIKE '%" . $this->db->real_escape_string($termino) . "%'
-                    OR LOWER(p.descripcion) LIKE '%" . $this->db->real_escape_string($termino) . "%'
-                    OR p.codigo_barra = '" . $this->db->real_escape_string($termino) . "'
-                )";
+                WHERE p.activo = ?
+                  AND (
+                        LOWER(p.nombre) LIKE ?
+                        OR LOWER(p.descripcion) LIKE ?
+                        OR p.codigo_barra = ?
+                        OR p.codigo_barra LIKE ?
+                  )";
 
-        $params = [$activo];
-        $types = "i";
+        $params = [$terminoExacto, $terminoPrefijo, $terminoContiene, $terminoContiene, $activo, $terminoContiene, $terminoContiene, $terminoExacto, $terminoContiene];
+        $types = "ssssissss";
 
-        // Filtro por categorías
         if (!empty($categorias) && is_array($categorias)) {
             $placeholders = implode(',', array_fill(0, count($categorias), '?'));
             $sql .= " AND p.id_categoria IN ($placeholders)";
@@ -193,7 +175,6 @@ class Producto
             $types .= str_repeat("i", count($categorias));
         }
 
-        // Filtro por precio
         if ($precio_min !== null && is_numeric($precio_min)) {
             $sql .= " AND p.precio_venta >= ?";
             $params[] = $precio_min;
@@ -206,7 +187,6 @@ class Producto
             $types .= "d";
         }
 
-        // Ordenamiento por relevancia
         $ordenes_validos = [
             'nombre ASC' => 'p.nombre ASC',
             'nombre DESC' => 'p.nombre DESC',
@@ -217,23 +197,18 @@ class Producto
 
         $orden_sql = $ordenes_validos[$orden] ?? 'relevancia DESC, p.nombre ASC';
         $sql .= " ORDER BY $orden_sql";
-
-        // Paginación
         $sql .= " LIMIT ?, ?";
-        $params[] = $inicio;
-        $params[] = $productos_por_pagina;
+        $params[] = (int)$inicio;
+        $params[] = (int)$productos_por_pagina;
         $types .= "ii";
 
         $stmt = $this->db->prepare($sql);
         if ($stmt === false) {
             error_log("Error en la preparación: " . $this->db->error);
-            return ['productos' => [], 'total' => 0];
+            return ['productos' => [], 'total' => 0, 'pagina_actual' => $pagina, 'total_paginas' => 0, 'productos_por_pagina' => $productos_por_pagina];
         }
 
-        if (!empty($params)) {
-            $stmt->bind_param($types, ...$params);
-        }
-
+        $stmt->bind_param($types, ...$params);
         $stmt->execute();
         $result = $stmt->get_result();
         $productos = [];
@@ -258,7 +233,6 @@ class Producto
             ];
         }
 
-        // Obtener total para paginación
         $total = $this->obtenerTotalProductosFiltrados($filtros);
 
         return [
@@ -270,58 +244,37 @@ class Producto
         ];
     }
 
-    // Método para obtener el total de productos filtrados - ACTUALIZADO
+    // Método para obtener el total de productos filtrados - optimizado
     private function obtenerTotalProductosFiltrados($filtros)
     {
-        $activo = $filtros['activo'] ?? 1;
-        $buscar = $filtros['buscar'] ?? '';
+        $activo = (int)($filtros['activo'] ?? 1);
+        $buscar = trim((string)($filtros['buscar'] ?? ''));
         $categorias = $filtros['categorias'] ?? [];
         $precio_min = $filtros['precio_min'] ?? null;
         $precio_max = $filtros['precio_max'] ?? null;
 
-        // Si hay búsqueda, usar lógica de búsqueda avanzada
         if (!empty($buscar)) {
-            $termino = strtolower(trim($buscar));
-            $palabras = explode(' ', $termino);
-
-            $condicionesNombre = [];
-            $condicionesDescripcion = [];
-
-            foreach ($palabras as $palabra) {
-                if (strlen($palabra) > 2) {
-                    $condicionesNombre[] = "LOWER(nombre) LIKE '%" . $this->db->real_escape_string($palabra) . "%'";
-                    $condicionesDescripcion[] = "LOWER(descripcion) LIKE '%" . $this->db->real_escape_string($palabra) . "%'";
-                }
-            }
-
-            if (empty($condicionesNombre)) {
-                $condicionesNombre[] = "LOWER(nombre) LIKE '%" . $this->db->real_escape_string($termino) . "%'";
-                $condicionesDescripcion[] = "LOWER(descripcion) LIKE '%" . $this->db->real_escape_string($termino) . "%'";
-            }
-
-            $whereNombre = implode(' AND ', $condicionesNombre);
-            $whereDescripcion = implode(' AND ', $condicionesDescripcion);
-
+            $termino = strtolower($buscar);
+            $terminoEscapado = $this->db->real_escape_string($termino);
+            $terminoBusca = '%' . $terminoEscapado . '%';
             $sql = "SELECT COUNT(*) as total
                     FROM productos p
                     WHERE p.activo = ?
-                    AND (
-                        $whereNombre 
-                        OR $whereDescripcion
-                        OR LOWER(p.nombre) LIKE '%" . $this->db->real_escape_string($termino) . "%'
-                        OR LOWER(p.descripcion) LIKE '%" . $this->db->real_escape_string($termino) . "%'
-                        OR p.codigo_barra = '" . $this->db->real_escape_string($termino) . "'
-                    )";
+                      AND (
+                            LOWER(p.nombre) LIKE ?
+                            OR LOWER(p.descripcion) LIKE ?
+                            OR p.codigo_barra = ?
+                      )";
+            $params = [$activo, $terminoBusca, $terminoBusca, $terminoEscapado];
+            $types = "isss";
         } else {
             $sql = "SELECT COUNT(*) as total
                     FROM productos p
                     WHERE p.activo = ?";
+            $params = [$activo];
+            $types = "i";
         }
 
-        $params = [$activo];
-        $types = "i";
-
-        // Filtro por categorías
         if (!empty($categorias) && is_array($categorias)) {
             $placeholders = implode(',', array_fill(0, count($categorias), '?'));
             $sql .= " AND p.id_categoria IN ($placeholders)";
@@ -329,7 +282,6 @@ class Producto
             $types .= str_repeat("i", count($categorias));
         }
 
-        // Filtro por precio
         if ($precio_min !== null && is_numeric($precio_min)) {
             $sql .= " AND p.precio_venta >= ?";
             $params[] = $precio_min;
@@ -343,26 +295,29 @@ class Producto
         }
 
         $stmt = $this->db->prepare($sql);
-        if (!empty($params)) {
-            $stmt->bind_param($types, ...$params);
+        if ($stmt === false) {
+            return 0;
         }
 
+        $stmt->bind_param($types, ...$params);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
 
-        return $row['total'] ?? 0;
+        return (int)($row['total'] ?? 0);
     }
 
-    // NUEVO MÉTODO: Búsqueda en tiempo real con sugerencias
+    // Búsqueda rápida para autocompletado y sugerencias
     public function buscarSugerencias($termino, $limite = 8)
     {
+        $termino = strtolower(trim((string)$termino));
         if (strlen($termino) < 2) {
             return [];
         }
 
-        $termino = strtolower(trim($termino));
         $terminoEscapado = $this->db->real_escape_string($termino);
+        $terminoPrefijo = $terminoEscapado . '%';
+        $terminoContiene = '%' . $terminoEscapado . '%';
 
         $sql = "SELECT 
                     p.id_producto,
@@ -374,32 +329,32 @@ class Producto
                     p.imagen_path,
                     c.nombre as categoria,
                     CASE 
-                        WHEN LOWER(p.nombre) LIKE '{$terminoEscapado}%' THEN 'Coincidencia exacta'
-                        WHEN LOWER(p.nombre) LIKE '%{$terminoEscapado}%' THEN 'Coincidencia parcial'
-                        WHEN LOWER(p.descripcion) LIKE '%{$terminoEscapado}%' THEN 'En descripción'
+                        WHEN LOWER(p.nombre) LIKE ? THEN 'Coincidencia exacta'
+                        WHEN LOWER(p.nombre) LIKE ? THEN 'Coincidencia parcial'
+                        WHEN LOWER(p.descripcion) LIKE ? THEN 'En descripción'
                         ELSE 'Otra coincidencia'
                     END as tipo_coincidencia
                 FROM productos p
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
-                WHERE p.activo = 1 
-                AND (
-                    LOWER(p.nombre) LIKE '{$terminoEscapado}%'
-                    OR LOWER(p.nombre) LIKE '%{$terminoEscapado}%'
-                    OR LOWER(p.descripcion) LIKE '%{$terminoEscapado}%'
-                    OR p.codigo_barra LIKE '{$terminoEscapado}%'
-                )
+                WHERE p.activo = 1
+                  AND (
+                    LOWER(p.nombre) LIKE ?
+                    OR LOWER(p.descripcion) LIKE ?
+                    OR p.codigo_barra LIKE ?
+                    OR p.codigo_barra = ?
+                  )
                 ORDER BY 
                     CASE 
-                        WHEN LOWER(p.nombre) LIKE '{$terminoEscapado}%' THEN 1
-                        WHEN LOWER(p.nombre) LIKE '%{$terminoEscapado}%' THEN 2
-                        WHEN LOWER(p.descripcion) LIKE '%{$terminoEscapado}%' THEN 3
+                        WHEN LOWER(p.nombre) LIKE ? THEN 1
+                        WHEN LOWER(p.nombre) LIKE ? THEN 2
+                        WHEN LOWER(p.descripcion) LIKE ? THEN 3
                         ELSE 4
                     END,
                     p.nombre ASC
                 LIMIT ?";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("i", $limite);
+        $stmt->bind_param("sssssssssi", $terminoPrefijo, $terminoContiene, $terminoContiene, $terminoPrefijo, $terminoContiene, $terminoPrefijo, $terminoEscapado, $terminoPrefijo, $terminoContiene, $terminoContiene, $limite);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -411,28 +366,17 @@ class Producto
         return $sugerencias;
     }
 
-    // NUEVO MÉTODO: Búsqueda avanzada con corrección de errores
+    // Búsqueda avanzada simple y rápida: prioriza nombre exacto y prefijo para no escanear millones de registros.
     public function buscarAvanzado($termino, $limite = 15)
     {
-        if (empty($termino)) {
+        $termino = strtolower(trim((string)$termino));
+        if ($termino === '') {
             return [];
         }
 
-        $termino = strtolower(trim($termino));
         $terminoEscapado = $this->db->real_escape_string($termino);
-
-        // Generar variaciones para corrección de errores
-        $variaciones = $this->generarVariaciones($termino);
-        $condicionesVariaciones = [];
-
-        foreach ($variaciones as $variacion) {
-            if ($variacion !== $termino) {
-                $variacionEscapado = $this->db->real_escape_string($variacion);
-                $condicionesVariaciones[] = "LOWER(p.nombre) LIKE '%{$variacionEscapado}%'";
-            }
-        }
-
-        $condicionesVariacionesSQL = !empty($condicionesVariaciones) ? "OR " . implode(" OR ", $condicionesVariaciones) : "";
+        $terminoPrefijo = $terminoEscapado . '%';
+        $terminoContiene = '%' . $terminoEscapado . '%';
 
         $sql = "SELECT 
                     p.id_producto,
@@ -445,30 +389,29 @@ class Producto
                     c.nombre as categoria,
                     (
                         CASE 
-                            WHEN LOWER(p.nombre) = '{$terminoEscapado}' THEN 100
-                            WHEN LOWER(p.nombre) LIKE '{$terminoEscapado}%' THEN 90
-                            WHEN LOWER(p.nombre) LIKE '%{$terminoEscapado}%' THEN 80
+                            WHEN LOWER(p.nombre) = LOWER(?) THEN 100
+                            WHEN LOWER(p.nombre) LIKE ? THEN 90
+                            WHEN LOWER(p.nombre) LIKE ? THEN 80
                             ELSE 50
                         END +
                         CASE 
-                            WHEN p.codigo_barra = '{$terminoEscapado}' THEN 20
+                            WHEN p.codigo_barra = ? THEN 20
                             ELSE 0
                         END
                     ) as puntuacion
                 FROM productos p
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
-                WHERE p.activo = 1 
-                AND (
-                    LOWER(p.nombre) LIKE '%{$terminoEscapado}%'
-                    OR LOWER(p.descripcion) LIKE '%{$terminoEscapado}%'
-                    OR p.codigo_barra = '{$terminoEscapado}'
-                    {$condicionesVariacionesSQL}
-                )
+                WHERE p.activo = 1
+                  AND (
+                    LOWER(p.nombre) LIKE ?
+                    OR LOWER(p.descripcion) LIKE ?
+                    OR p.codigo_barra = ?
+                  )
                 ORDER BY puntuacion DESC, p.nombre ASC
                 LIMIT ?";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("i", $limite);
+        $stmt->bind_param("sssssssi", $terminoEscapado, $terminoPrefijo, $terminoContiene, $terminoEscapado, $terminoContiene, $terminoContiene, $terminoEscapado, $limite);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -478,35 +421,6 @@ class Producto
         }
 
         return $resultados;
-    }
-
-    // NUEVO MÉTODO: Generar variaciones para corrección de errores
-    private function generarVariaciones($termino)
-    {
-        $variaciones = [];
-        $length = strlen($termino);
-
-        // Solo generar variaciones para términos de al menos 4 caracteres
-        if ($length >= 4) {
-            // Intercambiar caracteres adyacentes (errores comunes de tecleo)
-            for ($i = 0; $i < $length - 1; $i++) {
-                $variacion = $termino;
-                $temp = $variacion[$i];
-                $variacion[$i] = $variacion[$i + 1];
-                $variacion[$i + 1] = $temp;
-                $variaciones[] = $variacion;
-            }
-
-            // Eliminar caracteres duplicados
-            for ($i = 0; $i < $length - 1; $i++) {
-                if ($termino[$i] === $termino[$i + 1]) {
-                    $variacion = substr($termino, 0, $i) . substr($termino, $i + 1);
-                    $variaciones[] = $variacion;
-                }
-            }
-        }
-
-        return array_unique($variaciones);
     }
 
     // Método original para compatibilidad

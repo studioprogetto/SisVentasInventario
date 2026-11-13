@@ -1,0 +1,134 @@
+# Inventario de archivos — avance Fase 0
+
+Los archivos listados se crean en este avance. Se excluyen secretos locales, vendor nuevo, Composer descargado, cachés y archivos ignorados.
+
+## Creados
+
+- .gitignore
+- .htaccess
+- backups/.htaccess
+- config/.htaccess
+- config/connection.php
+- config/local.example.php
+- docs/.htaccess
+- docs/phase-0/INFORME.md
+- docs/phase-0/PLAN.md
+- docs/phase-0/tests-mariadb.xml
+- docs/phase-0/tests-sqlite.xml
+- laravel/.editorconfig
+- laravel/.env.example
+- laravel/.gitattributes
+- laravel/.gitignore
+- laravel/.htaccess
+- laravel/README.md
+- laravel/app/Console/Commands/CheckExistingSchema.php
+- laravel/app/Http/Controllers/Auth/SessionController.php
+- laravel/app/Http/Controllers/Categorias/CategoriaController.php
+- laravel/app/Http/Controllers/Controller.php
+- laravel/app/Http/Controllers/DashboardController.php
+- laravel/app/Http/Middleware/EnsureActiveUser.php
+- laravel/app/Http/Middleware/EnsureWritableEnvironment.php
+- laravel/app/Http/Requests/Auth/LoginRequest.php
+- laravel/app/Http/Requests/Categorias/SaveCategoriaRequest.php
+- laravel/app/Models/Almacen.php
+- laravel/app/Models/AuditoriaCambio.php
+- laravel/app/Models/CambioVenta.php
+- laravel/app/Models/Categoria.php
+- laravel/app/Models/Cliente.php
+- laravel/app/Models/Compra.php
+- laravel/app/Models/DetalleCambio.php
+- laravel/app/Models/DetalleCompra.php
+- laravel/app/Models/DetalleServicio.php
+- laravel/app/Models/DetalleVenta.php
+- laravel/app/Models/MovimientoCaja.php
+- laravel/app/Models/MovimientoInventario.php
+- laravel/app/Models/MovimientoServicio.php
+- laravel/app/Models/Permiso.php
+- laravel/app/Models/Producto.php
+- laravel/app/Models/Proveedor.php
+- laravel/app/Models/Rol.php
+- laravel/app/Models/SaldoCliente.php
+- laravel/app/Models/Servicio.php
+- laravel/app/Models/TipoCambio.php
+- laravel/app/Models/TipoMoneda.php
+- laravel/app/Models/TurnoCaja.php
+- laravel/app/Models/Usuario.php
+- laravel/app/Models/Venta.php
+- laravel/app/Models/VentaAnulada.php
+- laravel/app/Policies/CategoriaPolicy.php
+- laravel/app/Providers/AppServiceProvider.php
+- laravel/app/Providers/AuthorizationServiceProvider.php
+- laravel/app/Services/Dashboard/DashboardQuery.php
+- laravel/app/Support/Database/GuardedMigrationRepository.php
+- laravel/app/Support/Database/TestDatabaseGuard.php
+- laravel/artisan
+- laravel/bootstrap/app.php
+- laravel/bootstrap/cache/.gitignore
+- laravel/bootstrap/providers.php
+- laravel/composer.json
+- laravel/composer.lock
+- laravel/config/app.php
+- laravel/config/auth.php
+- laravel/config/business.php
+- laravel/config/cache.php
+- laravel/config/database.php
+- laravel/config/filesystems.php
+- laravel/config/hashing.php
+- laravel/config/logging.php
+- laravel/config/mail.php
+- laravel/config/migration.php
+- laravel/config/queue.php
+- laravel/config/services.php
+- laravel/config/session.php
+- laravel/database/.gitignore
+- laravel/database/migrations/2026_11_13_000000_existing_schema_test_baseline.php
+- laravel/database/schema/legacy-schema.json
+- laravel/database/seeders/DatabaseSeeder.php
+- laravel/phpstan.neon
+- laravel/phpunit.xml
+- laravel/public/.htaccess
+- laravel/public/css/app.css
+- laravel/public/favicon.ico
+- laravel/public/img/logo.png
+- laravel/public/index.php
+- laravel/public/robots.txt
+- laravel/resources/views/auth/login.blade.php
+- laravel/resources/views/categorias/index.blade.php
+- laravel/resources/views/dashboard/index.blade.php
+- laravel/resources/views/layouts/app.blade.php
+- laravel/routes/console.php
+- laravel/routes/web.php
+- laravel/storage/app/.gitignore
+- laravel/storage/app/private/.gitignore
+- laravel/storage/app/public/.gitignore
+- laravel/storage/framework/.gitignore
+- laravel/storage/framework/cache/.gitignore
+- laravel/storage/framework/cache/data/.gitignore
+- laravel/storage/framework/sessions/.gitignore
+- laravel/storage/framework/testing/.gitignore
+- laravel/storage/framework/views/.gitignore
+- laravel/storage/logs/.gitignore
+- laravel/tests/Feature/AuthenticationTest.php
+- laravel/tests/Feature/CategoriaArchitectureTest.php
+- laravel/tests/Feature/DatabaseSafetyTest.php
+- laravel/tests/Feature/ModelMappingTest.php
+- laravel/tests/Feature/SchemaLifecycleTest.php
+- laravel/tests/Support/BusinessTestCase.php
+- laravel/tests/TestCase.php
+- laravel/tests/Unit/ArchitectureTest.php
+- libs/.htaccess
+- logs/.htaccess
+- tools/.htaccess
+- tools/export-schema.php
+- tools/test-mariadb.php
+- vendor/.htaccess
+- docs/phase-0/FILES.md
+
+## Modificados en el código anterior
+
+- config/database.php: lee configuración privada manteniendo constantes y valores.
+- logs/debug.log: entradas automáticas de lecturas HTTP; sin edición manual.
+
+## Eliminados del sistema anterior
+
+Ninguno. Las eliminaciones del esqueleto nuevo y su justificación están en INFORME.md.
