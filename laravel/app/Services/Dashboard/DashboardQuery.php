@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Dashboard;
 
+use App\Services\Reports\ReportQuery;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -32,13 +33,15 @@ final class DashboardQuery
             ->where('d.tipo_item', 'producto')
             ->sum('d.cantidad');
 
-        $grossProfit = DB::table('detalle_ventas as d')
-            ->join('ventas as v', 'v.id_venta', '=', 'd.id_venta')
-            ->where('v.estado', 'completada')
-            ->whereBetween('v.fecha_venta', [$start, $end])
-            ->where('d.tipo_item', 'producto')
-            ->selectRaw('COALESCE(SUM((d.precio_unitario - COALESCE(d.costo_unitario_base, 0)) * d.cantidad), 0) as gross_profit')
-            ->value('gross_profit');
+        $reports = new ReportQuery;
+        $profitRows = $reports->build('rentabilidad', $since, $until)->get();
+        $documented = $profitRows->whereNotNull('ganancia_base_documentada');
+        $grossProfit = $documented->isEmpty() ? null : (float) $documented->sum('ganancia_base_documentada');
+        $stockTotals = DB::table('existencias')->select('id_producto')->selectRaw('SUM(stock) as stock')->groupBy('id_producto');
+        $inventory = DB::table('productos as p')->leftJoinSub($stockTotals, 'i', 'i.id_producto', '=', 'p.id_producto')->where('p.activo', true);
+        $lowStock = (clone $inventory)->whereRaw('COALESCE(i.stock, 0) <= p.stock_minimo');
+        $inventoryHealth = (clone $inventory)->selectRaw('COUNT(*) as total, SUM(CASE WHEN COALESCE(i.stock, 0) <= 0 THEN 1 ELSE 0 END) as agotados, SUM(CASE WHEN COALESCE(i.stock, 0) > 0 AND COALESCE(i.stock, 0) <= p.stock_minimo THEN 1 ELSE 0 END) as reposicion, SUM(CASE WHEN COALESCE(i.stock, 0) > p.stock_minimo THEN 1 ELSE 0 END) as suficiente')->first();
+        $payments = (clone $currentSales)->groupBy('moneda_codigo', 'metodo_pago')->select('moneda_codigo', 'metodo_pago')->selectRaw('COUNT(*) as operaciones, SUM(cobro_base) as cobro_base')->get();
 
         $topProducts = DB::table('detalle_ventas as d')
             ->join('ventas as v', 'v.id_venta', '=', 'd.id_venta')
@@ -96,7 +99,7 @@ final class DashboardQuery
             ->take(2)
             ->values();
 
-        $chartPoints = $this->normalizeSeries($salesTrend);
+        $chartPoints = $this->normalizeSeries($salesTrend, $since, $until);
         $cards = [
             [
                 'label' => 'Ventas del periodo',
@@ -123,9 +126,9 @@ final class DashboardQuery
                 'trend_suffix' => 'vs. período previo',
             ],
             [
-                'label' => 'Ganancia estimada',
-                'value' => $this->money((float) $grossProfit),
-                'trend' => $this->trendDelta((float) $grossProfit, (float) DB::table('detalle_ventas as d')->join('ventas as v', 'v.id_venta', '=', 'd.id_venta')->where('v.estado', 'completada')->whereBetween('v.fecha_venta', [$previousWindow['start'], $previousWindow['end']])->where('d.tipo_item', 'producto')->selectRaw('COALESCE(SUM((d.precio_unitario - COALESCE(d.costo_unitario_base, 0)) * d.cantidad), 0) as gross_profit')->value('gross_profit')),
+                'label' => 'Ganancia base documentada',
+                'value' => $grossProfit === null ? 'No disponible' : $this->money($grossProfit),
+                'trend' => null,
                 'tone' => 'amber',
                 'icon' => 'wallet',
                 'trend_suffix' => 'vs. período previo',
@@ -139,10 +142,13 @@ final class DashboardQuery
             'sales_count' => $salesCount,
             'products_sold' => (float) $productsSold,
             'customers_served' => (int) $clientsServed,
-            'gross_profit' => (float) $grossProfit,
-            'low_stock' => (int) DB::table('productos')->where('activo', true)->whereColumn('stock', '<=', 'stock_minimo')->count(),
-            'out_of_stock' => (int) DB::table('productos')->where('activo', true)->where('stock', 0)->count(),
-            'inventory_alerts' => DB::table('productos')->where('activo', true)->whereColumn('stock', '<=', 'stock_minimo')->orderBy('stock')->limit(5)->get(),
+            'gross_profit' => $grossProfit,
+            'profit_missing' => $profitRows->count() - $documented->count(),
+            'payments' => $payments,
+            'inventory_health' => $inventoryHealth,
+            'low_stock' => (clone $lowStock)->count(),
+            'out_of_stock' => (int) ($inventoryHealth->agotados ?? 0),
+            'inventory_alerts' => (clone $lowStock)->select('p.id_producto', 'p.nombre', 'p.stock_minimo')->selectRaw('COALESCE(i.stock, 0) as stock')->orderBy('stock')->limit(5)->get(),
             'top_products' => $topProducts,
             'stock_by_warehouse' => $warehouseStocks,
             'sales_series' => $chartPoints,
@@ -166,43 +172,21 @@ final class DashboardQuery
         ];
     }
 
-    private function normalizeSeries($series): array
+    private function normalizeSeries($series, string $since, string $until): array
     {
-        if ($series->isEmpty()) {
-            return [
-                ['label' => 'Hoy', 'value' => 0],
-                ['label' => 'Ayer', 'value' => 0],
-                ['label' => 'Ant.', 'value' => 0],
-                ['label' => '4d', 'value' => 0],
-                ['label' => '5d', 'value' => 0],
-                ['label' => '6d', 'value' => 0],
-                ['label' => '7d', 'value' => 0],
-            ];
-        }
-
+        $totals = $series->keyBy('dia');
         $points = [];
-        foreach ($series as $point) {
-            $points[] = [
-                'label' => Carbon::parse($point->dia)->format('d'),
-                'value' => (float) $point->total,
-            ];
+        for ($day = Carbon::parse($since); $day->lte(Carbon::parse($until)); $day->addDay()) {
+            $points[] = ['label' => $day->format('d/m/Y'), 'value' => (float) ($totals->get($day->toDateString())->total ?? 0)];
         }
 
-        $labels = array_slice(array_map(fn ($point) => $point['label'], $points), 0, 7);
-        $values = array_slice(array_map(fn ($point) => $point['value'], $points), 0, 7);
-
-        while (count($labels) < 7) {
-            $labels[] = '—';
-            $values[] = 0;
-        }
-
-        return array_map(fn ($label, $value) => ['label' => $label, 'value' => (float) $value], $labels, $values);
+        return $points;
     }
 
-    private function trendDelta(float $current, float $previous): float
+    private function trendDelta(float $current, float $previous): ?float
     {
         if ($previous <= 0) {
-            return $current > 0 ? 100 : 0;
+            return $current > 0 ? null : 0;
         }
 
         return round((($current - $previous) / $previous) * 100, 1);
