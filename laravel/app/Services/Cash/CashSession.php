@@ -24,14 +24,14 @@ final class CashSession
         return $turn;
     }
 
-    public function open(int $user, string $amount): array
+    public function open(int $user, string $amount, ?string $note = null): array
     {
-        return DB::transaction(function () use ($user, $amount): array {
+        return DB::transaction(function () use ($user, $amount, $note): array {
             DB::table('usuarios')->where('id_usuario', $user)->lockForUpdate()->first();
             if (DB::table('turnos_caja')->where(['id_usuario' => $user, 'estado' => 'abierto'])->exists()) {
                 throw ValidationException::withMessages(['caja' => 'Ya tiene una caja abierta.']);
             }
-            $id = DB::table('turnos_caja')->insertGetId(['id_usuario' => $user, 'monto_inicial' => Money::decimal(Money::cents($amount)), 'estado' => 'abierto'], 'id_turno');
+            $id = DB::table('turnos_caja')->insertGetId(['id_usuario' => $user, 'nota_apertura' => $note, 'monto_inicial' => Money::decimal(Money::cents($amount)), 'estado' => 'abierto'], 'id_turno');
             $this->audit->record($user, 'apertura', 'turnos_caja', $id);
 
             return ['id_turno' => $id];
@@ -48,15 +48,15 @@ final class CashSession
             }
             $id = DB::table('movimientos_caja')->insertGetId(['id_turno' => $turn->id_turno, 'id_usuario' => $user,
                 'tipo_movimiento' => $data['tipo_movimiento'], 'monto' => Money::decimal($amount), 'descripcion' => $data['descripcion']], 'id_movimiento_caja');
-            $this->audit->record($user, 'movimiento', 'movimientos_caja', $id);
+            $this->audit->record($user, 'movimiento', 'movimientos_caja', $id, ['tipo_movimiento'=>$data['tipo_movimiento']]);
 
             return ['id_movimiento_caja' => $id];
         }, 3);
     }
 
-    public function close(int $user, string $declared, bool $legacyReviewed = false): array
+    public function close(int $user, string $declared, bool $legacyReviewed = false, ?string $note = null): array
     {
-        return DB::transaction(function () use ($user, $declared, $legacyReviewed): array {
+        return DB::transaction(function () use ($user, $declared, $legacyReviewed, $note): array {
             $turn = $this->active($user);
             $legacy = DB::table('ventas')->where('id_turno', $turn->id_turno)->whereNull('id_moneda')->count();
             if ($legacy > 0 && ! $legacyReviewed) {
@@ -72,10 +72,14 @@ final class CashSession
             }
             $actual = Money::cents($declared);
             DB::table('turnos_caja')->where('id_turno', $turn->id_turno)->update([
-                'estado' => 'cerrado', 'fecha_cierre' => now(), 'monto_final_sistema' => Money::decimal($expected),
+                'estado' => 'cerrado', 'nota_cierre' => $note, 'fecha_cierre' => now(), 'monto_final_sistema' => Money::decimal($expected),
                 'monto_final_real' => Money::decimal($actual), 'diferencia' => Money::decimal($actual - $expected),
             ]);
             $this->audit->record($user, 'cierre', 'turnos_caja', $turn->id_turno);
+            if ($actual !== $expected) {
+                app(\App\Services\Notifications\Inbox::class)->admins('caja-diferencia-'.$turn->id_turno,
+                    'Diferencia en cierre de caja', 'Turno #'.$turn->id_turno.' · Diferencia declarada: S/ '.Money::decimal($actual - $expected));
+            }
             if ($legacy > 0) {
                 $this->audit->record($user, 'cierre_historico_revisado', 'turnos_caja', $turn->id_turno, ['ventas_sin_moneda' => $legacy]);
             }

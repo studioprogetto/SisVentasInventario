@@ -30,11 +30,7 @@ $logoUrl = route('brand.logo').'?v='.now()->timestamp;
                             @error($name)<small class="bs-error" id="bs-error-{{ $name }}">{{ $message }}</small>@enderror
                         </label>
                         @endforeach
-                        <label class="bs-wide" for="bs-return_policy_days">Días de devolución
-                            <span class="bs-stepper"><button type="button" class="btn-secondary" data-step="-1" aria-label="Disminuir días">−</button><input type="number" id="bs-return_policy_days" name="return_policy_days" min="1" max="365" step="1" value="{{ old('return_policy_days', config('business.return_policy_days')) }}" data-preview="return_policy_days" data-saved="{{ config('business.return_policy_days') }}"><button type="button" class="btn-secondary" data-step="1" aria-label="Aumentar días">+</button></span>
-                            @error('return_policy_days')<small class="bs-error">{{ $message }}</small>@enderror
-                            <small>Política utilizada por los comprobantes. Rango permitido: 1–365 días.</small>
-                        </label>
+                        <p>Plazo para cambio o saldo a favor: 48 horas desde la compra.</p>
                     </div>
                     <div class="bs-actions"><button type="button" class="btn-secondary" id="bs-reset">Restablecer valores guardados</button><button type="submit">Guardar configuración</button></div>
                 </form>
@@ -58,12 +54,18 @@ $logoUrl = route('brand.logo').'?v='.now()->timestamp;
                 @foreach(['address', 'district', 'phone', 'email'] as $key)<p data-ticket="{{ $key }}">{{ config('business.'.$key) }}</p>@endforeach
                 <div class="bs-receipt-rule"><strong>VISTA PREVIA · SIN VALOR FISCAL</strong><p>Usuario: {{ auth()->user()->name ?? auth()->user()->nombre ?? 'Usuario autenticado' }}</p><p>Los productos e importes se completan al registrar una venta.</p></div>
                 <strong>HORARIOS DE ATENCIÓN</strong><p data-ticket="opening_weekdays">{{ config('business.opening_hours.weekdays') }}</p><p data-ticket="opening_weekend">{{ config('business.opening_hours.weekend') }}</p>
-                <div class="bs-receipt-rule">Cambios y devoluciones dentro de <strong data-ticket="return_policy_days">{{ config('business.return_policy_days') }}</strong> días presentando el comprobante.</div><p data-ticket="website">{{ config('business.website') }}</p><p>¡Gracias por su preferencia!</p>
+                <div class="bs-receipt-rule">Cambios o saldo a favor dentro de <strong>48 horas</strong> presentando el comprobante.</div><p data-ticket="website">{{ config('business.website') }}</p><p>¡Gracias por su preferencia!</p>
             </div>
             <div class="bs-identity"><span class="bs-badge">Vista previa local</span><strong data-ticket="name">{{ config('business.name') }}</strong><small>La vista previa no guarda cambios. Utiliza los botones de cada formulario.</small></div>
         </aside>
     </div>
 </div>
+<section class="activity-card neo-card currency-settings"><h2>Monedas y tipos de cambio</h2>
+<form method="POST" action="{{ route('settings.currency') }}">@csrf<label>Moneda para nuevas ventas y compras
+<select name="id_moneda" required>@foreach($currencies as $currency)<option value="{{ $currency->id }}" @selected(config('business.operating_currency_id') ? $currency->id == config('business.operating_currency_id') : $currency->principal)>{{ $currency->descripcion }} · {{ $currency->codigo }}</option>@endforeach</select></label>
+<button class="btn btn-success">Guardar moneda</button></form>
+@can('tipomoneda_gestionar')<a href="{{ route('masters.index','tipomoneda') }}">Gestionar monedas</a>@endcan
+@canany(['tipocambio_ver_lista','tipocambio_gestionar'])@include('currency.rate-list')@endcanany</section>
 @endsection
 @push('styles')
 <style>

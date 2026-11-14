@@ -21,8 +21,9 @@ final class DashboardQuery
         $previousWindow = $this->previousWindow($since, $until);
         $previousSales = DB::table('ventas')->where('estado', 'completada')->whereBetween('fecha_venta', [$previousWindow['start'], $previousWindow['end']]);
 
-        $salesTotal = $this->toFloat((clone $currentSales)->sum('total_venta'));
-        $previousSalesTotal = $this->toFloat((clone $previousSales)->sum('total_venta'));
+        $salesTotal = $this->toFloat((clone $currentSales)->sum('total_base'));
+        $previousSalesTotal = $this->toFloat((clone $previousSales)->sum('total_base'));
+        $salesMissing = (clone $currentSales)->whereNull('total_base')->count();
         $salesCount = (clone $currentSales)->count();
         $clientsServed = (clone $currentSales)->whereNotNull('id_cliente')->distinct()->count('id_cliente');
 
@@ -69,7 +70,7 @@ final class DashboardQuery
             ->where('v.estado', 'completada')
             ->whereBetween('v.fecha_venta', [$start, $end])
             ->selectRaw('DATE(v.fecha_venta) as dia')
-            ->selectRaw('SUM(v.total_venta) as total')
+            ->selectRaw('SUM(v.total_base) as total')
             ->groupByRaw('DATE(v.fecha_venta)')
             ->orderBy('dia')
             ->get();
@@ -78,10 +79,9 @@ final class DashboardQuery
             ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
             ->leftJoin('usuarios as u', 'u.id_usuario', '=', 'v.id_usuario')
             ->whereBetween('v.fecha_venta', [$start, $end])
-            ->select('v.id_venta as id_venta', 'v.fecha_venta as fecha_venta', DB::raw('COALESCE(c.nombre_cliente, "Venta sin cliente") as cliente'), 'v.total_venta as total_venta', 'v.estado', 'u.nombre_completo as usuario')
-            ->orderByDesc('v.fecha_venta')
-            ->limit(5)
-            ->get();
+            ->select('v.id_venta as id_venta', 'v.fecha_venta as fecha_venta', DB::raw('COALESCE(c.nombre_cliente, "Venta sin cliente") as cliente'), 'v.total_venta as total_venta', 'v.estado', 'v.moneda_codigo', 'v.id_usuario', 'u.nombre_completo as usuario')
+            ->orderByDesc('v.fecha_venta')->orderByDesc('v.id_venta')
+            ->paginate(config('business.pagination'), ['*'], 'ventas')->withQueryString();
 
         $operations = [
             'compras' => (float) DB::table('compras')->where('estado', 'recibida')->whereBetween('fecha_compra', [$start, $end])->sum('total_compra'),
@@ -99,7 +99,13 @@ final class DashboardQuery
             ->take(2)
             ->values();
 
+        $undocumented = (clone $currentSales)->whereNull('total_base')->whereNull('moneda_codigo')
+            ->selectRaw('DATE(fecha_venta) as dia, SUM(total_venta) as total')->groupByRaw('DATE(fecha_venta)')->get();
         $chartPoints = $this->normalizeSeries($salesTrend, $since, $until);
+        $dailyUnits = DB::table('detalle_ventas as d')->join('ventas as v', 'v.id_venta', '=', 'd.id_venta')
+            ->where('v.estado', 'completada')->whereBetween('v.fecha_venta', [$start, $end])->where('d.tipo_item', 'producto')
+            ->selectRaw('DATE(v.fecha_venta) as dia, SUM(d.cantidad) as total')->groupByRaw('DATE(v.fecha_venta)')->get();
+        $dailyClients = (clone $currentSales)->selectRaw('DATE(fecha_venta) as dia, COUNT(DISTINCT id_cliente) as total')->groupByRaw('DATE(fecha_venta)')->get();
         $cards = [
             [
                 'label' => 'Ventas del periodo',
@@ -139,6 +145,8 @@ final class DashboardQuery
             'since' => $since,
             'until' => $until,
             'sales_total' => $salesTotal,
+            'sales_missing' => $salesMissing,
+            'spark_series' => [$chartPoints, $this->normalizeSeries($dailyUnits, $since, $until), $this->normalizeSeries($dailyClients, $since, $until)],
             'sales_count' => $salesCount,
             'products_sold' => (float) $productsSold,
             'customers_served' => (int) $clientsServed,
@@ -152,6 +160,7 @@ final class DashboardQuery
             'top_products' => $topProducts,
             'stock_by_warehouse' => $warehouseStocks,
             'sales_series' => $chartPoints,
+            'legacy_series' => $this->normalizeSeries($undocumented, $since, $until),
             'latest_sales' => $latestSales,
             'operations' => $operations,
             'rates' => $exchangeRates,
@@ -164,7 +173,7 @@ final class DashboardQuery
     {
         $start = Carbon::parse($since);
         $end = Carbon::parse($until);
-        $duration = $end->diffInDays($start) + 1;
+        $duration = (int) $start->diffInDays($end, true) + 1;
 
         return [
             'start' => $start->copy()->subDays($duration)->toDateString().' 00:00:00',

@@ -18,19 +18,9 @@ use App\Services\Sales\SaleQuote;
 
 final class OperationController extends Controller
 {
-    public function quote(OperationRequest $request, SaleQuote $pricing): mixed
-    {
-        return response()->json($pricing->quote($request->validated()));
-    }
-
-    public function sale(OperationRequest $request, SaleCheckout $sales): mixed
-    {
-        return $this->result($request, $sales->checkout((int) $request->user()->getKey(), $request->validated()), 'sales.pos');
-    }
-
     public function refund(OperationRequest $request, ReturnCredit $returns): mixed
     {
-        return $this->result($request, $returns->refund((int) $request->user()->getKey(), $request->validated()), 'sales.history');
+        return $this->result($request, (($request->validated('destino') === 'cambio') ? app(ProductExchange::class)->exchange((int) $request->user()->getKey(), $request->validated()) : $returns->refund((int) $request->user()->getKey(), $request->validated())), 'sales.history');
     }
 
     public function exchange(OperationRequest $request, ProductExchange $exchanges): mixed
@@ -55,6 +45,7 @@ final class OperationController extends Controller
 
     public function transition(OperationRequest $request, TransferWorkflow $transfers, int $id): mixed
     {
+        abort_if($request->user()->isMultifunctional() && $request->validated('estado') === 'cancelada', 403);
         return $this->result($request, $transfers->transition((int) $request->user()->getKey(), $id, $request->validated('estado')), 'transfers.index');
     }
 
@@ -69,8 +60,8 @@ final class OperationController extends Controller
         $data = $request->validated();
         $action = $request->route()->getName();
         $result = $operations->execute($user, $action, $data['idempotency_key'], $data, fn () => match ($action) {
-            'cash.open' => $cash->open($user, (string) $data['monto_inicial']),
-            'cash.close' => $cash->close($user, (string) $data['monto_final_real'], (bool) ($data['confirmar_legacy'] ?? false)),
+            'cash.open' => $cash->open($user, (string) $data['monto_inicial'], $data['observacion'] ?? null),
+            'cash.close' => $cash->close($user, (string) $data['monto_final_real'], (bool) ($data['confirmar_legacy'] ?? false), $data['observacion'] ?? null),
             default => $cash->movement($user, $data),
         });
 

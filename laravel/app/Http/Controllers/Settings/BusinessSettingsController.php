@@ -14,7 +14,10 @@ final class BusinessSettingsController extends Controller
 {
     public function index(): mixed
     {
-        return view('settings.business', ['settings' => config('business')]);
+        return view('settings.business', ['settings' => config('business'),
+            'currencies' => \App\Models\TipoMoneda::query()->where('activo', true)->orderByDesc('principal')->get(),
+            'rates' => \App\Models\TipoCambio::with('moneda')->orderByDesc('fecha')->paginate(config('business.pagination')),
+        ]);
     }
 
     public function save(Request $request): mixed
@@ -71,6 +74,14 @@ final class BusinessSettingsController extends Controller
 
        return back()->with('status', 'Configuración de la empresa actualizada.');
    }
+
+    public function currency(Request $request, \App\Services\Currency\CurrencyQuote $quotes): mixed
+    {
+        $input = $request->validate(['id_moneda' => ['required', 'integer', 'exists:tipo_moneda,id']]);
+        $quote = $quotes->snapshot((int) $input['id_moneda']);
+        EmpresaConfiguracion::query()->updateOrCreate(['clave' => 'operating_currency_id'], ['valor' => (string) $quote['id_moneda']]);
+        return back()->with('status', 'Moneda predeterminada de las nuevas operaciones actualizada.');
+    }
 
     public function uploadLogo(Request $request): mixed
     {

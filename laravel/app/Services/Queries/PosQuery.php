@@ -35,7 +35,7 @@ final class PosQuery
             default => empty($filters['almacen']) ? $products->unionAll($services) : $products,
         };
         $page = DB::query()->fromSub($query, 'items')->orderBy('nombre')->orderBy('tipo')->orderBy('id')->orderBy('id_almacen')
-            ->paginate((int) ($filters['per_page'] ?? 8));
+            ->paginate(config('business.pagination'));
         $rows = $page->getCollection()->map(function ($row) use ($quote): array {
             $price = bcadd(bcdiv((string) $row->precio_venta, $quote['tipo_cambio_aplicado'], 4), '0.005', 2);
 
@@ -52,10 +52,12 @@ final class PosQuery
         $client = DB::table('clientes')->where(['id_cliente' => $id, 'activo' => 1])
             ->firstOrFail(['id_cliente', 'nombre_cliente', 'documento_identidad', 'sellos', 'total_compras', 'tarjetas_llenas']);
         $quote = app(CurrencyQuote::class)->snapshot($currency);
-        $credit = DB::table('saldos_clientes')->where(['id_cliente' => $id, 'estado' => 'pendiente', 'id_moneda' => $quote['id_moneda']])->sum('saldo');
+        $credit = DB::table('saldos_clientes')->where(['id_cliente' => $id, 'estado' => 'pendiente', 'id_moneda' => $quote['id_moneda']]);
+        $debt = -(float) (clone $credit)->where('saldo','<',0)->sum('saldo');
+        $credit = $credit->where('saldo','>',0)->sum('saldo');
 
         return (array) $client + ['ventas_completadas' => DB::table('ventas')->where(['id_cliente' => $id, 'estado' => 'completada'])->count(),
-            'saldo_disponible' => Money::decimal(Money::cents((string) $credit)), 'moneda_codigo' => $quote['moneda_codigo'],
+            'deuda_pendiente' => number_format($debt,2,'.',''), 'saldo_disponible' => Money::decimal(Money::cents((string) $credit)), 'moneda_codigo' => $quote['moneda_codigo'],
             'descuento_proxima_compra' => app(Loyalty::class)->percent($client, true)];
     }
 }

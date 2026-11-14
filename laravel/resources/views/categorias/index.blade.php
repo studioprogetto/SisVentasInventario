@@ -11,9 +11,10 @@
         <a class="cat-surface cat-stat cat-positive" href="{{ route('categorias.index', ['search' => $search, 'estado' => 'active']) }}"><div><span>Categorías activas</span><strong>{{ $active }}</strong><small>Estado activo del registro</small></div><x-icon name="shield" /></a>
         <a class="cat-surface cat-stat cat-negative" href="{{ route('categorias.index', ['search' => $search, 'estado' => 'inactive']) }}"><div><span>Categorías inactivas</span><strong>{{ $total - $active }}</strong><small>Estado inactivo del registro</small></div><x-icon name="alert" /></a>
     </div>
-    <div class="cat-split @cannot('create', App\Models\Categoria::class) cat-list-only @endcannot">
+    <div class="cat-split cat-list-only">
         @can('create', App\Models\Categoria::class)
-        <aside class="cat-create">
+        <button type="button" class="btn btn-success" data-open-create="nueva-categoria">Nueva categoría</button><x-create-dialog id="nueva-categoria" title="Nueva categoría">
+
             <section class="cat-surface cat-padding">
                 <div class="cat-section-heading"><x-icon name="tag" /><div><h2>Nueva categoría</h2><p>Registrar categoría para productos.</p></div></div>
                 <form method="POST" action="{{ route('categorias.store') }}" class="cat-form" id="cat-create-form">
@@ -29,7 +30,8 @@
                 <div class="cat-preview-inset"><x-icon name="tag" /><strong id="cat-preview-name">Nueva categoría</strong><span id="cat-preview-status" class="cat-badge">Sin publicar</span></div>
                 <p>El registro se guarda únicamente al enviar el formulario.</p>
             </section>
-        </aside>
+        
+</x-create-dialog>
         @endcan
         <section class="cat-surface cat-list">
             <div class="cat-padding">
@@ -54,7 +56,7 @@
                         <td><div class="cat-actions">
                             @can('update', $categoria)
                             <details class="cat-edit" data-category-id="{{ $categoria->getKey() }}" @if($errors->any() && (string) old('_category_id') === (string) $categoria->getKey()) open @endif>
-                                <summary class="btn btn-secondary">Editar<span class="cat-sr-only"> {{ $categoria->nombre }}</span></summary>
+                                <summary class="btn btn-success">Editar<span class="cat-sr-only"> {{ $categoria->nombre }}</span></summary>
                                 <div class="cat-edit-content">
                                     <h2>Editar categoría</h2><p>Registro #{{ $categoria->getKey() }}</p>
                                     <form method="POST" action="{{ route('categorias.update', $categoria) }}" class="cat-form">
@@ -87,100 +89,9 @@
 @endsection
 
 @push('styles')
-<style>
-.categories-page{display:grid;gap:1.6rem;min-width:0;color:var(--text)}
-.categories-page h1{margin:.3rem 0;font-size:clamp(1.6rem,3vw,2.1rem);letter-spacing:-.04em}
-.categories-page h2{margin:0;font-size:1.05rem}.categories-page p{margin:.35rem 0;color:var(--muted);font-size:.78rem}
-.categories-page .cat-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.categories-page .cat-surface{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}
-.categories-page .cat-padding{padding:1.5rem}.categories-page .cat-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.3rem}
-.categories-page .cat-stat{display:flex;align-items:center;justify-content:space-between;padding:1.4rem;text-decoration:none;color:var(--accent);transition:transform .2s ease}
-.categories-page .cat-stat:hover{transform:translateY(-3px)}.categories-page .cat-stat span{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
-.categories-page .cat-stat strong{display:block;font-size:2rem;line-height:1.5;color:var(--text)}.categories-page .cat-stat small{display:block;color:var(--muted);font-size:.68rem}
-.categories-page .cat-stat>.icon{width:46px;height:46px;padding:10px;border-radius:14px;box-shadow:var(--inset)}
-.categories-page .cat-positive,.categories-page .cat-positive strong{color:var(--green)}.categories-page .cat-negative,.categories-page .cat-negative strong{color:var(--red)}
-.categories-page .cat-split{display:grid;grid-template-columns:minmax(250px,1fr) minmax(0,2fr);align-items:start;gap:1.6rem}.categories-page .cat-list-only{grid-template-columns:1fr}
-.categories-page .cat-create{display:grid;gap:1.4rem}.categories-page .cat-section-heading{display:flex;align-items:center;gap:.8rem;border-bottom:1px solid var(--line);padding-bottom:1rem;margin-bottom:1.2rem}
-.categories-page .cat-section-heading>.icon{color:var(--green)}.categories-page .cat-form{display:grid;gap:.8rem}
-.categories-page label{font-size:.75rem;font-weight:600}.categories-page input:not([type=checkbox]):not([type=hidden]){width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);box-shadow:var(--inset);padding:.75rem;font-size:.8rem}
-.categories-page .cat-check{display:flex;align-items:center;gap:.7rem;padding:1rem;border:1px solid var(--line);border-radius:14px;box-shadow:var(--inset)}
-.categories-page input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:var(--green)}.categories-page .cat-check small{display:block;color:var(--muted);font-weight:400;font-size:.65rem}
-.categories-page .cat-preview-inset{display:flex;align-items:center;gap:.6rem;margin:1rem 0;padding:1rem;border-radius:14px;box-shadow:var(--inset)}.categories-page .cat-preview-inset strong{min-width:0;overflow-wrap:anywhere;font-size:.75rem;flex:1}
-.categories-page .cat-list{min-width:0;overflow:hidden}.categories-page .cat-filters{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0}
-.categories-page .btn{font-size:.72rem;min-height:40px;padding:.65rem .85rem}.categories-page .is-selected{box-shadow:var(--inset);border-color:var(--green);color:var(--green)}
-.categories-page .cat-search>div{display:flex;gap:.6rem;margin-top:.4rem}.categories-page .cat-search input{flex:1}.categories-page .cat-table-scroll{overflow-x:auto}
-.categories-page .cat-table{width:100%;border-collapse:collapse}.categories-page .cat-table th{padding:1rem;text-align:left;font-size:.65rem;letter-spacing:.07em;text-transform:uppercase;background:var(--sidebar);color:var(--raised)}
-[data-theme=dark] .categories-page .cat-table th{color:var(--text)}
-.categories-page .cat-table td{padding:1rem;border-bottom:1px solid var(--line);vertical-align:middle;font-size:.78rem;overflow-wrap:anywhere}.categories-page .cat-table tr{animation:cat-row-in .3s ease both;transition:background .2s}
-.categories-page .cat-table tbody tr:hover{background:var(--raised)}.categories-page .cat-id{display:block;font-size:.65rem;color:var(--muted);margin-bottom:.3rem}
-.categories-page .cat-badge{display:inline-flex;white-space:nowrap;padding:.3rem .6rem;border-radius:999px;font-size:.65rem;font-weight:700;background:var(--raised);color:var(--muted);border:1px solid var(--line)}
-.categories-page .cat-badge.is-active{background:var(--green-soft);color:var(--green)}.categories-page .cat-publication{display:block;color:var(--muted);font-size:.65rem;margin-top:.35rem}
-.categories-page .cat-actions{display:flex;gap:.5rem;flex-wrap:wrap}.categories-page .cat-actions form{margin:0}.categories-page .cat-edit-content{padding:1rem;background:var(--surface);min-width:210px}
-.categories-page .cat-empty{text-align:center;padding:2.5rem!important}.categories-page .cat-empty>.icon{width:36px;height:36px;color:var(--muted)}
-.categories-page .cat-summary{padding:1rem 1.5rem;background:var(--bg);color:var(--muted);font-size:.68rem}.categories-page .cat-pagination{padding:0 1rem}.categories-page .cat-pagination:empty{display:none}
-.categories-page .cat-sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-.categories-page dialog{width:min(480px,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);padding:1.4rem;border:1px solid var(--line);border-radius:24px;background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
-.categories-page dialog::backdrop{background:color-mix(in srgb,var(--sidebar) 72%,transparent)}.categories-page dialog[open]{animation:cat-row-in .2s ease}.categories-page .cat-dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.8rem}.categories-page dialog .cat-edit-content{padding:0;min-width:0}
-@keyframes cat-row-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-@media(min-width:1280px){.categories-page .cat-create{position:sticky;top:1.5rem}}
-@media(max-width:1100px){.categories-page .cat-split{grid-template-columns:1fr}.categories-page .cat-create{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.categories-page .cat-heading{align-items:stretch;flex-direction:column}.categories-page .cat-stats,.categories-page .cat-create{grid-template-columns:1fr}.categories-page .cat-padding{padding:1rem}.categories-page .cat-search>div{flex-wrap:wrap}.categories-page .cat-search input{flex-basis:100%}.categories-page .cat-table thead{display:none}.categories-page .cat-table,.categories-page .cat-table tbody,.categories-page .cat-table tr,.categories-page .cat-table td{display:block;width:100%}.categories-page .cat-table tr{padding:.8rem;border-bottom:1px solid var(--line)}.categories-page .cat-table td{border:0;padding:.5rem}.categories-page .cat-actions{justify-content:flex-start}}
-@media(prefers-reduced-motion:reduce){.categories-page .cat-stat,.categories-page .cat-table tr,.categories-page dialog[open]{animation:none;transition:none}.categories-page .cat-stat:hover{transform:none}}
-</style>
+<link rel="stylesheet" href="{{ asset('css/category-modules.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-(() => {
-    const page = document.querySelector('.categories-page');
-    if (!page) return;
-    const name = page.querySelector('#cat-name');
-    const publish = page.querySelector('#cat-publish');
-    if (name && publish) {
-        const preview = () => {
-            page.querySelector('#cat-preview-name').textContent = name.value.trim() || 'Nueva categoría';
-            const badge = page.querySelector('#cat-preview-status');
-            badge.textContent = publish.checked ? 'Publicada' : 'Sin publicar';
-            badge.classList.toggle('is-active', publish.checked);
-        };
-        name.addEventListener('input', preview);
-        publish.addEventListener('change', preview);
-        preview();
-    }
-    const dialog = page.querySelector('#cat-edit-dialog');
-    const body = page.querySelector('#cat-dialog-body');
-    let source = null;
-    let trigger = null;
-    if (typeof dialog.showModal === 'function') {
-        const open = details => {
-            source = details;
-            trigger = details.querySelector('summary');
-            details.open = false;
-            body.append(details.querySelector('.cat-edit-content'));
-            dialog.showModal();
-            body.querySelector('input[name="nombre"]').focus();
-        };
-        page.querySelectorAll('.cat-edit').forEach(details => {
-            details.querySelector('summary').addEventListener('click', event => {
-                event.preventDefault();
-                open(details);
-            });
-        });
-        dialog.addEventListener('close', () => {
-            if (source) source.append(body.firstElementChild);
-            source = null;
-            if (trigger) trigger.focus();
-        });
-        page.querySelector('#cat-close-dialog').addEventListener('click', () => dialog.close());
-        const invalidEdit = page.querySelector('.cat-edit[open]');
-        if (invalidEdit) open(invalidEdit);
-    }
-    page.querySelectorAll('.cat-state-form').forEach(form => {
-        form.addEventListener('submit', event => {
-            const action = form.querySelector('input[name="activo"]').value === '0' ? 'Desactivar' : 'Activar';
-            if (!window.confirm(action + ' categoría "' + form.dataset.categoryName + '"? La publicación no se modifica.')) event.preventDefault();
-        });
-    });
-})();
-</script>
+<script defer src="{{ asset('js/categories.js') }}"></script>
 @endpush

@@ -99,24 +99,24 @@
         </div>
         <div class="ticket-divider"></div>
         <div class="ticket-footer">
-            <p>Política de devolución:</p>
-            <p>Los productos comprados tienen un plazo de {{ config('business.return_policy_days', 4) }} días para devolución.</p>
-            <p>Compra desde: {{ $saleDate->addDay()->format('d/m/Y') }}</p>
-            <p>Hasta: {{ $saleDate->copy()->addDays(config('business.return_policy_days', 4) - 1)->format('d/m/Y') }}</p>
+            <strong>Política de cambios · 48 horas</strong>
+            <p>Revisa tu producto al comprar. Si presenta una falla, solicita el cambio con este ticket hasta el {{ $saleDate->copy()->addDays(2)->format('d/m/Y H:i') }}.</p>
+            <p>Puedes elegir otro producto o mantener saldo a favor en tu cuenta para otra compra. Si el nuevo importe es mayor, pagas la diferencia. No se entrega dinero en efectivo.</p>
         </div>
         <div class="ticket-actions" aria-label="Acciones del ticket">
             <button type="button" class="btn btn-primary" data-print-ticket>Imprimir Ticket</button>
             <button type="button" class="btn btn-success" data-save-pdf>Guardar en PDF</button>
             <a class="btn btn-warning" href="{{ route('sales.pos') }}">Volver al POS</a>
-            <a class="btn btn-secondary" href="{{ route('sales.history') }}">Ver Historial</a>
+            <a class="btn btn-success" href="{{ route('sales.history') }}">Ver Historial</a>
         </div>
-        @can('ventas_devolver')
-            @if(in_array((string) $sale->estado, ['completada', 'parcialmente_devuelta'], true))
+        @canany(['ventas_devolver','solicitar_devolucion'])
+            @if(now()->lte($saleDate->copy()->addDays(2)) && in_array((string) $sale->estado, ['completada', 'parcialmente_devuelta'], true))
                 <section class="return-panel" aria-labelledby="return-title">
-                    <h3 id="return-title">Devoluciones y reembolsos</h3>
+                    <h3 id="return-title">Cambio de producto o saldo a favor</h3>
                     <p>Selecciona una línea, indica la cantidad y registra el motivo. La cantidad máxima se calcula con base en esta venta.</p>
                     @foreach($sale->detalles as $line)
-                        <form method="POST" action="{{ route('sales.return') }}" class="return-form" data-confirm="¿Confirmas registrar esta devolución?">
+                        @continue(!$line->id_producto)
+                        <form method="POST" action="{{ route(auth()->user()->can('ventas_devolver') ? 'sales.return' : 'returns.request') }}" class="return-form" data-confirm="¿Confirmas la solicitud de cambio o saldo?">
                             @csrf
                             <input type="hidden" name="idempotency_key" value="{{ \Illuminate\Support\Str::random(24) }}">
                             <input type="hidden" name="id_venta_original" value="{{ $sale->id_venta }}">
@@ -124,21 +124,23 @@
                             <label>{{ $line->producto?->nombre ?? $line->servicio?->nombre ?? 'Concepto sin nombre' }} · compradas: {{ $line->cantidad }}
                                 <input type="number" name="productos[0][cantidad]" min="1" max="{{ $line->cantidad }}" value="1" required>
                             </label>
-                            <label>Destino del reembolso
-                                <select name="destino">
-                                    @if($sale->id_cliente)<option value="saldo">Saldo del cliente</option>@endif
-                                    <option value="efectivo">Efectivo</option>
-                                </select>
-                            </label>
+                            @unless($sale->id_cliente)
+                            <label>Cliente titular<select name="id_cliente" required><option value="">Seleccionar cliente registrado</option>@foreach($holders as $holder)<option value="{{ $holder->id_cliente }}">{{ $holder->nombre_cliente }}</option>@endforeach</select></label>
+                            <a href="{{ route('masters.index','cliente') }}">Registrar cliente</a>
+                            @endunless
+                            <label>Resolución<select name="destino"><option value="saldo">Guardar saldo a favor</option><option value="cambio">Cambiar por otro producto</option></select></label>
+                            <label>Estado del artículo<select name="condicion"><option value="defectuoso">Defectuoso · retirar de la venta</option><option value="conforme">Sin uso y apto para la venta</option></select></label>
+                            <label>Producto de reemplazo (solo para cambio)<select name="reemplazo"><option value="">Seleccionar producto</option>@foreach($replacementProducts as $product)<option value="{{ $product->id_producto }}">{{ $product->nombre }}</option>@endforeach</select></label>
+                            <label>Pago de la diferencia<select name="metodo_pago">@foreach(['efectivo','yape','plin','transferencia'] as $method)<option>{{ $method }}</option>@endforeach</select></label>
                             <label>Motivo
                                 <textarea name="observacion" maxlength="255" required placeholder="Describe el motivo de la devolución"></textarea>
                             </label>
-                            <button type="submit" class="btn btn-danger">Registrar devolución</button>
+                            <button type="submit" class="btn btn-danger">{{ auth()->user()->can('ventas_devolver') ? 'Confirmar cambio o saldo' : 'Solicitar aprobación' }}</button>
                         </form>
                     @endforeach
                 </section>
             @endif
-        @endcan
+        @endcanany
     </div>
 </div>
 @endsection

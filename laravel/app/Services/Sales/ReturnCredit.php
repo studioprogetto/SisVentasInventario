@@ -19,11 +19,24 @@ final class ReturnCredit
     public function refund(int $user, array $data): array
     {
         return $this->requests->execute($user, 'devolucion', $data['idempotency_key'], $data, function () use ($user, $data): array {
-            $cashReturn = ($data['destino'] ?? 'saldo') === 'efectivo';
-            $turn = $cashReturn ? $this->cash->active($user) : null;
+            if (!in_array($data['destino'] ?? 'saldo', ['saldo','cambio'], true)) {
+                throw ValidationException::withMessages(['destino'=>'Solo se admite cambio de producto o saldo a favor.']);
+            }
             $sale = DB::table('ventas')->where('id_venta', $data['id_venta_original'])->lockForUpdate()->first();
-            if (! $sale || ! in_array($sale->estado, ['completada', 'parcialmente_devuelta'], true) || (! $cashReturn && ! $sale->id_cliente) || ! $sale->id_moneda) {
-                throw ValidationException::withMessages(['venta' => 'La venta no admite devolución automática: verifique estado, cliente y moneda histórica.']);
+            if (!$sale || !in_array($sale->estado, ['completada','parcialmente_devuelta'], true) || !$sale->id_moneda) {
+                throw ValidationException::withMessages(['venta'=>'Esta venta no admite cambios.']);
+            }
+            if (now()->gt(\Carbon\Carbon::parse($sale->fecha_venta)->addDays(2))) {
+                throw ValidationException::withMessages(['venta'=>'El plazo de 48 horas desde la compra ha terminado.']);
+            }
+            $originalClient = $sale->id_cliente;
+            $clientId = $originalClient ?: ($data['id_cliente'] ?? null);
+            if (!$clientId || !DB::table('clientes')->where(['id_cliente'=>$clientId,'activo'=>1])->exists()) {
+                throw ValidationException::withMessages(['id_cliente'=>'Registra y selecciona al cliente titular.']);
+            }
+            if (!$originalClient) {
+                DB::table('ventas')->where('id_venta',$sale->id_venta)->update(['id_cliente'=>$clientId]);
+                $sale->id_cliente = $clientId;
             }
             $details = DB::table('detalle_ventas')->where('id_venta', $sale->id_venta)->orderBy('id_detalle_venta')->lockForUpdate()->get()->keyBy('id_detalle_venta');
             $this->stock->lockProducts($details->whereNotNull('id_producto')->pluck('id_producto')->all());
@@ -35,7 +48,7 @@ final class ReturnCredit
                 $id = (int) $input['id_detalle_venta'];
                 $line = $details->get($id);
                 $quantity = (int) $input['cantidad'];
-                if (isset($seen[$id]) || ! $line || ($line->id_producto && ! $line->id_almacen) || $line->importe_neto === null || $quantity <= 0) {
+                if (isset($seen[$id]) || ! $line || !$line->id_producto || ($line->id_producto && ! $line->id_almacen) || $line->importe_neto === null || $quantity <= 0) {
                     throw ValidationException::withMessages(['productos' => 'Detalle ajeno, repetido, histórico incompleto o cantidad inválida.']);
                 }
                 $seen[$id] = true;
@@ -49,15 +62,12 @@ final class ReturnCredit
                 $amount += $value;
                 DB::table('detalles_cambio')->insert(['id_cambio' => $change, 'id_producto' => $line->id_producto, 'id_servicio' => $line->id_servicio,
                     'id_detalle_venta' => $id, 'cantidad' => $quantity, 'precio' => $line->precio_unitario, 'tipo' => 'devolucion']);
-                if ($line->id_producto) {
+                if ($line->id_producto && ($data['condicion'] ?? 'conforme') !== 'defectuoso') {
                     $this->stock->move($line->id_producto, $line->id_almacen, $quantity, 'devolucion', $user, $change);
                 }
             }
             DB::table('cambios_ventas')->where('id_cambio', $change)->update(['monto_saldo' => Money::decimal($amount)]);
-            if ($cashReturn && $amount > 0) {
-                $base = bcadd(bcmul(Money::decimal($amount), (string) $sale->tipo_cambio_aplicado, 4), '0.005', 2);
-                DB::table('movimientos_caja')->insert(['id_turno' => $turn->id_turno, 'id_usuario' => $user, 'tipo_movimiento' => 'egreso', 'monto' => $base, 'descripcion' => 'Devolución #'.$change.' de venta #'.$sale->id_venta, 'referencia_id' => $change]);
-            } elseif ($amount > 0) {
+            if ($amount > 0) {
                 DB::table('saldos_clientes')->insert(['id_cliente' => $sale->id_cliente, 'id_moneda' => $sale->id_moneda, 'saldo' => Money::decimal($amount), 'estado' => 'pendiente']);
             }
             $totalQuantity = (int) $details->sum('cantidad');
@@ -66,7 +76,7 @@ final class ReturnCredit
             $full = $returnedTotal === $totalQuantity;
             DB::table('ventas')->where('id_venta', $sale->id_venta)->update(['estado' => $full ? 'anulada' : 'parcialmente_devuelta']);
             if ($full) {
-                if ($sale->id_cliente && $details->whereNotNull('id_producto')->isNotEmpty() && ! $sale->es_cambio) {
+                if ($originalClient && $details->whereNotNull('id_producto')->isNotEmpty() && ! $sale->es_cambio) {
                     $client = DB::table('clientes')->where('id_cliente', $sale->id_cliente)->lockForUpdate()->first();
                     DB::table('clientes')->where('id_cliente', $client->id_cliente)->update(['sellos' => max(0, (int) $client->sellos - 1)]);
                 }
@@ -74,9 +84,9 @@ final class ReturnCredit
             }
             DB::table('auditoria_cambios')->insert(['id_venta_original' => $sale->id_venta, 'id_cambio' => $change, 'id_cliente' => $sale->id_cliente,
                 'tipo_operacion' => 'devolucion', 'monto_original' => $sale->total_venta, 'saldo_generado' => Money::decimal($amount), 'fecha_auditoria' => now()]);
-            $this->audit->record($user, 'devolucion', 'cambios_ventas', $change);
+            $this->audit->record($user, 'cambio_o_saldo', 'cambios_ventas', $change, ['condicion'=>$data['condicion'] ?? 'conforme','motivo'=>$data['observacion'] ?? '']);
 
-            return ['success' => true, 'id_cambio' => $change, 'saldo_generado' => $cashReturn ? '0.00' : Money::decimal($amount), 'monto_devuelto' => Money::decimal($amount), 'id_cliente' => $sale->id_cliente, 'id_moneda' => $sale->id_moneda];
+            return ['success' => true, 'id_cambio' => $change, 'saldo_generado' => Money::decimal($amount), 'monto_devuelto' => Money::decimal($amount), 'id_cliente' => $sale->id_cliente, 'id_moneda' => $sale->id_moneda];
         });
     }
 }

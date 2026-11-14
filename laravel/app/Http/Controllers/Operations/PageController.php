@@ -14,7 +14,9 @@ final class PageController extends Controller
 {
     public function pos(PosQuery $queries): mixed
     {
-        return view('sales.pos', $queries->lookups());
+        $lookups = $queries->lookups();
+        $currency = $lookups['currencies']->firstWhere('id', config('business.operating_currency_id')) ?? $lookups['currencies']->first();
+        return view('sales.pos', $lookups + ['selectedCurrency' => $currency?->id, 'catalog' => $queries->items(['id_moneda' => $currency?->id])]);
     }
 
     public function history(Request $request, BackOfficeQueries $queries): mixed
@@ -30,7 +32,8 @@ final class PageController extends Controller
         $sale = $queries->sale($id);
         abort_unless($request->user()->can('ventas_ver_listado') || ($request->user()->can('ventas_crear') && (int) $sale->id_usuario === (int) $request->user()->getKey()), 403);
 
-        return $request->expectsJson() ? response()->json($sale) : view('sales.ticket', ['sale' => $sale] + $queries->lookups());
+        return $request->expectsJson() ? response()->json($sale) : view('sales.ticket', ['sale' => $sale, 'replacementProducts' => \App\Models\Producto::where('activo',true)->orderBy('nombre')->get(['id_producto','nombre']),
+            'holders' => $sale->id_cliente ? [] : \App\Models\Cliente::where('activo',true)->orderBy('nombre_cliente')->get(['id_cliente','nombre_cliente'])] + $queries->lookups());
     }
 
     public function search(Request $request, BackOfficeQueries $queries): mixed
@@ -59,8 +62,13 @@ final class PageController extends Controller
         return view('transfers.index', ['transfers' => $queries->transfers()] + $queries->lookups());
     }
 
+    public function cashReport(Request $request, BackOfficeQueries $queries): mixed
+    {
+        return view('cash.report', $queries->cash((int) $request->user()->getKey()));
+    }
+
     public function cash(Request $request, BackOfficeQueries $queries): mixed
     {
-        return view('cash.index', $queries->cash((int) $request->user()->getKey()));
+        return view('cash.index', $queries->cash((int) $request->user()->getKey(), false));
     }
 }

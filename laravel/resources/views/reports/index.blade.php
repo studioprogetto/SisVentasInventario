@@ -28,6 +28,7 @@
     @endforeach
     </div><p id="report-empty" hidden>No hay reportes que coincidan con la búsqueda.</p>
 </section>
+@can('caja_gestionar')<a class="btn btn-success" href="{{ route('reports.my-cash') }}">Reporte de caja · Mis turnos y movimientos</a>@endcan
 @endsection
 @push('styles')
 <style>

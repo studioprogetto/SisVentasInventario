@@ -27,6 +27,14 @@ final class Producto extends Model
         ];
     }
 
+    public function scopeLowStock(\Illuminate\Database\Eloquent\Builder $query, ?int $warehouseId = null): void
+    {
+        $stocks = Existencia::query()->selectRaw('COALESCE(SUM(stock), 0)')
+            ->whereColumn('existencias.id_producto', 'productos.id_producto')
+            ->when($warehouseId, fn ($stock) => $stock->where('id_almacen', $warehouseId));
+        $query->where($stocks, '<=', \Illuminate\Support\Facades\DB::raw('productos.stock_minimo'));
+    }
+
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(Categoria::class, 'id_categoria', 'id_categoria');

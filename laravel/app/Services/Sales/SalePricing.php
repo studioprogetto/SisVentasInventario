@@ -26,6 +26,9 @@ final class SalePricing
             if (! $record) {
                 throw ValidationException::withMessages(['carrito' => 'Producto o servicio no disponible.']);
             }
+            if ($physical && (int) $record->stock !== (int) DB::table('existencias')->where('id_producto', $record->id_producto)->sum('stock')) {
+                throw ValidationException::withMessages(['inventario' => 'El stock del producto difiere de las existencias por almacén. Revisa el inventario antes de vender.']);
+            }
             $price = bcadd(bcdiv((string) $record->precio_venta, $quote['tipo_cambio_aplicado'], 4), '0.005', 2);
             $gross += Money::cents($price) * (int) $line['cantidad'];
             $lines[] = ['id' => (int) $line['id'], 'tipo' => $line['tipo'], 'cantidad' => (int) $line['cantidad'], 'precio' => $price, 'costo' => $physical ? $record->precio_compra : null, 'almacen' => $physical ? (int) ($line['id_almacen'] ?? $record->id_almacen) : null];

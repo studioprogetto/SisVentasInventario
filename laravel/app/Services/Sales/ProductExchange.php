@@ -14,6 +14,9 @@ final class ProductExchange
     public function exchange(int $user, array $data): array
     {
         return $this->requests->execute($user, 'cambio', $data['idempotency_key'], $data, function () use ($user, $data): array {
+            if (isset($data['reemplazo'])) {
+                $data['carrito'] = [['id'=>(int)$data['reemplazo'],'tipo'=>'producto','cantidad'=>(int)$data['productos'][0]['cantidad']]];
+            }
             $credit = $this->returns->refund($user, array_replace($data, ['idempotency_key' => hash('sha256', $data['idempotency_key'].':return')]));
             $replacement = $this->sales->checkout($user, [
                 'idempotency_key' => hash('sha256', $data['idempotency_key'].':sale'), 'id_cliente' => $credit['id_cliente'], 'id_moneda' => $credit['id_moneda'],

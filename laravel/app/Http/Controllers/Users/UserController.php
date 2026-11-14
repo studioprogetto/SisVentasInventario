@@ -16,7 +16,7 @@ final class UserController extends Controller
 {
     public function index(): mixed
     {
-        return view('users.index', ['users' => Usuario::query()->with('rol')->orderBy('nombre_completo')->paginate(30), 'roles' => Rol::query()->with('permisos')->get(), 'permissions' => Permiso::query()->orderBy('nombre_permiso')->get()]);
+        return view('users.index', ['users' => Usuario::query()->with('rol')->orderBy('nombre_completo')->paginate(config('business.pagination')), 'roles' => Rol::query()->with('permisos')->get(), 'permissions' => Permiso::query()->orderBy('nombre_permiso')->get()]);
     }
 
     public function save(Request $request, UserAdministration $users, ?int $id = null): mixed

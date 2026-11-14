@@ -31,6 +31,6 @@ final class CatalogQuery
             ->when($filters['categoria'] ?? null, fn ($query, $id) => $query->where('id_categoria', $id))
             ->when(isset($filters['minimo']), fn ($query) => $query->where('precio_venta', '>=', $filters['minimo']))
             ->when(isset($filters['maximo']), fn ($query) => $query->where('precio_venta', '<=', $filters['maximo']))
-            ->orderBy(...$order)->paginate(24)->withQueryString();
+            ->orderBy(...$order)->paginate(config('business.pagination'))->withQueryString();
     }
 }

@@ -29,7 +29,7 @@
         </div>
         @can('usuarios_crear_editar')
             <div class="users-header__actions">
-                <a class="btn btn-success" href="#nuevo-usuario">Nuevo usuario</a>
+                <button type="button" class="btn btn-success" data-open-create="nuevo-usuario">Nuevo usuario</button>
             </div>
         @endcan
     </header>
@@ -46,14 +46,13 @@
     </section>
 
     @can('usuarios_crear_editar')
-        <section class="panel users-panel" id="nuevo-usuario">
-            <div class="users-panel__header"><div><h2>Crear usuario</h2><p>Registra una nueva cuenta y asigna el rol correspondiente.</p></div><span class="status-chip">Alta de acceso</span></div>
-            <form method="POST" action="{{ route('users.store') }}" class="users-form">
+        <x-create-dialog id="nuevo-usuario" title="Nuevo usuario">
+<form method="POST" action="{{ route('users.store') }}" class="users-form">
                 @csrf
                 <div class="form-grid">@include('users.form', ['user' => null])</div>
                 <div class="users-form__actions"><button type="reset" class="btn btn-secondary">Limpiar</button><button type="submit" class="btn btn-success">Crear usuario</button></div>
             </form>
-        </section>
+</x-create-dialog>
     @endcan
 
     <section class="panel users-panel">
@@ -71,7 +70,7 @@
                         <td><span class="user-status {{ $user->activo ? 'active' : 'inactive' }}">{{ $user->activo ? 'Activo' : 'Inactivo' }}</span></td>
                         <td><div class="user-actions">
                             @can('usuarios_crear_editar')
-                                <details><summary class="btn btn-secondary">Editar</summary><div class="user-edit"><form method="POST" action="{{ route('users.update', $user->getKey()) }}">@csrf @method('PUT')<div class="form-grid">@include('users.form')</div><div class="user-edit__actions"><button type="submit" class="btn btn-success">Guardar cambios</button></div></form></div></details>
+                                <details><summary class="btn btn-success">Editar</summary><div class="user-edit"><form method="POST" action="{{ route('users.update', $user->getKey()) }}">@csrf @method('PUT')<div class="form-grid">@include('users.form')</div><div class="user-edit__actions"><button type="submit" class="btn btn-success">Guardar cambios</button></div></form></div></details>
                             @endcan
                             @can('usuarios_cambiar_estado')
                                 <form method="POST" action="{{ route('users.state', $user->getKey()) }}" data-confirm="¿Confirmas cambiar el estado de este usuario?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $user->activo ? 0 : 1 }}"><button type="submit" class="btn {{ $user->activo ? 'btn-danger' : 'btn-success' }}">{{ $user->activo ? 'Desactivar' : 'Activar' }}</button></form>

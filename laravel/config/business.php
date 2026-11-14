@@ -13,7 +13,7 @@ return [
         'weekend' => 'Sáb: 8:00 - 20:30',
     ],
     'return_policy_days' => 4,
-    'pagination' => 30,
+    'pagination' => 12,
     'display_currency' => 'S/',
     'payment_methods' => ['efectivo', 'yape', 'plin', 'agora', 'transferencia', 'saldo', 'mixto'],
 ];

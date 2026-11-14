@@ -28,7 +28,7 @@ final class SaleQuote
         $total = $priced['gross'] - $loyalty - $manual;
         $quote['lineas'] = array_map(fn ($line) => ['id' => $line['id'], 'tipo' => $line['tipo'], 'id_almacen' => $line['almacen'],
             'cantidad' => $line['cantidad'], 'precio' => $line['precio'], 'subtotal' => Money::decimal(Money::cents($line['precio']) * $line['cantidad'])], $priced['lines']);
-        $available = $client ? DB::table('saldos_clientes')->where(['id_cliente' => $client->id_cliente, 'id_moneda' => $quote['id_moneda'], 'estado' => 'pendiente'])->sum('saldo') : 0;
+        $available = $client ? DB::table('saldos_clientes')->where(['id_cliente' => $client->id_cliente, 'id_moneda' => $quote['id_moneda'], 'estado' => 'pendiente'])->where('saldo','>',0)->sum('saldo') : 0;
         $credit = ($data['metodo_pago'] === 'saldo' || ($data['usar_saldo'] ?? false)) ? min($total, Money::cents((string) $available)) : 0;
 
         return $quote + ['subtotal' => Money::decimal($priced['gross']), 'descuento_sellos' => Money::decimal($loyalty), 'descuento_manual' => Money::decimal($manual), 'total' => Money::decimal($total), 'saldo_aplicable' => Money::decimal($credit), 'por_cobrar' => Money::decimal($total - $credit)];

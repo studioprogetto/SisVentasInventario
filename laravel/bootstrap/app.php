@@ -22,5 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->report(function (Throwable $exception) {
+            if ($exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface && $exception->getStatusCode() < 500) return;
+            try {
+                \Illuminate\Support\Facades\Cache::store('file')->put('server-incident', now()->format('d/m/Y H:i'), now()->addDay());
+            } catch (Throwable) {
+                // Logging the original exception still proceeds if storage is unavailable.
+            }
+        });
     })->create();

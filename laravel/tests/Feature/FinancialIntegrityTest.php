@@ -56,16 +56,23 @@ final class FinancialIntegrityTest extends CommercialTestCase
         }
     }
 
-    public function test_generic_sale_can_be_refunded_to_cash_without_inventing_a_customer(): void
+    public function test_generic_sale_requires_registered_holder_and_never_pays_cash(): void
     {
         app(CashSession::class)->open($this->operator->getKey(), '0');
         $sale = app(SaleCheckout::class)->checkout($this->operator->getKey(), $this->cart(['id_cliente' => null]));
         $line = DB::table('detalle_ventas')->value('id_detalle_venta');
-        app(ReturnCredit::class)->refund($this->operator->getKey(), ['idempotency_key' => (string) Str::uuid(), 'id_venta_original' => $sale['id_venta'], 'destino' => 'efectivo', 'observacion' => 'Devolución en efectivo', 'productos' => [['id_detalle_venta' => $line, 'cantidad' => 2]]]);
-        $closed = app(CashSession::class)->close($this->operator->getKey(), '0');
-        $this->assertSame('0.00', $closed['esperado']);
-        $this->assertDatabaseCount('saldos_clientes', 0);
-        $this->assertDatabaseHas('cambios_ventas', ['id_venta_original' => $sale['id_venta'], 'id_cliente' => null]);
+        $claim = ['idempotency_key' => (string) Str::uuid(), 'id_venta_original'=>$sale['id_venta'], 'observacion'=>'Producto defectuoso', 'productos'=>[['id_detalle_venta'=>$line,'cantidad'=>1]], 'condicion'=>'defectuoso'];
+        $this->actingAs($this->operator)->postJson(route('sales.return'), $claim + ['destino'=>'efectivo'])->assertUnprocessable();
+        $this->postJson(route('sales.return'), $claim + ['destino'=>'saldo'])->assertUnprocessable();
+        $this->postJson(route('sales.return'), $claim + ['destino'=>'saldo','id_cliente'=>$this->client])->assertOk();
+        $this->assertDatabaseHas('saldos_clientes',['id_cliente'=>$this->client,'saldo'=>25]);
+        $this->assertDatabaseCount('movimientos_caja',0);
+        $this->assertDatabaseHas('productos',['id_producto'=>$this->product,'stock'=>8]);
+        $next = app(SaleCheckout::class)->checkout($this->operator->getKey(), $this->cart(['usar_saldo'=>true,'monto_recibido'=>'25.00']));
+        $this->assertDatabaseHas('ventas',['id_venta'=>$next['id_venta'],'saldo_utilizado'=>25,'cobro_base'=>25]);
+        $this->travel(49)->hours();
+        $claim['idempotency_key'] = (string) Str::uuid();
+        $this->postJson(route('sales.return'), $claim + ['destino'=>'saldo'])->assertUnprocessable();
     }
 
     public function test_quote_is_read_only_and_confirmed_total_is_rechecked(): void

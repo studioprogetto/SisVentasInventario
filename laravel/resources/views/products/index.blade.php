@@ -123,7 +123,7 @@
                 <footer class="inventory-card-actions">
                     @can('productos_ver_detalle')<a href="{{ route('products.ledger', $product->id_producto) }}" class="inventory-action-link">Kardex / almacenes</a>@endcan
                     <a href="{{ route('products.labels', ['ids' => [$product->id_producto]]) }}" class="inventory-action-link" target="_blank" rel="noopener">Etiqueta</a>
-                    @can('productos_editar')<button type="button" class="inventory-action-link" data-open-product-modal="product-modal-{{ $product->id_producto }}">Editar</button>@endcan
+                    @can('productos_editar')<button type="button" class="inventory-action-link btn-success" data-open-product-modal="product-modal-{{ $product->id_producto }}">Editar</button>@endcan
                     @can('productos_cambiar_estado')<form method="POST" action="{{ route('products.state', $product->id_producto) }}" data-confirm="¿{{ $product->activo ? 'Desactivar' : 'Activar' }} este producto?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $product->activo ? 0 : 1 }}"><button class="inventory-action-link {{ $product->activo ? 'is-danger' : 'is-success' }}" type="submit">{{ $product->activo ? 'Desactivar' : 'Activar' }}</button></form>@endcan
                 </footer>
             </article>
@@ -146,8 +146,8 @@
                     <td class="inventory-table-actions">
                         @can('productos_ver_detalle')<a href="{{ route('products.ledger', $product->id_producto) }}">Kardex</a>@endcan
                         <a href="{{ route('products.labels', ['ids' => [$product->id_producto]]) }}" target="_blank" rel="noopener">Etiqueta</a>
-                        @can('productos_editar')<button type="button" class="inventory-action-link" data-open-product-modal="product-modal-{{ $product->id_producto }}">Editar</button>@endcan
-                        @can('productos_cambiar_estado')<form method="POST" action="{{ route('products.state', $product->id_producto) }}" data-confirm="¿Cambiar el estado del producto?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $product->activo ? 0 : 1 }}"><button type="submit">{{ $product->activo ? 'Desactivar' : 'Activar' }}</button></form>@endcan
+                        @can('productos_editar')<button type="button" class="inventory-action-link btn-success" data-open-product-modal="product-modal-{{ $product->id_producto }}">Editar</button>@endcan
+                        @can('productos_cambiar_estado')<form method="POST" action="{{ route('products.state', $product->id_producto) }}" data-confirm="¿Cambiar el estado del producto?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $product->activo ? 0 : 1 }}"><button class="btn {{ $product->activo ? 'btn-danger' : 'btn-success' }}" type="submit">{{ $product->activo ? 'Desactivar' : 'Activar' }}</button></form>@endcan
                     </td>
                 </tr>
             @empty<tr><td colspan="7">No hay productos con estos filtros.</td></tr>@endforelse

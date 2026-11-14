@@ -17,7 +17,7 @@
   let revision = 0, quoteTimer, searchTimer, clientTimer;
   let searchController, clientController, quoteController, clientRevision = 0;
   let currency = 'S/', selectedClient = null, cart = [];
-  let pendingClient = false;
+  let pendingClient = false, due = 0;
   const toNumber = value => Number.parseFloat(String(value ?? 0).replace(/[^\d.-]/g, '')) || 0;
   const money = amount => `${currency || 'S/'} ${Number(amount).toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
   const key = item => `${item.tipo}:${item.id}:${item.id_almacen || 0}`;
@@ -48,7 +48,7 @@
       status.textContent = 'Pago registrado.';
       return;
     }
-    const total = toNumber($('[name=accepted_total]').value);
+    const total = due;
     const received = toNumber(receivedField.value);
     const delta = received - total;
     status.textContent = delta >= 0 ? `Vuelto: ${money(delta)}` : `Falta: ${money(Math.abs(delta))}`;
@@ -107,6 +107,7 @@
     try {
       const data = await json(form.dataset.quoteUrl, {method:'POST', body:new FormData(form), signal:quoteController.signal});
       if (current !== revision) return;
+      due = toNumber(data.por_cobrar);
       currency = data.moneda_codigo;
       $('[name=accepted_total]').value = data.total;
       $('[data-pos-total]').textContent = money(data.total);
@@ -145,7 +146,7 @@
     clearTimeout(searchTimer); searchController?.abort(); searchController = new AbortController();
     const url = new URL(form.dataset.itemsUrl);
     url.searchParams.set('term',$('[data-pos-search]').value.trim()); url.searchParams.set('page',page);
-    url.searchParams.set('per_page',$('[data-pos-page-size]').value); url.searchParams.set('id_moneda',$('[name=id_moneda]').value);
+    url.searchParams.set('id_moneda',$('[name=id_moneda]').value);
     if (warehouse) url.searchParams.set('almacen',warehouse);
     if (services) url.searchParams.set('tipo','servicio');
     $('[data-pos-status]').textContent = 'Buscando productos…'; $('[data-pos-products]').setAttribute('aria-busy','true');
@@ -194,9 +195,9 @@
   }));
   $('[data-pos-prev]').addEventListener('click',()=>{if(page>1){page--;loadItems();}});
   $('[data-pos-next]').addEventListener('click',()=>{if(page<lastPage){page++;loadItems();}});
-  $('[data-pos-page-size]').addEventListener('change',resetPage);
+
   function clearClient() {
-    clientRevision++; selectedClient=null;pendingClient=false;clientController?.abort();clearTimeout(clientTimer);
+    $('[name=usar_saldo]').checked = false; clientRevision++; selectedClient=null;pendingClient=false;clientController?.abort();clearTimeout(clientTimer);
     $('[name=id_cliente]').value='';$('[data-pos-client-card]').hidden=true;
     $('[data-pos-client-results]').replaceChildren();$('[data-pos-client-search]').value='';
     $('[data-pos-client-search]').setAttribute('aria-expanded','false');
@@ -214,6 +215,11 @@
       $('[data-pos-client-card]').hidden=false;$('[data-client-name]').textContent=data.nombre_cliente;
       $('[data-client-document]').textContent=data.documento_identidad ? `DNI / documento: ${data.documento_identidad}` : 'Sin documento registrado';
       $('[data-client-sales]').textContent=data.ventas_completadas;
+      const toast = document.querySelector('[data-client-notice]');
+      toast.textContent = data.nombre_cliente + ' · A favor: ' + data.moneda_codigo + ' ' + data.saldo_disponible + ' · Por pagar: ' + data.moneda_codigo + ' ' + data.deuda_pendiente;
+      toast.hidden = false;
+      clearTimeout(toast.hideTimer); toast.hideTimer = setTimeout(() => toast.hidden = true, 7000);
+      $('[name=usar_saldo]').checked = Number(data.saldo_disponible) > 0;
       $('[data-client-credit]').textContent=`${data.moneda_codigo} ${data.saldo_disponible}`;
       const stamps=Math.max(0,Math.min(11,Number(data.sellos)));
       $('[data-client-stamps]').textContent=`${stamps} / 12 sellos`;
@@ -261,8 +267,8 @@
   form.addEventListener('submit',event=>{
     const method = $('[name=metodo_pago]')?.value || 'efectivo';
     const amount = toNumber($('[name=monto_recibido]')?.value || 0);
-    const total = toNumber($('[name=accepted_total]').value || 0);
-    if(!cart.length || pendingClient || !total){event.preventDefault();$('[data-pos-quote-status]').textContent='Espera el cálculo del total antes de finalizar.';return;}
+    const total = due;
+    if(!cart.length || pendingClient || !$('[name=accepted_total]').value){event.preventDefault();$('[data-pos-quote-status]').textContent='Espera el cálculo del total antes de finalizar.';return;}
     if((method === 'efectivo' || method === 'mixto') && amount < total){
       event.preventDefault();
       $('[data-pos-quote-status]').textContent = 'Ingresa el monto recibido para poder finalizar la venta en efectivo.';
@@ -270,5 +276,12 @@
     }
   });
   syncPaymentState();
-  loadItems();
+  const firstPage = $('[data-pos-page]');
+  lastPage = Number(firstPage.dataset.lastPage);
+  currency = firstPage.dataset.currency;
+  $('[data-pos-prev]').disabled = true;
+  $('[data-pos-next]').disabled = lastPage <= 1;
+  form.querySelectorAll('[data-first-item]').forEach(control => {
+    control.addEventListener('click', () => add(JSON.parse(control.dataset.firstItem)));
+  });
 })();

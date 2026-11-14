@@ -41,14 +41,8 @@ final class BackOfficeQueries
         return $products->where('activo', ($filters['estado'] ?? '') !== 'inactivos')
             ->when($filters['q'] ?? '', fn ($query, $term) => $query->where(fn ($q) => $q->where('nombre', 'like', '%'.$term.'%')->orWhere('descripcion', 'like', '%'.$term.'%')->orWhere('codigo_barra', 'like', '%'.$term.'%')))
             ->when($filters['id_categoria'] ?? null, fn ($query, $id) => $query->where('id_categoria', $id))
-            ->when($filters['bajo'] ?? false, function ($query) use ($warehouseId): void {
-                if ($warehouseId) {
-                    $query->whereRaw('(SELECT COALESCE(SUM(existencias.stock), 0) FROM existencias WHERE existencias.id_producto = productos.id_producto AND existencias.id_almacen = ?) <= productos.stock_minimo', [$warehouseId]);
-                } else {
-                    $query->whereRaw('(SELECT COALESCE(SUM(existencias.stock), 0) FROM existencias WHERE existencias.id_producto = productos.id_producto) <= productos.stock_minimo');
-                }
-            })
-            ->orderBy($sortColumn, $direction)->paginate(24)->withQueryString();
+            ->when($filters['bajo'] ?? false, fn ($query) => $query->lowStock($warehouseId))
+            ->orderBy($sortColumn, $direction)->paginate(config('business.pagination'))->withQueryString();
     }
 
     public function productStats(?int $warehouseId = null): array
@@ -91,7 +85,7 @@ final class BackOfficeQueries
             ->when($filters['usuario'] ?? null, fn ($query, $name) => $query->whereHas('usuario', fn ($q) => $q->where('nombre_completo', 'like', '%'.$name.'%')))
             ->when($filters['id_moneda'] ?? null, fn ($query, $id) => $query->where('id_moneda', $id))
             ->when($filters['metodo_pago'] ?? null, fn ($query, $method) => $query->where('metodo_pago', $method))
-            ->when($filters['estado'] ?? null, fn ($query, $state) => $query->where('estado', $state))->orderByDesc('id_venta')->paginate(30)->withQueryString();
+            ->when($filters['estado'] ?? null, fn ($query, $state) => $query->where('estado', $state))->orderByDesc('id_venta')->paginate(config('business.pagination'))->withQueryString();
     }
 
     public function sale(int $id): Venta
@@ -101,27 +95,27 @@ final class BackOfficeQueries
 
     public function purchases(): mixed
     {
-        return Compra::query()->with(['proveedor', 'almacen', 'detalles.producto'])->orderByDesc('id_compra')->paginate(30);
+        return Compra::query()->with(['proveedor', 'almacen', 'detalles.producto'])->orderByDesc('id_compra')->paginate(config('business.pagination'));
     }
 
     public function transfers(): mixed
     {
         return DB::table('transferencias')->join('almacenes as o', 'o.id', '=', 'transferencias.origen')->join('almacenes as d', 'd.id', '=', 'transferencias.destino')
-            ->select('transferencias.*', 'o.nombre as origen_nombre', 'd.nombre as destino_nombre')->orderByDesc('transferencias.id')->paginate(30);
+            ->select('transferencias.*', 'o.nombre as origen_nombre', 'd.nombre as destino_nombre')->orderByDesc('transferencias.id')->paginate(config('business.pagination'));
     }
 
-    public function cash(int $user): array
+    public function cash(int $user, bool $history = true): array
     {
-        $active = TurnoCaja::query()->where(['id_usuario' => $user, 'estado' => 'abierto'])->with(['movimientos', 'ventas'])->first();
+        $active = TurnoCaja::query()->where(['id_usuario' => $user, 'estado' => 'abierto'])->with('ventas')->first();
 
-        return ['active' => $active, 'turns' => TurnoCaja::query()->where('id_usuario', $user)->orderByDesc('id_turno')->paginate(30),
+        return ['active' => $active, 'movements' => ! $history ? null : $active?->movimientos()->orderByDesc('fecha')->paginate(config('business.pagination'), ['*'], 'movimientos')->withQueryString(), 'turns' => ! $history ? null : TurnoCaja::query()->where('id_usuario', $user)->orderByDesc('id_turno')->paginate(config('business.pagination')),
             'backupStatus' => DB::table('auditoria_operaciones')->where('id_usuario', $user)->whereIn('accion', ['backup_fallido', 'backup_cierre'])->orderByDesc('id')->first()];
     }
 
     public function ledger(int $id): array
     {
-        return ['product' => DB::table('productos')->where('id_producto', $id)->firstOrFail(),
+        return ['product' => Producto::with(['categoria', 'almacen'])->findOrFail($id),
             'stocks' => DB::table('existencias')->join('almacenes', 'existencias.id_almacen', '=', 'almacenes.id')->where('id_producto', $id)->get(['existencias.*', 'almacenes.nombre']),
-            'movements' => DB::table('movimientos_inventario')->where('id_producto', $id)->orderByDesc('id_movimiento')->paginate(50)];
+            'movements' => DB::table('movimientos_inventario')->where('id_producto', $id)->orderByDesc('id_movimiento')->paginate(config('business.pagination'))];
     }
 }

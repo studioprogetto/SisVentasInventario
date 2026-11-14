@@ -14,7 +14,7 @@ final class ExchangeRateController extends Controller
 {
     public function index(): mixed
     {
-        return view('currency.rates', ['rates' => TipoCambio::query()->with('moneda')->orderByDesc('fecha')->paginate(30), 'currencies' => TipoMoneda::query()->where('activo', 1)->get()]);
+        return view('currency.rates', ['rates' => TipoCambio::query()->with('moneda')->orderByDesc('fecha')->paginate(config('business.pagination')), 'currencies' => TipoMoneda::query()->where('activo', 1)->get()]);
     }
 
     public function save(Request $request, ExchangeRateWriter $rates): mixed

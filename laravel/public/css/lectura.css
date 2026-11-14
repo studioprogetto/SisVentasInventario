@@ -1,0 +1,20 @@
+html { font-family:system-ui,"Segoe UI",Arial,sans-serif; font-size:100%; }
+body.admin-app,body.admin-app #content,body.admin-app #content :is(section,article,input,textarea,select,button,table,p,label,small,strong,span,th,td,h1,h2,h3,.ticket-brand) {font-family:system-ui,"Segoe UI",Arial,sans-serif;letter-spacing:normal;}
+body.admin-app {font-size:1rem;line-height:1.55;}
+body.admin-app .sidebar .nav-link,body.admin-app #content :is(td,input,textarea,select,button,.btn,p,label) {font-size:.96rem;line-height:1.5;}
+body.admin-app #content :is(small,th,.eyebrow,.data-note,.pos-results-status),body.admin-app .topbar :is(.breadcrumb,.user-meta strong,.user-meta small),body.admin-app .nav-group {font-size:.84rem;line-height:1.45;}
+body.admin-app #content :is(h2,.pos-product h3){font-size:1.15rem;line-height:1.35;}
+body.admin-app #content :is(.inventory-table,.cat-table,.sales-table) :is(td,th){font-size:.94rem;}
+body.admin-app #content .ticket-paper {color-scheme:light;--bg:white;--surface:white;--raised:white;--text:#17202b;--muted:#364457;--line:#ccd1d7;background:white;color:var(--text);}
+body.admin-app #content .ticket-paper .ticket-table :is(tr,td,th){background:white;color:#17202b;}
+body.admin-app #content .ticket-paper :is(.ticket-meta,.ticket-method,.ticket-hours,.ticket-footer p,.ticket-brand p){font-size:.91rem;line-height:1.5;}
+.client-notice {position:fixed;top:1rem;right:1rem;max-width:min(26rem,90vw);z-index:120;padding:1rem;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:14px;background:var(--raised);color:var(--text);box-shadow:var(--shadow);animation:notice-in .28s ease-out;}
+@keyframes notice-in {from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.client-notice{animation:none}}
+@media print {
+    html:has(.ticket-paper),body.admin-app:has(.ticket-paper),body.admin-app:has(.ticket-paper) :is(.workspace,#content,.ticket-shell,.ticket-paper){background:white!important;color:black!important;box-shadow:none!important;margin:0!important;padding:0!important;border:0!important;overflow:visible!important;}
+    body:has(.ticket-paper) :is(.return-panel,.ticket-actions,.workspace-footer,.skip-link,.birthday-banner,.sale-toast,.nav-backdrop,.topbar,.sidebar,.notice){display:none!important;}
+    body.admin-app #content .ticket-paper {width:100%;max-width:80mm;margin:auto!important;}
+    body.admin-app #content .ticket-paper table {display:table!important;min-width:0!important;width:100%;}
+    body.admin-app #content .ticket-table td,body.admin-app #content .ticket-table th {padding:3px;font-size:10pt;}
+}

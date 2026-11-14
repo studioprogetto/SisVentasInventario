@@ -1,0 +1,56 @@
+/* Shared back-office tables, controls and forms. */
+.admin-app .topbar .neo-search label {
+    display:flex; flex-flow:row nowrap; align-items:center; gap:.6rem;
+    height:38px; padding:0 .85rem; margin:0; border-radius:12px;
+}
+.admin-app .topbar .neo-search input {
+    flex:1; width:0; min-height:0; height:34px; padding:0; background:transparent; box-shadow:none;
+}
+.admin-app .topbar .neo-search .icon { width:17px; height:17px; }
+body.admin-app #content :is(.table-wrap,.inventory-table-wrap,.cat-table-scroll,.executive-scroll) {
+    max-width:100%; min-width:0; overflow-x:auto; background:var(--surface); border-radius:16px;
+}
+body.admin-app #content table {
+    display:table; width:100%; border-collapse:collapse; font-size:.82rem; color:var(--text); background:var(--surface);
+}
+body.admin-app #content table caption { padding:.8rem 1rem; text-align:start; font-weight:650; color:var(--text); background:var(--surface); }
+body.admin-app #content table thead { display:table-header-group; }
+body.admin-app #content table tbody { display:table-row-group; }
+body.admin-app #content table tr { display:table-row; }
+body.admin-app #content table :is(td,th) {
+    display:table-cell; width:auto; border:0; border-bottom:1px solid var(--line);
+    padding:.75rem .9rem; text-align:start; vertical-align:middle; font-variant-numeric:tabular-nums;
+}
+body.admin-app #content table th {
+    font-size:.71rem; letter-spacing:.04em; text-transform:uppercase; background:var(--raised); color:var(--text);
+}
+body.admin-app #content tbody tr, body.admin-app #content tbody td { background:var(--surface); color:var(--text); }
+body.admin-app #content tbody tr:nth-child(even) td { background:color-mix(in srgb,var(--raised) 55%,var(--surface)); }
+body.admin-app #content tbody tr:hover td { background:var(--raised); }
+.payment-badge { display:inline-block; padding:.23rem .58rem; border-radius:.5rem; font-weight:650; background:var(--accent-soft); color:var(--text); }
+.payment-badge[data-payment=yape] { background:#693ab4; color:white; }
+.payment-badge[data-payment=efectivo] { background:#107342; color:white; }
+.payment-badge[data-payment=plin] { background:#97e7b8; color:#10462a; }
+.payment-badge:is([data-payment=agora],[data-payment=sip],[data-payment="sip/agora"]) { background:#007a9e; color:white; }
+body.admin-app #content dialog.create-dialog {
+    width:min(620px,calc(100% - 2rem)); max-height:85dvh; margin:auto; overflow:auto;
+    padding:clamp(1rem,3vw,1.6rem); border:1px solid var(--line); border-radius:22px;
+    background:var(--surface); color:var(--text); box-shadow:0 18px 70px #101c3260;
+}
+.create-dialog::backdrop { background:#0c182bb0; }
+.create-dialog > header { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
+.create-dialog > header h2 { margin:0; }
+.create-dialog form { min-width:0; }
+.create-dialog fieldset { min-width:0; }
+@media(max-width:640px) {
+    .create-dialog .form-grid { grid-template-columns:1fr; }
+    body.admin-app #content table :is(th,td) { padding:.65rem .75rem; }
+    .admin-app .filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr)); }
+}
+.ledger-profile { display:grid; grid-template-columns:minmax(130px,25%) 1fr; gap:2rem; padding:clamp(1rem,3vw,2rem); align-items:center; }
+.ledger-profile img { width:100%; max-height:250px; object-fit:contain; border-radius:16px; }
+.ledger-profile h1 { margin:.35rem 0; }
+.ledger-profile dl { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1rem; }
+.ledger-profile dt { font-size:.75rem; color:var(--muted); }
+.ledger-profile dd { margin:0; font-weight:600; }
+@media(max-width:600px){.ledger-profile { grid-template-columns:1fr; }.ledger-profile img { height:150px; }}

@@ -29,19 +29,25 @@ final class OperationRequest extends FormRequest
         $products = ['productos' => ['required', 'array', 'min:1', 'max:200'], 'productos.*.id_producto' => ['required', 'integer', 'distinct', 'exists:productos,id_producto'], 'productos.*.cantidad' => ['required', 'integer', 'min:1', 'max:100000']];
         $return = ['id_venta_original' => ['required', 'integer', 'exists:ventas,id_venta'], 'productos' => ['required', 'array', 'min:1', 'max:200'],
             'productos.*.id_detalle_venta' => ['required', 'integer', 'distinct'], 'productos.*.cantidad' => ['required', 'integer', 'min:1', 'max:100000'], 'observacion' => ['required', 'string', 'max:255']];
-        $return['destino'] = ['sometimes', Rule::in(['saldo', 'efectivo'])];
+        $return['destino'] = ['sometimes', Rule::in(['saldo', 'cambio'])];
 
+        $return += [
+            'id_cliente' => ['nullable','integer','exists:clientes,id_cliente'],
+            'condicion' => ['sometimes', Rule::in(['defectuoso','conforme'])],
+            'reemplazo' => ['required_if:destino,cambio','nullable','integer','exists:productos,id_producto'],
+            'metodo_pago' => ['sometimes',Rule::in(config('business.payment_methods'))],
+        ];
         return match ($this->route()->getName()) {
             'sales.store' => $key + $sale,
             'sales.quote' => $sale,
-            'sales.return' => $key + $return,
+            'returns.request', 'sales.return' => $key + $return,
             'sales.exchange' => $key + $return + $sale,
             'purchases.store' => $key + $products + ['id_proveedor' => ['required', 'integer', 'exists:proveedores,id_proveedor'], 'id_almacen' => ['required', 'integer', 'exists:almacenes,id'], 'id_moneda' => ['nullable', 'integer', 'exists:tipo_moneda,id'], 'productos.*.costo_unitario' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999']],
             'transfers.store' => $key + $products + ['origen' => ['required', 'integer', 'exists:almacenes,id'], 'destino' => ['required', 'integer', 'different:origen', 'exists:almacenes,id']],
             'transfers.transition' => ['estado' => ['required', Rule::in(['enviada', 'recibida', 'cancelada'])]],
             'inventory.adjust' => $key + ['id_producto' => ['required', 'integer', 'exists:productos,id_producto'], 'id_almacen' => ['required', 'integer', 'exists:almacenes,id'], 'delta' => ['required', 'integer', 'not_in:0', 'between:-100000,100000'], 'motivo' => ['required', 'string', 'min:5', 'max:255']],
-            'cash.open' => $key + ['monto_inicial' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999']],
-            'cash.close' => $key + ['monto_final_real' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999'], 'confirmar_legacy' => ['sometimes', 'accepted']],
+            'cash.open' => $key + ['observacion'=>['nullable','string','max:255'],'monto_inicial' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999']],
+            'cash.close' => $key + ['observacion'=>['nullable','string','max:255'],'monto_final_real' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999'], 'confirmar_legacy' => ['sometimes', 'accepted']],
             'cash.movement' => $key + ['monto' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:99999999'], 'tipo_movimiento' => ['required', Rule::in(['ingreso', 'egreso'])], 'descripcion' => ['required', 'string', 'min:3', 'max:255']],
             default => [],
         };

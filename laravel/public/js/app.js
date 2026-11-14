@@ -85,7 +85,7 @@
       }
     }
 
-    if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+    if (event.key === 'Escape' && mobile.matches && toggle?.getAttribute('aria-expanded') === 'true') {
       closeMobileNav();
       toggle.focus();
     }
@@ -130,9 +130,9 @@
   };
   document.querySelectorAll('[data-print-ticket], [data-print]').forEach(button => button.addEventListener('click', printTicket));
   document.querySelectorAll('[data-save-pdf]').forEach(button => button.addEventListener('click', saveTicketAsPdf));
-  document.querySelectorAll('form[data-confirm]').forEach(form => form.addEventListener('submit', event => {
-    if (!window.confirm(form.dataset.confirm)) event.preventDefault();
-  }));
+  document.addEventListener('submit', event => {
+    if (event.target.matches('form[data-confirm]') && !window.confirm(event.target.dataset.confirm)) event.preventDefault();
+  });
   const timers = new WeakMap();
   const invalidate=form=>{if(form?.matches('[data-pos]'))return;const button=form?.querySelector('[data-confirm-sale]');if(button){button.disabled=true;form.dataset.revision=String(Number(form.dataset.revision||0)+1);form.querySelector('[name=accepted_total]').value='';}};
   document.addEventListener('input',event=>invalidate(event.target.form));

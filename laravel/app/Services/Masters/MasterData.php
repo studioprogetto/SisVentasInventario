@@ -25,6 +25,7 @@ final class MasterData
     {
         $definition = $this->definition($module);
 
+        if (auth()->user()?->isMultifunctional()) return $definition['permission'].'_'.$action;
         return $definition['all_permission'] ?? $definition['permission'].'_'.$action;
     }
 

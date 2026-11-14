@@ -55,10 +55,10 @@ final class SaleCheckout
             $change = null;
             if (in_array((string) ($data['metodo_pago'] ?? ''), ['efectivo', 'mixto'], true) && array_key_exists('monto_recibido', $data)) {
                 $received = Money::cents((string) $data['monto_recibido']);
-                if ($received < $total) {
+                if ($received < $total - $usedCredit) {
                     throw ValidationException::withMessages(['monto_recibido' => 'El monto recibido debe cubrir el total de la venta.']);
                 }
-                $change = $received - $total;
+                $change = $received - ($total - $usedCredit);
             }
             $saleData = $quote + ['id_cliente' => $client?->id_cliente, 'id_usuario' => $user, 'id_turno' => $turn->id_turno,
                 'total_venta' => Money::decimal($total), 'total_base' => bcadd(bcmul(Money::decimal($total), $quote['tipo_cambio_aplicado'], 4), '0.005', 2),
@@ -93,7 +93,7 @@ final class SaleCheckout
 
     private function consumeCredit(int $client, int $currency, int $amount, bool $partial = false): int
     {
-        $credits = DB::table('saldos_clientes')->where(['id_cliente' => $client, 'id_moneda' => $currency, 'estado' => 'pendiente'])->orderBy('id_saldo')->lockForUpdate()->get();
+        $credits = DB::table('saldos_clientes')->where(['id_cliente' => $client, 'id_moneda' => $currency, 'estado' => 'pendiente'])->where('saldo','>',0)->orderBy('id_saldo')->lockForUpdate()->get();
         $available = $credits->sum(fn ($row) => Money::cents($row->saldo));
         if ($available < $amount && ! $partial) {
             throw ValidationException::withMessages(['saldo' => 'Saldo insuficiente en la moneda seleccionada.']);
