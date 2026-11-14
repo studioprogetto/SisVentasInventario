@@ -25,10 +25,10 @@ final class PosQuery
             ->join('almacenes as a', 'a.id', '=', 'e.id_almacen')->where('p.activo', 1)->where('a.activo', 1)
             ->when($term !== '', fn ($q) => $q->where(fn ($q) => $q->where('p.nombre', 'like', '%'.$term.'%')->orWhere('p.codigo_barra', $term)))
             ->when($filters['almacen'] ?? null, fn ($q, $id) => $q->where('a.id', $id))
-            ->selectRaw("p.id_producto as id, p.nombre, p.precio_venta, e.stock, a.id as id_almacen, a.nombre as almacen, 'producto' as tipo, CASE WHEN p.stock=(SELECT SUM(x.stock) FROM existencias x WHERE x.id_producto=p.id_producto) THEN 1 ELSE 0 END as stock_consistente");
+            ->selectRaw("p.id_producto as id, p.nombre, p.precio_venta, e.stock, a.id as id_almacen, a.nombre as almacen, 'producto' as tipo");
         $services = DB::table('servicios')->where('activo', 1)
             ->when($term !== '', fn ($q) => $q->where('nombre', 'like', '%'.$term.'%'))
-            ->selectRaw("id_servicio as id, nombre, precio_venta, NULL as stock, NULL as id_almacen, 'Servicio' as almacen, 'servicio' as tipo, 1 as stock_consistente");
+            ->selectRaw("id_servicio as id, nombre, precio_venta, NULL as stock, NULL as id_almacen, 'Servicio' as almacen, 'servicio' as tipo");
         $query = match ($filters['tipo'] ?? '') {
             'servicio' => $services,
             'producto' => $products,
@@ -39,7 +39,7 @@ final class PosQuery
         $rows = $page->getCollection()->map(function ($row) use ($quote): array {
             $price = bcadd(bcdiv((string) $row->precio_venta, $quote['tipo_cambio_aplicado'], 4), '0.005', 2);
 
-            return ['id' => (int) $row->id, 'nombre' => $row->nombre, 'tipo' => $row->tipo, 'precio_venta' => $price, 'stock_consistente' => (bool) $row->stock_consistente,
+            return ['id' => (int) $row->id, 'nombre' => $row->nombre, 'tipo' => $row->tipo, 'precio_venta' => $price,
                 'stock' => $row->stock === null ? null : (int) $row->stock, 'id_almacen' => $row->id_almacen === null ? null : (int) $row->id_almacen,
                 'almacen' => $row->almacen, 'imagen' => $row->tipo === 'producto' ? route('pos.image', $row->id) : null];
         });

@@ -26,26 +26,26 @@ final class BackOfficeQueries
 
     public function products(array $filters): mixed
     {
-        $sorts = ['nombre' => 'nombre', 'precio_asc' => 'precio_venta', 'precio_desc' => 'precio_venta', 'stock_asc' => 'stock', 'stock_desc' => 'stock'];
+        $sorts = ['nombre' => 'nombre', 'precio_asc' => 'precio_venta', 'precio_desc' => 'precio_venta'];
         $sort = $filters['orden'] ?? 'nombre';
         $direction = in_array($sort, ['precio_desc', 'stock_desc'], true) ? 'desc' : 'asc';
 
         $warehouseId = isset($filters['id_almacen']) ? (int) $filters['id_almacen'] : null;
-        $stockSum = ['existencias as stock_scope_sum'];
+        $sortColumn = in_array($sort, ['stock_asc', 'stock_desc'], true) ? ($warehouseId ? 'stock_scope_sum' : 'stock_total') : ($sorts[$sort] ?? 'nombre');
+
+        $products = Producto::query()->with(['categoria', 'almacen'])->withSum('existencias as stock_total', 'stock');
         if ($warehouseId) {
-            $stockSum['existencias as stock_scope_sum'] = fn ($query) => $query->where('id_almacen', $warehouseId);
+            $products->withSum(['existencias as stock_scope_sum' => fn ($query) => $query->where('id_almacen', $warehouseId)], 'stock');
         }
 
-        $sortColumn = in_array($sort, ['stock_asc', 'stock_desc'], true) && $warehouseId ? 'stock_scope_sum' : ($sorts[$sort] ?? 'nombre');
-
-        return Producto::query()->with(['categoria', 'almacen'])->withSum($stockSum, 'stock')->where('activo', ($filters['estado'] ?? '') !== 'inactivos')
+        return $products->where('activo', ($filters['estado'] ?? '') !== 'inactivos')
             ->when($filters['q'] ?? '', fn ($query, $term) => $query->where(fn ($q) => $q->where('nombre', 'like', '%'.$term.'%')->orWhere('descripcion', 'like', '%'.$term.'%')->orWhere('codigo_barra', 'like', '%'.$term.'%')))
             ->when($filters['id_categoria'] ?? null, fn ($query, $id) => $query->where('id_categoria', $id))
             ->when($filters['bajo'] ?? false, function ($query) use ($warehouseId): void {
                 if ($warehouseId) {
                     $query->whereRaw('(SELECT COALESCE(SUM(existencias.stock), 0) FROM existencias WHERE existencias.id_producto = productos.id_producto AND existencias.id_almacen = ?) <= productos.stock_minimo', [$warehouseId]);
                 } else {
-                    $query->whereColumn('stock', '<=', 'stock_minimo');
+                    $query->whereRaw('(SELECT COALESCE(SUM(existencias.stock), 0) FROM existencias WHERE existencias.id_producto = productos.id_producto) <= productos.stock_minimo');
                 }
             })
             ->orderBy($sortColumn, $direction)->paginate(24)->withQueryString();

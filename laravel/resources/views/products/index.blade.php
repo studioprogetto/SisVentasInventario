@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/products-index.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/products-index.css') }}?v=2">
 @endpush
 
 @section('title', 'Inventario — '.config('business.name'))
@@ -20,12 +20,14 @@
             <p>Consulta productos, disponibilidad y alertas de reposición.</p>
         </div>
         <div class="inventory-heading-actions">
+            <a class="inventory-button inventory-button-soft" href="{{ route('reports.show', 'inventario') }}?formato=xlsx">Excel</a>
+            <a class="inventory-button inventory-button-soft" href="{{ route('reports.show', 'inventario') }}?formato=pdf">PDF</a>
             <a class="inventory-button inventory-button-soft" href="{{ route('products.index', ['estado' => $activeState === 'activos' ? 'inactivos' : 'activos']) }}">
                 <x-icon name="box"/>
                 {{ $activeState === 'activos' ? 'Ver inactivos' : 'Ver activos' }}
             </a>
             @can('productos_crear')
-                <a class="inventory-button inventory-button-primary" href="#new-product-form"><span aria-hidden="true">＋</span> Nuevo producto</a>
+                <button class="inventory-button inventory-button-primary" type="button" data-open-product-modal="new-product-modal"><span aria-hidden="true">＋</span> Nuevo producto</button>
             @endcan
         </div>
     </header>
@@ -87,14 +89,14 @@
         <p>Mostrando <strong>{{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }}</strong> de <strong>{{ $products->total() }}</strong> productos</p>
         <div class="inventory-view-controls" role="group" aria-label="Tipo de vista">
             <button type="button" class="is-active" data-inventory-view="grid" aria-pressed="true"><span aria-hidden="true">▦</span> Tarjetas</button>
-            <button type="button" data-inventory-view="table" aria-pressed="false"><span aria-hidden="true">☷</span> Tabla</button>
+            <button type="button" data-inventory-view="table" aria-pressed="false"><span aria-hidden="true">▤</span> Tabla</button>
         </div>
     </div>
 
     <div class="inventory-product-grid" data-products-grid>
         @forelse($products as $product)
             @php
-                $stock = $warehouseFilter ? (int) ($product->stock_scope_sum ?? 0) : (int) $product->stock;
+                $stock = $warehouseFilter ? (int) ($product->stock_scope_sum ?? 0) : (int) ($product->stock_total ?? 0);
                 $isLow = $stock <= (int) $product->stock_minimo;
                 $stockPercent = $product->stock_minimo > 0 ? min(100, (int) round($stock / ($product->stock_minimo * 2) * 100)) : ($stock > 0 ? 100 : 0);
                 $imageUrl = route('products.image', $product->id_producto);
@@ -121,7 +123,7 @@
                 <footer class="inventory-card-actions">
                     @can('productos_ver_detalle')<a href="{{ route('products.ledger', $product->id_producto) }}" class="inventory-action-link">Kardex / almacenes</a>@endcan
                     <a href="{{ route('products.labels', ['ids' => [$product->id_producto]]) }}" class="inventory-action-link" target="_blank" rel="noopener">Etiqueta</a>
-                    @can('productos_editar')<details class="inventory-edit-details"><summary>Editar</summary><div class="inventory-edit-popover"><h3>Editar producto</h3><form method="POST" action="{{ route('products.update', $product->id_producto) }}" enctype="multipart/form-data">@csrf @method('PUT') @include('products.form', ['product' => $product])</form></div></details>@endcan
+                    @can('productos_editar')<button type="button" class="inventory-action-link" data-open-product-modal="product-modal-{{ $product->id_producto }}">Editar</button>@endcan
                     @can('productos_cambiar_estado')<form method="POST" action="{{ route('products.state', $product->id_producto) }}" data-confirm="¿{{ $product->activo ? 'Desactivar' : 'Activar' }} este producto?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $product->activo ? 0 : 1 }}"><button class="inventory-action-link {{ $product->activo ? 'is-danger' : 'is-success' }}" type="submit">{{ $product->activo ? 'Desactivar' : 'Activar' }}</button></form>@endcan
                 </footer>
             </article>
@@ -135,7 +137,7 @@
             <thead><tr><th>Producto</th><th>Categoría</th><th>Almacén</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
             @forelse($products as $product)
-                @php $stock = $warehouseFilter ? (int) ($product->stock_scope_sum ?? 0) : (int) $product->stock; $isLow = $stock <= (int) $product->stock_minimo; @endphp
+                @php $stock = $warehouseFilter ? (int) ($product->stock_scope_sum ?? 0) : (int) ($product->stock_total ?? 0); $isLow = $stock <= (int) $product->stock_minimo; @endphp
                 <tr>
                     <td><div class="inventory-table-product"><img src="{{ route('products.image', $product->id_producto) }}" alt="" loading="lazy"><span><strong>{{ $product->nombre }}</strong><small>{{ $product->codigo_barra ?: 'Sin código' }}</small></span></div></td>
                     <td>{{ $product->categoria?->nombre ?? 'Sin categoría' }}</td><td>{{ $product->almacen?->nombre ?? 'No asignado' }}</td><td>{{ $money($product->precio_venta) }}</td>
@@ -144,7 +146,7 @@
                     <td class="inventory-table-actions">
                         @can('productos_ver_detalle')<a href="{{ route('products.ledger', $product->id_producto) }}">Kardex</a>@endcan
                         <a href="{{ route('products.labels', ['ids' => [$product->id_producto]]) }}" target="_blank" rel="noopener">Etiqueta</a>
-                        @can('productos_editar')<details class="inventory-edit-details"><summary>Editar</summary><div class="inventory-edit-popover"><form method="POST" action="{{ route('products.update', $product->id_producto) }}" enctype="multipart/form-data">@csrf @method('PUT') @include('products.form', ['product' => $product])</form></div></details>@endcan
+                        @can('productos_editar')<button type="button" class="inventory-action-link" data-open-product-modal="product-modal-{{ $product->id_producto }}">Editar</button>@endcan
                         @can('productos_cambiar_estado')<form method="POST" action="{{ route('products.state', $product->id_producto) }}" data-confirm="¿Cambiar el estado del producto?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $product->activo ? 0 : 1 }}"><button type="submit">{{ $product->activo ? 'Desactivar' : 'Activar' }}</button></form>@endcan
                     </td>
                 </tr>
@@ -152,22 +154,23 @@
             </tbody>
         </table>
     </div>
-    <nav class="inventory-pagination" aria-label="Paginación del inventario">{{ $products->links() }}</nav>
+    <nav class="inventory-pagination" aria-label="Paginación del inventario">{{ $products->links('vendor.pagination.tailwind') }}</nav>
 
     @can('productos_crear')
-        <section id="new-product-form" class="inventory-create-panel">
-            <details>
-                <summary><span><strong>Registrar producto</strong><small>Agrega un producto al inventario con su categoría, precios y stock inicial.</small></span><span class="inventory-create-plus" aria-hidden="true">＋</span></summary>
-                <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data" class="inventory-create-form">
-                    @csrf
-                    @include('products.form', ['product' => null])
-                </form>
-            </details>
-        </section>
+        <dialog class="product-modal" id="new-product-modal" aria-labelledby="new-product-title">
+            <div class="product-modal__surface"><button type="button" class="product-modal__close" data-close-product-modal aria-label="Cerrar formulario">×</button><div class="product-modal__heading"><span class="product-modal__eyebrow">Nuevo registro</span><h2 id="new-product-title">Crear producto</h2><p>Completa la información comercial, de inventario e imagen.</p></div><form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data" class="product-modal__form">@csrf @include('products.form', ['product' => null])</form></div>
+        </dialog>
     @endcan
+    @foreach($products as $product)
+        @can('productos_editar')
+            <dialog class="product-modal" id="product-modal-{{ $product->id_producto }}" aria-labelledby="product-title-{{ $product->id_producto }}">
+                <div class="product-modal__surface"><button type="button" class="product-modal__close" data-close-product-modal aria-label="Cerrar formulario">×</button><div class="product-modal__heading"><span class="product-modal__eyebrow">Edición de inventario</span><h2 id="product-title-{{ $product->id_producto }}">Editar producto</h2><p>Actualiza los datos del producto y guarda los cambios.</p></div><form method="POST" action="{{ route('products.update', $product->id_producto) }}" enctype="multipart/form-data" class="product-modal__form">@csrf @method('PUT') @include('products.form', ['product' => $product])</form></div>
+            </dialog>
+        @endcan
+    @endforeach
 </section>
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/products-index.js') }}?v=1" defer></script>
+<script src="{{ asset('js/products-index.js') }}?v=2" defer></script>
 @endpush

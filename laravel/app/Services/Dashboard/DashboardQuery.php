@@ -52,10 +52,13 @@ final class DashboardQuery
             ->limit(5)
             ->get();
 
-        $warehouseStocks = DB::table('productos as p')
-            ->select('p.id_almacen as almacen', DB::raw('COALESCE(SUM(p.stock), 0) as stock_total'))
+        $warehouseStocks = DB::table('existencias as e')
+            ->join('productos as p', 'p.id_producto', '=', 'e.id_producto')
+            ->join('almacenes as a', 'a.id', '=', 'e.id_almacen')
+            ->select('a.nombre as almacen', DB::raw('COALESCE(SUM(e.stock), 0) as stock_total'))
             ->where('p.activo', true)
-            ->groupBy('p.id_almacen')
+            ->where('a.activo', true)
+            ->groupBy('a.id', 'a.nombre')
             ->orderByDesc('stock_total')
             ->get();
 

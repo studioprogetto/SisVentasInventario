@@ -7,31 +7,36 @@
 @push('styles')
 <style>
     .ticket-shell{display:flex;justify-content:center;padding:18px 0 32px}
-    .ticket-paper{width:min(100%, 440px);background:#fff;border:1px solid #d7dfe9;border-radius:16px;box-shadow:0 25px 60px rgba(17,24,39,.12);padding:18px 16px 12px}
+    .ticket-paper{width:min(100%, 440px);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 25px 60px rgba(17,24,39,.12);padding:18px 16px 12px}
     .ticket-logo{display:flex;justify-content:center;margin:6px auto 12px;width:100%}
-    .ticket-logo-mark{width:64px;height:64px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:#f5f7fb;border:1px solid #dfe7f1;box-shadow:0 12px 26px rgba(15,23,42,.08)}
+    .ticket-logo-mark{width:64px;height:64px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:var(--raised);border:1px solid var(--line);box-shadow:0 12px 26px rgba(15,23,42,.08)}
     .ticket-logo-mark img{display:block;width:100%;height:100%;object-fit:contain;padding:8px;background:#fff}
-    .ticket-brand{text-align:center;margin-bottom:10px;font-family:Georgia,'Times New Roman',serif}
-    .ticket-brand h2{font-size:1.12rem;margin:0 0 4px;color:#1f2937;letter-spacing:.02em}
-    .ticket-brand p{margin:2px 0;color:#575d6d;font-size:.72rem}
+    .ticket-brand{text-align:center;margin-bottom:10px;font-family:'Poppins','Segoe UI',sans-serif}
+    .ticket-brand h2{font-size:1.12rem;margin:0 0 4px;color:var(--text);letter-spacing:.02em}
+    .ticket-brand p{margin:2px 0;color:var(--muted);font-size:.72rem}
     .ticket-divider{border-top:1px dashed #aab4bf;margin:10px 0 12px}
-    .ticket-meta{text-align:center;line-height:1.6;color:#1f2937;font-size:.74rem}
+    .ticket-meta{text-align:center;line-height:1.6;color:var(--text);font-size:.74rem}
     .ticket-meta strong{font-size:.8rem}
     .ticket-table{width:100%;border-collapse:collapse;margin-top:8px}
-    .ticket-table th,.ticket-table td{padding:4px 0;font-size:.72rem;vertical-align:top;color:#1f2937}
+    .ticket-table th,.ticket-table td{padding:4px 0;font-size:.72rem;vertical-align:top;color:var(--text)}
     .ticket-table th{text-align:left;font-weight:700}
     .ticket-table td:nth-child(2),.ticket-table td:nth-child(3),.ticket-table td:nth-child(4){text-align:right}
     .ticket-totals{margin-top:12px;padding-top:8px;border-top:1px dashed #aab4bf}
-    .ticket-total-line{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:#1f2937;padding:2px 0}
+    .ticket-total-line{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--text);padding:2px 0}
     .ticket-total-line strong{font-size:1.1rem;letter-spacing:-.02em}
-    .ticket-method{text-align:center;color:#4a5568;font-size:.72rem;margin-top:12px;padding-top:10px;border-top:1px dashed #aab4bf}
-    .ticket-hours{font-size:.7rem;color:#4a5568;text-align:center;line-height:1.6;margin-top:16px}
+    .ticket-method{text-align:center;color:var(--muted);font-size:.72rem;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+    .ticket-hours{font-size:.7rem;color:var(--muted);text-align:center;line-height:1.6;margin-top:16px}
     .ticket-footer{margin-top:14px;padding-top:10px;border-top:1px dashed #aab4bf;text-align:center}
-    .ticket-footer p{margin:0;color:#4a5568;font-size:.7rem;line-height:1.5}
+    .ticket-footer p{margin:0;color:var(--muted);font-size:.7rem;line-height:1.5}
     .ticket-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
     .ticket-actions button{min-height:42px;border-radius:10px;padding:0 10px;font-size:.72rem}
     .ticket-actions .btn-primary{background:#1c7fdb}.ticket-actions .btn-success{background:#1c8c67}.ticket-actions .btn-warning{background:#d98a0e}.ticket-actions .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--line)}
+    .return-panel{margin-top:18px;padding:14px;border:1px solid #e1e7ef;border-radius:12px;background:#f8fafc}
+    .return-panel h3{margin:0 0 5px;color:#1a2a44;font-size:.9rem}.return-panel>p{margin:0 0 12px;color:#586577;font-size:.72rem;line-height:1.45}
+    .return-form{display:grid;gap:8px;padding:10px 0;border-top:1px solid #e1e7ef}.return-form:first-of-type{border-top:0;padding-top:0}
+    .return-form label{display:grid;gap:4px;color:#344054;font-size:.7rem;font-weight:600}.return-form input,.return-form select,.return-form textarea{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:8px;background:#fff;color:#1f2937;font:inherit}.return-form textarea{min-height:54px;resize:vertical}.return-form .btn{min-height:38px;font-size:.72rem}
     @media (max-width: 560px){.ticket-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.ticket-paper{padding-left:12px;padding-right:12px}}
+    @media print{.ticket-paper{background:#fff;border-color:#d7dfe9;color:#1f2937}.ticket-brand h2,.ticket-meta,.ticket-table th,.ticket-table td,.ticket-total-line{color:#1f2937}.ticket-brand p,.ticket-method,.ticket-hours,.ticket-footer p{color:#4a5568}}
 </style>
 @endpush
 @section('content')
@@ -99,12 +104,41 @@
             <p>Compra desde: {{ $saleDate->addDay()->format('d/m/Y') }}</p>
             <p>Hasta: {{ $saleDate->copy()->addDays(config('business.return_policy_days', 4) - 1)->format('d/m/Y') }}</p>
         </div>
-        <div class="ticket-actions">
-            <button type="button" class="btn btn-primary" data-print>Imprimir Ticket</button>
-            <button type="button" class="btn btn-success" onclick="window.print()">Guardar en PDF</button>
-            <button type="button" class="btn btn-warning" onclick="window.location='{{ route('sales.pos') }}'">Volver al POS</button>
-            <button type="button" class="btn btn-secondary" onclick="window.location='{{ route('sales.history') }}'">Ver Historial</button>
+        <div class="ticket-actions" aria-label="Acciones del ticket">
+            <button type="button" class="btn btn-primary" data-print-ticket>Imprimir Ticket</button>
+            <button type="button" class="btn btn-success" data-save-pdf>Guardar en PDF</button>
+            <a class="btn btn-warning" href="{{ route('sales.pos') }}">Volver al POS</a>
+            <a class="btn btn-secondary" href="{{ route('sales.history') }}">Ver Historial</a>
         </div>
+        @can('ventas_devolver')
+            @if(in_array((string) $sale->estado, ['completada', 'parcialmente_devuelta'], true))
+                <section class="return-panel" aria-labelledby="return-title">
+                    <h3 id="return-title">Devoluciones y reembolsos</h3>
+                    <p>Selecciona una línea, indica la cantidad y registra el motivo. La cantidad máxima se calcula con base en esta venta.</p>
+                    @foreach($sale->detalles as $line)
+                        <form method="POST" action="{{ route('sales.return') }}" class="return-form" data-confirm="¿Confirmas registrar esta devolución?">
+                            @csrf
+                            <input type="hidden" name="idempotency_key" value="{{ \Illuminate\Support\Str::random(24) }}">
+                            <input type="hidden" name="id_venta_original" value="{{ $sale->id_venta }}">
+                            <input type="hidden" name="productos[0][id_detalle_venta]" value="{{ $line->id_detalle_venta }}">
+                            <label>{{ $line->producto?->nombre ?? $line->servicio?->nombre ?? 'Concepto sin nombre' }} · compradas: {{ $line->cantidad }}
+                                <input type="number" name="productos[0][cantidad]" min="1" max="{{ $line->cantidad }}" value="1" required>
+                            </label>
+                            <label>Destino del reembolso
+                                <select name="destino">
+                                    @if($sale->id_cliente)<option value="saldo">Saldo del cliente</option>@endif
+                                    <option value="efectivo">Efectivo</option>
+                                </select>
+                            </label>
+                            <label>Motivo
+                                <textarea name="observacion" maxlength="255" required placeholder="Describe el motivo de la devolución"></textarea>
+                            </label>
+                            <button type="submit" class="btn btn-danger">Registrar devolución</button>
+                        </form>
+                    @endforeach
+                </section>
+            @endif
+        @endcan
     </div>
 </div>
 @endsection

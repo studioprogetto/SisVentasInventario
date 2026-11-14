@@ -50,6 +50,6 @@ final class ReportController extends Controller
             }, $type.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
         }
 
-        return view('reports.show', ['title' => $title, 'type' => $type, 'since' => $since, 'until' => $until, 'rows' => $query->paginate(50)->withQueryString()]);
+        return view('reports.show', ['title' => $title, 'type' => $type, 'since' => $since, 'until' => $until, 'summary' => $reports->summary($type, $since, $until), 'rows' => $query->paginate(50)->withQueryString()]);
     }
 }

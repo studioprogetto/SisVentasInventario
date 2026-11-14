@@ -13,7 +13,7 @@ final class CatalogQuery
     /** @return Builder<Producto> */
     public function published(): Builder
     {
-        return Producto::query()->where('activo', 1)->where('publicado', 1)->whereHas('categoria', fn ($query) => $query->where('activo', 1)->where('publicado', 1))->with('categoria');
+        return Producto::query()->where('activo', 1)->where('publicado', 1)->whereHas('categoria', fn ($query) => $query->where('activo', 1)->where('publicado', 1))->with('categoria')->withSum('existencias as stock_total', 'stock');
     }
 
     public function categories(): mixed

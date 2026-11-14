@@ -1,19 +1,11 @@
 @extends('layouts.app')
 @section('title', $definition['title'].' — '.config('business.name', 'Studio & Progetto'))
 @section('content')
-<h1>{{ $definition['title'] }}</h1>
-<form method="GET" class="filters"><label>Buscar<input name="q" value="{{ request('q') }}"></label><label>Estado<select name="estado"><option value="activos">Activos</option><option value="inactivos" @selected(request('estado')==='inactivos')>Inactivos</option></select></label><button>Filtrar</button></form>
-@if($canEdit)
-<details class="card"><summary>Nuevo registro</summary>
-<form method="POST" action="{{ route('masters.store', $module) }}" class="form-grid">@csrf
-@foreach($definition['fields'] as $name=>$field)<label>{{ $field['label'] }}<input name="{{ $name }}" value="{{ old($name) }}" @required(str_contains($field['rules'],'required'))></label>@endforeach
-<button>Guardar</button></form></details>
-@endif
-<div class="table-wrap"><table><caption>{{ $definition['title'] }} registrados</caption><thead><tr>@foreach($definition['fields'] as $field)<th>{{ $field['label'] }}</th>@endforeach<th>Acciones</th></tr></thead><tbody>
-@forelse($rows as $row)<tr>@foreach($definition['fields'] as $name=>$field)<td>{{ $row->getAttribute($name) }}</td>@endforeach<td>
-@if($canEdit)<details><summary>Editar</summary><form method="POST" action="{{ route('masters.update', [$module,$row->getKey()]) }}" class="form-grid">@csrf @method('PUT')
-@foreach($definition['fields'] as $name=>$field)<label>{{ $field['label'] }}<input name="{{ $name }}" value="{{ $row->getAttribute($name) }}" @required(str_contains($field['rules'],'required'))></label>@endforeach<button>Guardar cambios</button></form></details>@endif
-@if($canState)<form method="POST" action="{{ route('masters.state', [$module,$row->getKey()]) }}" data-confirm="¿Cambiar el estado de este registro?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $row->activo ? 0 : 1 }}"><button>{{ $row->activo ? 'Desactivar' : 'Activar' }}</button></form>@endif
-</td></tr>@empty<tr><td colspan="{{ count($definition['fields'])+1 }}">No hay registros con estos filtros.</td></tr>@endforelse
-</tbody></table></div>{{ $rows->links() }}
+<section class="module-shell master-page">
+    <header class="module-header"><div><span class="eyebrow">Operaciones y recursos</span><h1>{{ $definition['title'] }}</h1><p>Administra los registros maestros utilizados por ventas, compras e inventario.</p></div><div class="module-actions"><a class="btn btn-secondary" href="{{ route('masters.index', ['maestro' => $module, 'estado' => 'activos']) }}">Activos</a><a class="btn btn-secondary" href="{{ route('masters.index', ['maestro' => $module, 'estado' => 'inactivos']) }}">Inactivos</a></div></header>
+    <form method="GET" class="filters"><label>Buscar<input name="q" value="{{ request('q') }}" placeholder="Buscar registro..."></label><label>Estado<select name="estado"><option value="activos">Activos</option><option value="inactivos" @selected(request('estado') === 'inactivos')>Inactivos</option></select></label><button class="btn btn-secondary" type="submit">Filtrar</button></form>
+    @if($canEdit)<details class="card master-form"><summary><strong>Nuevo registro</strong><span>Agregar {{ strtolower($definition['title']) }}</span></summary><form method="POST" action="{{ route('masters.store', $module) }}" class="form-grid">@csrf @foreach($definition['fields'] as $name => $field)<label>{{ $field['label'] }}<input name="{{ $name }}" value="{{ old($name) }}" @required(str_contains($field['rules'], 'required'))></label>@endforeach<button class="btn btn-success" type="submit">Guardar registro</button></form></details>@endif
+    <div class="panel"><div class="panel-header"><div><h2>{{ $definition['title'] }} registrados</h2><p class="muted">Listado paginado con acciones y estado actual.</p></div></div><div class="table-wrap"><table><thead><tr>@foreach($definition['fields'] as $field)<th>{{ $field['label'] }}</th>@endforeach<th>Acciones</th></tr></thead><tbody>@forelse($rows as $row)<tr>@foreach($definition['fields'] as $name => $field)<td>{{ $row->getAttribute($name) }}</td>@endforeach<td class="table-actions">@if($canEdit)<details><summary class="btn btn-secondary">Editar</summary><form method="POST" action="{{ route('masters.update', [$module, $row->getKey()]) }}" class="form-grid inline-detail">@csrf @method('PUT') @foreach($definition['fields'] as $name => $field)<label>{{ $field['label'] }}<input name="{{ $name }}" value="{{ $row->getAttribute($name) }}" @required(str_contains($field['rules'], 'required'))></label>@endforeach<button class="btn btn-success" type="submit">Guardar cambios</button></form></details>@endif @if($canState)<form method="POST" action="{{ route('masters.state', [$module, $row->getKey()]) }}" data-confirm="¿Cambiar el estado de este registro?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $row->activo ? 0 : 1 }}"><button class="btn {{ $row->activo ? 'btn-danger' : 'btn-success' }}" type="submit">{{ $row->activo ? 'Desactivar' : 'Activar' }}</button></form>@endif</td></tr>@empty<tr><td colspan="{{ count($definition['fields']) + 1 }}">No hay registros con estos filtros.</td></tr>@endforelse</tbody></table></div></div>
+    {{ $rows->links('vendor.pagination.tailwind') }}
+</section>
 @endsection

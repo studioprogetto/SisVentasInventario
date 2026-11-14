@@ -11,6 +11,7 @@ use App\Services\Operations\AuditTrail;
 use App\Services\Operations\Idempotency;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 final class SaleCheckout
@@ -59,12 +60,20 @@ final class SaleCheckout
                 }
                 $change = $received - $total;
             }
-            $id = DB::table('ventas')->insertGetId($quote + ['id_cliente' => $client?->id_cliente, 'id_usuario' => $user, 'id_turno' => $turn->id_turno,
+            $saleData = $quote + ['id_cliente' => $client?->id_cliente, 'id_usuario' => $user, 'id_turno' => $turn->id_turno,
                 'total_venta' => Money::decimal($total), 'total_base' => bcadd(bcmul(Money::decimal($total), $quote['tipo_cambio_aplicado'], 4), '0.005', 2),
                 'saldo_utilizado' => Money::decimal($usedCredit), 'cobro_base' => bcadd(bcmul(Money::decimal($total - $usedCredit), $quote['tipo_cambio_aplicado'], 4), '0.005', 2),
                 'descuento_manual' => Money::decimal($manual), 'descuento_sellos' => bcdiv((string) $percent, '100', 2),
-                'metodo_pago' => $data['metodo_pago'], 'monto_recibido' => $received === null ? null : Money::decimal($received), 'cambio_entregado' => $change === null ? null : Money::decimal($change),
-                'observacion' => $data['observacion'] ?? '', 'estado' => 'completada', 'numero_cliente' => 0, 'es_cambio' => (bool) ($data['es_cambio'] ?? false)], 'id_venta');
+                'metodo_pago' => $data['metodo_pago'], 'observacion' => $data['observacion'] ?? '', 'estado' => 'completada', 'numero_cliente' => 0, 'es_cambio' => (bool) ($data['es_cambio'] ?? false)];
+            // Estas columnas pertenecen a una migración posterior; no deben impedir
+            // vender en instalaciones que todavía no la han ejecutado.
+            if (Schema::hasColumn('ventas', 'monto_recibido')) {
+                $saleData['monto_recibido'] = $received === null ? null : Money::decimal($received);
+            }
+            if (Schema::hasColumn('ventas', 'cambio_entregado')) {
+                $saleData['cambio_entregado'] = $change === null ? null : Money::decimal($change);
+            }
+            $id = DB::table('ventas')->insertGetId($saleData, 'id_venta');
             $allocated = 0;
             foreach ($lines as $index => $line) {
                 $net = $index === array_key_last($lines) ? $total - $allocated : ($gross === 0 ? 0 : (int) bcdiv(bcmul((string) $total, (string) (Money::cents($line['precio']) * $line['cantidad']), 0), (string) $gross, 0));

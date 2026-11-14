@@ -1,6 +1,175 @@
-.three-container{position:absolute;inset:0;z-index:0;width:100%;height:100%;overflow:hidden;touch-action:pan-y}.three-container canvas{display:block;width:100%;height:100%}.login-page.has-webgl .store-scene{display:none}
-@media(max-width:1023px){.login-layout{min-height:100vh;min-height:100dvh}.showcase{width:100%;height:25.5dvh;min-height:155px;max-height:245px;border-right:0;border-bottom:1px solid rgba(255,255,255,.07)}.showcase-header{padding:12px 16px}.environment-badge{gap:8px;padding:8px 11px;font-size:9px}.scene-hint{padding:8px 11px;font-size:10px}.showcase-copy{display:none}.store-scene{inset:0;width:100%;height:100%}.login-panel{width:100%;min-height:74.5dvh;flex:1 0 auto;overflow:visible;padding:clamp(12px,2.2dvh,22px) clamp(18px,4.5vw,28px) max(10px,env(safe-area-inset-bottom))}.login-card{max-width:500px;margin:auto;padding:clamp(20px,3dvh,30px) clamp(20px,5vw,34px);border-radius:24px}.brand-block{margin-bottom:clamp(14px,2.6dvh,22px)}.brand-emblem{width:58px;height:58px;margin-bottom:10px;border-radius:17px}.brand-emblem img{width:39px;height:39px}.brand-block h1{font-size:clamp(21px,3.2dvh,27px)}.brand-block p{margin-top:5px;font-size:11px}.login-form{gap:clamp(11px,1.8dvh,16px)}.field label{margin-bottom:7px;font-size:10px}.input-wrap{min-height:clamp(43px,6.2dvh,50px);border-radius:13px}.input-wrap input{font-size:14px}.login-actions{gap:10px}.login-button{min-height:clamp(46px,6.4dvh,52px);font-size:13px}.catalog-link{min-height:clamp(39px,5.4dvh,44px);font-size:12px}.login-footer{margin:12px 0 2px;padding-bottom:2px;font-size:10px}}
-@media(max-width:560px){body.login-page{background:#080d18}.login-panel{padding-right:clamp(16px,4.5vw,22px);padding-left:clamp(16px,4.5vw,22px)}.login-card{border-radius:22px}}
-@media(min-width:480px) and (max-width:680px){.login-layout{width:min(100%,480px);margin:0 auto;border-right:1px solid rgba(255,255,255,.06);border-left:1px solid rgba(255,255,255,.06);box-shadow:0 20px 60px rgba(0,0,0,.42)}}
-@media(max-height:700px) and (max-width:1023px){.showcase{height:23dvh;min-height:130px;max-height:190px}.login-panel{min-height:77dvh;padding-top:9px;padding-bottom:max(7px,env(safe-area-inset-bottom))}.login-card{padding-top:15px;padding-bottom:15px}.brand-block{margin-bottom:11px}.brand-emblem{width:48px;height:48px;margin-bottom:7px}.brand-emblem img{width:33px;height:33px}.login-form{gap:9px}.login-footer{margin-top:8px}}
-@media(prefers-reduced-motion:reduce){.three-container canvas{animation:none}}
+.three-container {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: pan-y;
+}
+.three-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.login-page.has-webgl .store-scene {
+    display: none;
+}
+@media (max-width: 1023px) {
+    .login-layout {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+    .showcase {
+        width: 100%;
+        height: 25.5dvh;
+        min-height: 155px;
+        max-height: 245px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .showcase-header {
+        padding: 12px 16px;
+    }
+    .environment-badge {
+        gap: 8px;
+        padding: 8px 11px;
+        font-size: 9px;
+    }
+    .scene-hint {
+        padding: 8px 11px;
+        font-size: 10px;
+    }
+    .showcase-copy {
+        display: none;
+    }
+    .store-scene {
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+    .login-panel {
+        width: 100%;
+        min-height: 74.5dvh;
+        flex: 1 0 auto;
+        overflow: visible;
+        padding: clamp(12px, 2.2dvh, 22px) clamp(18px, 4.5vw, 28px)
+            max(10px, env(safe-area-inset-bottom));
+    }
+    .login-card {
+        max-width: 500px;
+        margin: auto;
+        padding: clamp(20px, 3dvh, 30px) clamp(20px, 5vw, 34px);
+        border-radius: 24px;
+    }
+    .brand-block {
+        margin-bottom: clamp(14px, 2.6dvh, 22px);
+    }
+    .brand-emblem {
+        width: 58px;
+        height: 58px;
+        margin-bottom: 10px;
+        border-radius: 17px;
+    }
+    .brand-emblem img {
+        width: 39px;
+        height: 39px;
+    }
+    .brand-block h1 {
+        font-size: clamp(21px, 3.2dvh, 27px);
+    }
+    .brand-block p {
+        margin-top: 5px;
+        font-size: 11px;
+    }
+    .login-form {
+        gap: clamp(11px, 1.8dvh, 16px);
+    }
+    .field label {
+        margin-bottom: 7px;
+        font-size: 10px;
+    }
+    .input-wrap {
+        min-height: clamp(43px, 6.2dvh, 50px);
+        border-radius: 13px;
+    }
+    .input-wrap input {
+        font-size: 14px;
+    }
+    .login-actions {
+        gap: 10px;
+    }
+    .login-button {
+        min-height: clamp(46px, 6.4dvh, 52px);
+        font-size: 13px;
+    }
+    .catalog-link {
+        min-height: clamp(39px, 5.4dvh, 44px);
+        font-size: 12px;
+    }
+    .login-footer {
+        margin: 12px 0 2px;
+        padding-bottom: 2px;
+        font-size: 10px;
+    }
+}
+@media (max-width: 560px) {
+    body.login-page {
+        background: #080d18;
+    }
+    .login-panel {
+        padding-right: clamp(16px, 4.5vw, 22px);
+        padding-left: clamp(16px, 4.5vw, 22px);
+    }
+    .login-card {
+        border-radius: 22px;
+    }
+}
+@media (min-width: 480px) and (max-width: 680px) {
+    .login-layout {
+        width: min(100%, 480px);
+        margin: 0 auto;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        border-left: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
+    }
+}
+@media (max-height: 700px) and (max-width: 1023px) {
+    .showcase {
+        height: 23dvh;
+        min-height: 130px;
+        max-height: 190px;
+    }
+    .login-panel {
+        min-height: 77dvh;
+        padding-top: 9px;
+        padding-bottom: max(7px, env(safe-area-inset-bottom));
+    }
+    .login-card {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+    .brand-block {
+        margin-bottom: 11px;
+    }
+    .brand-emblem {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 7px;
+    }
+    .brand-emblem img {
+        width: 33px;
+        height: 33px;
+    }
+    .login-form {
+        gap: 9px;
+    }
+    .login-footer {
+        margin-top: 8px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .three-container canvas {
+        animation: none;
+    }
+}

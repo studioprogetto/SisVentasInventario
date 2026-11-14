@@ -11,7 +11,7 @@ final class ReportQuery
 {
     public const TYPES = [
         'ventas' => ['Ventas', 'reportes_ver_ventas'], 'compras' => ['Compras', 'compras_ver_lista'],
-        'inventario' => ['Inventario', 'reportes_ver_inventario'], 'movimientos' => ['Movimientos de inventario', 'reportes_ver_inventario'],
+        'inventario' => ['Inventario', 'productos_ver_lista'], 'movimientos' => ['Movimientos de inventario', 'reportes_ver_inventario'],
         'top-productos' => ['Productos más vendidos', 'reportes_ver_top_productos'], 'stock-bajo' => ['Stock bajo', 'reportes_ver_stock_bajo'],
         'rentabilidad' => ['Rentabilidad documentada', 'reportes_ver_rentabilidad'], 'metodos-pago' => ['Métodos de pago', 'reportes_ver_metodos_pago'],
         'clientes' => ['Clientes', 'clientes_ver_lista'], 'proveedores' => ['Proveedores', 'proveedores_ver_lista'], 'caja' => ['Caja', 'reportes_ver_caja'],
@@ -30,7 +30,7 @@ final class ReportQuery
             'ventas' => $sales->leftJoin('clientes as c', 'v.id_cliente', '=', 'c.id_cliente')->leftJoin('usuarios as u', 'u.id_usuario', '=', 'v.id_usuario')
                 ->select('v.id_venta as operacion', 'v.fecha_venta as fecha', 'c.nombre_cliente as cliente', 'u.nombre_completo as usuario', 'v.moneda_codigo as moneda', 'v.total_venta as importe', 'v.metodo_pago as pago', 'v.estado')->orderByDesc('v.id_venta'),
             'compras' => DB::table('compras as c')->leftJoin('proveedores as p', 'p.id_proveedor', '=', 'c.id_proveedor')->whereBetween('c.fecha_compra', [$start, $end])->select('c.id_compra as operacion', 'c.fecha_compra as fecha', 'p.nombre_proveedor as proveedor', 'c.moneda_codigo as moneda', 'c.total_compra as importe', 'c.estado')->orderByDesc('c.id_compra'),
-            'inventario', 'stock-bajo' => DB::table('productos')->where('activo', 1)->when($type === 'stock-bajo', fn ($query) => $query->whereColumn('stock', '<=', 'stock_minimo'))->select('id_producto as producto', 'nombre', 'stock', 'stock_minimo as minimo', 'precio_compra as costo_actual')->selectRaw('ROUND(stock * precio_compra, 2) as valor_actual')->orderBy('nombre'),
+            'inventario', 'stock-bajo' => $this->inventory($type),
             'movimientos' => DB::table('movimientos_inventario as m')->join('productos as p', 'm.id_producto', '=', 'p.id_producto')->whereBetween('m.fecha', [$start, $end])->select('m.id_movimiento as movimiento', 'm.fecha', 'p.nombre as producto', 'm.id_almacen as almacen', 'm.tipo_movimiento as causa', 'm.cantidad', 'm.stock_anterior as antes', 'm.stock_nuevo as despues', 'm.id_usuario as usuario', 'm.referencia_id as referencia')->orderByDesc('m.id_movimiento'),
             'metodos-pago' => $sales->groupBy('v.moneda_codigo', 'v.metodo_pago')->select('v.moneda_codigo as moneda', 'v.metodo_pago as pago')->selectRaw('COUNT(*) as operaciones, SUM(v.total_venta) as importe, SUM(v.saldo_utilizado) as saldo_utilizado, SUM(v.cobro_base) as cobro_base')->orderBy('v.metodo_pago'),
             'clientes' => DB::table('clientes')->select('id_cliente as cliente', 'nombre_cliente as nombre', 'documento_identidad as documento', 'telefono', 'email', 'total_compras as compras', 'sellos')->orderBy('nombre_cliente'),
@@ -44,6 +44,35 @@ final class ReportQuery
         };
     }
 
+    public function summary(string $type, string $since, string $until): array
+    {
+        $start = $since.' 00:00:00';
+        $end = $until.' 23:59:59';
+
+        return match ($type) {
+            'ventas' => (array) DB::table('ventas')->whereBetween('fecha_venta', [$start, $end])->whereIn('estado', ['completada', 'parcialmente_devuelta'])->selectRaw('COALESCE(SUM(total_venta), 0) as ingresos, COUNT(*) as ventas')->first(),
+            'compras' => (array) DB::table('compras')->whereBetween('fecha_compra', [$start, $end])->selectRaw('COALESCE(SUM(total_compra), 0) as total_compras, COUNT(*) as ordenes')->first(),
+            'inventario', 'stock-bajo' => (array) DB::table('productos as p')->leftJoinSub($this->inventoryTotals(), 'i', 'i.id_producto', '=', 'p.id_producto')->where('p.activo', 1)->selectRaw('COUNT(*) as productos, COALESCE(SUM(i.stock), 0) as unidades, COALESCE(SUM(i.stock * p.precio_compra), 0) as valor_costo, COALESCE(SUM(i.stock * p.precio_venta), 0) as valor_venta, COALESCE(SUM(CASE WHEN COALESCE(i.stock, 0) <= p.stock_minimo THEN 1 ELSE 0 END), 0) as reposicion')->first(),
+            'caja', 'movimientos-caja' => (array) DB::table('turnos_caja')->whereBetween('fecha_apertura', [$start, $end])->selectRaw('COUNT(*) as turnos, COALESCE(SUM(monto_final_real), 0) as declarado, COALESCE(SUM(diferencia), 0) as diferencia')->first(),
+            default => [],
+        };
+    }
+
+    private function inventory(string $type): Builder
+    {
+        $totals = $this->inventoryTotals();
+
+        return DB::table('productos as p')->leftJoinSub($totals, 'i', 'i.id_producto', '=', 'p.id_producto')->where('p.activo', 1)
+            ->when($type === 'stock-bajo', fn ($query) => $query->whereRaw('COALESCE(i.stock, 0) <= p.stock_minimo'))
+            ->select('p.id_producto as producto', 'p.nombre', 'p.stock_minimo as minimo', 'p.precio_compra as costo_actual', 'p.precio_venta as precio_venta')
+            ->selectRaw('COALESCE(i.stock, 0) as stock')->selectRaw('ROUND(COALESCE(i.stock, 0) * p.precio_compra, 2) as valor_actual')->selectRaw('ROUND(COALESCE(i.stock, 0) * (p.precio_venta - p.precio_compra), 2) as ganancia_potencial')->orderBy('p.nombre');
+    }
+
+    private function inventoryTotals(): Builder
+    {
+        return DB::table('existencias')->select('id_producto')->selectRaw('SUM(stock) as stock')->groupBy('id_producto');
+    }
+
     private function productSales(string $type, string $start, string $end): Builder
     {
         $returned = DB::table('detalles_cambio as dc')->join('cambios_ventas as cv', 'cv.id_cambio', '=', 'dc.id_cambio')->where('dc.tipo', 'devolucion')->where('cv.estado', 'completado')
@@ -52,7 +81,7 @@ final class ReportQuery
             ->leftJoinSub($returned, 'r', fn ($join) => $join->on('r.id_detalle_venta', '=', 'd.id_detalle_venta'))
             ->whereBetween('v.fecha_venta', [$start, $end])->whereIn('v.estado', ['completada', 'parcialmente_devuelta'])->where('d.tipo_item', 'producto');
         if ($type === 'top-productos') {
-            return $query->groupBy('p.id_producto', 'p.nombre')->select('p.id_producto as producto', 'p.nombre')->selectRaw('SUM(d.cantidad - COALESCE(r.cantidad,0)) as unidades_netas')->orderByDesc('unidades_netas');
+            return $query->groupBy('p.id_producto', 'p.nombre')->select('p.id_producto as producto', 'p.nombre')->selectRaw('SUM(d.cantidad - COALESCE(r.cantidad,0)) as unidades_netas')->orderByDesc('unidades_netas')->limit(5);
         }
 
         return $query->select('v.id_venta as venta', 'p.nombre as producto', 'v.moneda_codigo as moneda')->selectRaw('d.cantidad-COALESCE(r.cantidad,0) as unidades_netas')

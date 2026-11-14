@@ -24,6 +24,8 @@ final class ProductWriter
                 if ($path) {
                     $fields['imagen_path'] = 'storage:'.$path;
                     $fields['imagen_url'] = null;
+                } elseif (! empty($fields['imagen_url'])) {
+                    $fields['imagen_path'] = null;
                 }
                 if ($id) {
                     DB::table('productos')->where('id_producto', $id)->lockForUpdate()->firstOrFail();
@@ -31,6 +33,9 @@ final class ProductWriter
                 } else {
                     $id = DB::table('productos')->insertGetId($fields + ['stock' => 0, 'activo' => 1], 'id_producto');
                     DB::table('productos')->where('id_producto', $id)->update(['slug' => 'producto-'.$id]);
+                }
+                DB::table('existencias')->insertOrIgnore(['id_producto' => $id, 'id_almacen' => (int) $data['id_almacen'], 'stock' => 0, 'saldo_inicial' => 0, 'created_at' => now()]);
+                if (! empty($data['stock_inicial'])) {
                     $initial = (int) ($data['stock_inicial'] ?? 0);
                     if ($initial > 0) {
                         $this->stock->move($id, (int) $data['id_almacen'], $initial, 'ajuste_positivo', $user, $id);

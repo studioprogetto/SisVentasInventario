@@ -58,9 +58,10 @@ final class PurchaseReceipt
             $this->stock->lockProducts($lines->pluck('id_producto')->all());
             foreach ($lines as $line) {
                 $product = DB::table('productos')->where('id_producto', $line->id_producto)->first();
+                $currentStock = (int) DB::table('existencias')->where('id_producto', $line->id_producto)->sum('stock');
                 $cost = bcmul((string) $line->costo_unitario, (string) $purchase->tipo_cambio_aplicado, 6);
-                $value = bcadd(bcmul((string) $product->precio_compra, (string) $product->stock, 6), bcmul($cost, (string) $line->cantidad, 6), 6);
-                $average = bcadd(bcdiv($value, (string) ($product->stock + $line->cantidad), 4), '0.005', 2);
+                $value = bcadd(bcmul((string) $product->precio_compra, (string) $currentStock, 6), bcmul($cost, (string) $line->cantidad, 6), 6);
+                $average = bcadd(bcdiv($value, (string) ($currentStock + $line->cantidad), 4), '0.005', 2);
                 $this->stock->move($line->id_producto, $purchase->id_almacen, $line->cantidad, 'compra', $user, $id);
                 DB::table('productos')->where('id_producto', $line->id_producto)->update(['precio_compra' => $average]);
             }

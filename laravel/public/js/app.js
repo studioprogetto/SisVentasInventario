@@ -92,20 +92,44 @@
   });
   const saleToast = document.querySelector('[data-sale-toast]');
   if (saleToast) {
-    const hideToast = () => saleToast.classList.remove('is-visible');
+    let toastTimer;
+    const hideToast = () => {
+      saleToast.classList.remove('is-visible');
+      if (toastTimer) window.clearTimeout(toastTimer);
+    };
     const openTicket = () => {
       const url = saleToast.dataset.ticketUrl;
       if (url) window.location.href = url;
     };
     setTimeout(() => saleToast.classList.add('is-visible'), 80);
-    setTimeout(hideToast, 3000);
-    saleToast.querySelector('[data-open-ticket]')?.addEventListener('click', openTicket);
-    saleToast.querySelector('[data-close-sale-toast]')?.addEventListener('click', hideToast);
+    toastTimer = window.setTimeout(hideToast, 3000);
+    saleToast.querySelectorAll('[data-open-ticket]').forEach(button => button.addEventListener('click', event => {
+      event.stopPropagation();
+      openTicket();
+    }));
+    saleToast.querySelectorAll('[data-close-sale-toast]').forEach(button => button.addEventListener('click', event => {
+      event.stopPropagation();
+      hideToast();
+    }));
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') hideToast();
     });
   }
-  document.querySelectorAll('[data-print]').forEach(button => button.addEventListener('click', () => window.print()));
+  const printTicket = () => window.print();
+  const saveTicketAsPdf = () => {
+    const previousTitle = document.title;
+    const ticketNumber = document.querySelector('.ticket-meta strong')?.textContent?.trim() || 'ticket';
+    document.title = ticketNumber.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ# _-]/g, '').replace(/\s+/g, '-');
+    const restoreTitle = () => {
+      document.title = previousTitle;
+      window.removeEventListener('afterprint', restoreTitle);
+    };
+    window.addEventListener('afterprint', restoreTitle, {once: true});
+    window.print();
+    window.setTimeout(restoreTitle, 1500);
+  };
+  document.querySelectorAll('[data-print-ticket], [data-print]').forEach(button => button.addEventListener('click', printTicket));
+  document.querySelectorAll('[data-save-pdf]').forEach(button => button.addEventListener('click', saveTicketAsPdf));
   document.querySelectorAll('form[data-confirm]').forEach(form => form.addEventListener('submit', event => {
     if (!window.confirm(form.dataset.confirm)) event.preventDefault();
   }));

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title','Punto de venta — '.config('business.name', 'Studio & Progetto'))
-@push('styles')<link rel="stylesheet" href="{{ asset('css/pos.css') }}?v=1">@endpush
+@push('styles')<link rel="stylesheet" href="{{ asset('css/pos.css') }}?v=2">@endpush
 @section('content')
 <div class="page-heading"><div><p class="eyebrow">VENTAS · MOSTRADOR</p><h1>Punto de venta</h1><p>Encuentra, agrega y vende. Todo en una sola vista.</p></div><span class="badge"><x-icon name="shield"/>Precios validados en servidor</span></div>
 <form method="POST" action="{{ route('sales.store') }}" data-pos data-items-url="{{ route('pos.items') }}" data-client-url="{{ route('clients.search') }}" data-client-detail-url="{{ url('pos/clientes') }}" data-quote-url="{{ route('sales.quote') }}">@csrf
@@ -28,5 +28,5 @@
 <button type="button" class="btn btn-secondary pos-requote" data-pos-quote>Actualizar total</button><button type="submit" class="btn btn-success pos-checkout" data-confirm-sale disabled><x-icon name="shield"/>Finalizar venta</button><p class="financial-note">El total incluye los descuentos aplicables. Confirma después de revisar el resumen.</p>
 </div></section></div>
 </form>
-<script src="{{ asset('js/pos.js') }}?v=3" defer></script>
+<script src="{{ asset('js/pos.js') }}?v=5" defer></script>
 @endsection

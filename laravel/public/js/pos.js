@@ -35,14 +35,11 @@
     if (!cashPanel || !status || !receivedField) return;
     const shouldShowCash = method === 'efectivo' || method === 'mixto';
     cashPanel.hidden = !shouldShowCash;
-    if (shouldShowCash) {
-      receivedField.required = true;
-      receivedField.setAttribute('aria-required', 'true');
-    } else {
-      receivedField.required = false;
-      receivedField.setAttribute('aria-required', 'false');
-      receivedField.value = '0';
-    }
+    // El monto recibido se valida al finalizar, no al cotizar. Esto permite
+    // agregar varias líneas y calcular el total antes de registrar el pago.
+    receivedField.required = false;
+    receivedField.setAttribute('aria-required', 'false');
+    if (!shouldShowCash) receivedField.value = '0';
     if (!cart.length || !$('[name=accepted_total]').value) {
       status.textContent = shouldShowCash ? `Vuelto: ${money(0)}` : 'Pago registrado.';
       return;
@@ -131,12 +128,16 @@
   }
   function add(item) {
     const existing = cart.find(line=>key(line)===key(item));
-    const next = existing ? existing.cantidad + 1 : 1;
-    if (item.stock !== null && next > item.stock) {
-      $('[data-pos-quote-status]').textContent = 'No hay más unidades disponibles en este almacén.'; return;
+    if (existing) {
+      $('[data-pos-quote-status]').textContent = `${item.nombre} ya está en el carrito. Ajusta la cantidad en el resumen.`;
+      const quantity = [...form.querySelectorAll('.pos-quantity')].find(input => input.name.includes(`[${cart.indexOf(existing)}]`));
+      quantity?.focus();
+      return;
     }
-    if (existing) existing.cantidad = next;
-    else if (cart.length < 200) cart.push({...item,cantidad:1});
+    if (item.stock !== null && item.stock < 1) {
+      $('[data-pos-quote-status]').textContent = 'No hay existencias disponibles en este almacén.'; return;
+    }
+    if (cart.length < 200) cart.push({...item,cantidad:1});
     else { $('[data-pos-quote-status]').textContent = 'El carrito admite hasta 200 líneas.'; return; }
     renderCart(); invalidate();
   }
@@ -162,10 +163,10 @@
         } else visual.append(node('span','pos-service-icon','✦'));
         const name = node('h3','',item.nombre);
         const location = node('p','pos-product-location',item.almacen);
-        const stock = node('small','',!item.stock_consistente ? 'Stock pendiente de conciliación' : (item.stock === null ? 'Servicio · sin stock físico' : `${item.stock} disponibles`));
+        const stock = node('small','',item.stock === null ? 'Servicio · sin stock físico' : (item.stock > 0 ? `${item.stock} disponibles en este almacén` : 'Sin existencias en este almacén'));
         const footer = node('div','pos-product-footer');
         const addButton = button('+','pos-add',()=>add(item)); addButton.setAttribute('aria-label',`Agregar ${item.nombre} de ${item.almacen}`);
-        addButton.disabled = !item.stock_consistente || (item.stock !== null && item.stock < 1);
+        addButton.disabled = item.stock !== null && item.stock < 1;
         footer.append(node('strong','',money(item.precio_venta)),addButton);
         card.append(visual,name,location,stock,footer); grid.append(card);
       });

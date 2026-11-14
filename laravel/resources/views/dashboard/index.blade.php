@@ -1,5 +1,5 @@
-﻿@extends('layouts.app')
-@section('title', 'Dashboard — '.config('business.name', 'Studio & Progetto'))
+@extends('layouts.app')
+@section('title', 'Dashboard &mdash; '.config('business.name', 'Studio & Progetto'))
 @section('content')
 @php
     $user = auth()->user();
@@ -18,23 +18,22 @@
 
         return [$x, $y];
     })->map(fn ($point) => $point[0].','. $point[1])->implode(' ');
-    $stockTotal = collect($summary['stock_by_warehouse'] ?? [])->sum('stock_total');
 @endphp
 <div class="studio-dashboard">
     <div class="welcome-row">
         <div class="welcome-copy">
             <span class="welcome-avatar"><x-icon name="users" /></span>
             <div>
-                <h2>¡Hola, {{ $firstName }}!</h2>
-                <p>Aquí tienes un resumen actualizado de tu negocio.</p>
+                <h2>&iexcl;Hola, {{ $firstName }}!</h2>
+                <p>Aqu&iacute; tienes un resumen actualizado de tu negocio.</p>
             </div>
         </div>
 
-        <div class="date-pill" aria-label="Rango de fechas del periodo">
-            <span class="mini-calendar"><x-icon name="clock" /></span>
-            <span>{{ $summary['period_label'] ?? 'Periodo actual' }}</span>
-            <x-icon name="arrow" />
-        </div>
+        <form class="period-filter" method="GET" action="{{ route('home') }}">
+            <label>Desde<input type="date" name="desde" value="{{ $summary['since'] ?? request('desde') }}"></label>
+            <label>Hasta<input type="date" name="hasta" value="{{ $summary['until'] ?? request('hasta') }}"></label>
+            <button class="btn-primary" type="submit"><x-icon name="chart" /> Actualizar</button>
+        </form>
     </div>
 
     <div class="stats-grid">
@@ -50,7 +49,7 @@
                     <span class="stat-label">{{ $card['label'] }}</span>
                 </div>
                 <div class="stat-value">{{ $card['value'] }}</div>
-                <div class="stat-trend {{ $trendDirection }}"><span>{{ $trendValue >= 0 ? '↑' : '↓' }}</span> {{ $trendText }} vs. período previo</div>
+                <div class="stat-trend {{ $trendDirection }}"><span>{{ $trendValue >= 0 ? '&#8593;' : '&#8595;' }}</span> {{ $trendText }} vs. per&iacute;odo previo</div>
             </article>
         @endforeach
     </div>
@@ -62,11 +61,7 @@
                     <span class="panel-icon"><x-icon name="chart" /></span>
                     <h3>Resumen de ventas</h3>
                 </div>
-                <div class="range-tabs" aria-label="Rango del gráfico">
-                    <button class="active" type="button">7 días</button>
-                    <button type="button">30 días</button>
-                    <button type="button">3 meses</button>
-                </div>
+                <span class="period-caption">{{ $summary['period_label'] ?? 'Periodo actual' }}</span>
             </div>
 
             <div class="chart-summary">
@@ -75,16 +70,7 @@
             </div>
 
             <svg class="line-chart" viewBox="0 0 780 250" role="img" aria-label="Resumen de ventas del periodo">
-                <defs>
-                    <linearGradient id="areaBlue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#3c78ff" stop-opacity="0.22"/>
-                        <stop offset="100%" stop-color="#3c78ff" stop-opacity="0.01"/>
-                    </linearGradient>
-                    <linearGradient id="areaPurple" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#a58dff" stop-opacity="0.23"/>
-                        <stop offset="100%" stop-color="#a58dff" stop-opacity="0.02"/>
-                    </linearGradient>
-                </defs>
+                <defs><linearGradient id="areaBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#315ee9" stop-opacity="0.24"/><stop offset="100%" stop-color="#315ee9" stop-opacity="0.01"/></linearGradient></defs>
                 <g class="grid-lines">
                     <line x1="40" y1="25" x2="740" y2="25"/>
                     <line x1="40" y1="75" x2="740" y2="75"/>
@@ -93,9 +79,8 @@
                     <line x1="40" y1="225" x2="740" y2="225"/>
                 </g>
 
-                <polyline fill="url(#areaBlue)" stroke="none" points="40,225 40,175 180,125 320,90 470,110 610,80 740,52 740,225"/>
-                <polyline fill="none" stroke="#3c78ff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="40,175 180,125 320,90 470,110 610,80 740,52"/>
-                <polyline fill="none" stroke="#a58dff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="40,190 180,145 320,115 470,130 610,120 740,95" opacity="0.9"/>
+                <polyline fill="url(#areaBlue)" stroke="none" points="40,225 {{ $chartPath ?: '40,225' }} 740,225"/>
+                <polyline fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="{{ $chartPath ?: '40,225' }}"/>
                 <g class="chart-points">
                     @foreach($chartPoints->take(6) as $point)
                         @php
@@ -119,9 +104,9 @@
             <div class="panel-header">
                 <div class="panel-title">
                     <span class="panel-icon purple"><x-icon name="chart" /></span>
-                    <h3>Productos más vendidos</h3>
+                    <h3>Productos m&aacute;s vendidos</h3>
                 </div>
-                <a href="#">Ver todos</a>
+                <a href="{{ route('products.index') }}">Ver inventario</a>
             </div>
 
             <ol class="rank-list">
@@ -145,30 +130,22 @@
     </div>
 
     <div class="content-grid secondary-grid">
-        <section class="panel stock-panel">
+        <section class="panel alerts-panel">
             <div class="panel-header">
                 <div class="panel-title">
-                    <span class="panel-icon"><x-icon name="box" /></span>
-                    <h3>Stock por almacén</h3>
+                    <span class="panel-icon"><x-icon name="alert" /></span>
+                    <h3>Alertas de inventario</h3>
                 </div>
-                <a href="#">Ver inventario</a>
+                <a href="{{ route('products.index') }}">Ver inventario</a>
             </div>
-
-            <div class="stock-layout">
-                <div class="donut-wrap">
-                    <div class="donut-chart">
-                        <span>{{ number_format((int) $stockTotal, 0, ',', '.') }}</span>
-                        <small>Unidades</small>
-                    </div>
-                </div>
-
-                <ul class="stock-breakdown">
-                    @foreach(($summary['stock_by_warehouse'] ?? []) as $warehouse)
-                        @php $warehouseStock = (float) ($warehouse->stock_total ?? 0); $percentage = $stockTotal > 0 ? round(($warehouseStock / $stockTotal) * 100, 0) : 0; @endphp
-                        <li><span class="dot {{ ['blue','cyan','green','yellow','lavender'][$loop->index % 5] }}"></span> Almacén {{ $warehouse->almacen ?? $loop->iteration }} <strong>{{ $percentage }}%</strong></li>
-                    @endforeach
-                </ul>
-            </div>
+            <div class="alerts-summary"><strong>{{ number_format((int) ($summary['low_stock'] ?? 0)) }}</strong><span>productos requieren revisi&oacute;n</span></div>
+            <ul class="inventory-alert-list">
+                @forelse(($summary['inventory_alerts'] ?? []) as $alert)
+                    <li><span class="alert-dot"></span><span><strong>{{ $alert->nombre }}</strong><small>Stock actual: {{ number_format((int) $alert->stock) }} &middot; M&iacute;nimo: {{ number_format((int) $alert->stock_minimo) }}</small></span><a href="{{ route('products.ledger', $alert->id_producto) }}">Ver</a></li>
+                @empty
+                    <li class="empty-alert"><x-icon name="shield" /><span><strong>Todo en orden</strong><small>No hay productos por debajo del stock m&iacute;nimo.</small></span></li>
+                @endforelse
+            </ul>
         </section>
 
         <section class="panel operations-panel">
@@ -223,12 +200,12 @@
                     <div class="exchange-box">
                         <span class="currency-label">{{ $rate->codigo ?? 'USD' }} ({{ $rate->codigo ?? 'USD' }})</span>
                         <strong>S/ {{ number_format((float) ($rate->valor_soles ?? 0), 4, ',', '.') }}</strong>
-                        <small>Última tasa</small>
+                        <small>&Uacute;ltima tasa</small>
                     </div>
                 @endforeach
             </div>
 
-            <svg class="mini-chart" viewBox="0 0 300 120" role="img" aria-label="Evolución del tipo de cambio">
+            <svg class="mini-chart" viewBox="0 0 300 120" role="img" aria-label="Evoluci&oacute;n del tipo de cambio">
                 <path d="M0 80 C45 72, 58 60, 90 64 S150 58, 180 52 S225 64, 300 42" fill="none" stroke="#3c78ff" stroke-width="3" stroke-linecap="round"/>
             </svg>
         </section>
@@ -239,9 +216,9 @@
             <div class="panel-header">
                 <div class="panel-title">
                     <span class="panel-icon"><x-icon name="file" /></span>
-                    <h3>Últimas ventas</h3>
+                    <h3>&Uacute;ltimas ventas</h3>
                 </div>
-                <a href="#">Ver todas</a>
+                <a href="{{ route('sales.history') }}">Ver todas</a>
             </div>
 
             <table class="sales-table">
@@ -270,7 +247,7 @@
 
         <aside class="panel promo-panel">
             <div class="promo-badge"><x-icon name="chart" /></div>
-            <h3>¡Gracias por confiar en {{ config('app.name', config('business.name', 'Studio & Progetto')) }}!</h3>
+            <h3>&iexcl;Gracias por confiar en {{ config('app.name', config('business.name', 'Studio & Progetto')) }}!</h3>
             <p>Seguimos creciendo juntos.</p>
             <div class="promo-illustration">
                 <div class="pencil"></div>
@@ -281,760 +258,379 @@
     </div>
 </div>
 
-<style>
-.studio-dashboard {
-    display: grid;
-    gap: 1.25rem;
-    padding: 1.2rem 0 0;
-}
-
-.welcome-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    min-height: 76px;
-    padding: 0.4rem 0;
-}
-
-.welcome-copy {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-}
-
-.welcome-avatar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #ffd9a3, #ffb1a9);
-    color: #1f2937;
-    box-shadow: 8px 8px 18px rgba(142, 154, 173, 0.18), -4px -4px 12px rgba(255,255,255,0.8);
-}
-
-.welcome-copy h2 {
-    margin: 0;
-    font-size: clamp(1.2rem, 2vw, 2rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    color: #1a2a44;
-}
-
-.welcome-copy p {
-    margin: 0.15rem 0 0;
-    color: #63758d;
-    font-size: 0.82rem;
-}
-
-.date-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.7rem;
-    padding: 0.75rem 1rem;
-    border-radius: 14px;
-    border: 1px solid rgba(145, 159, 181, 0.35);
-    background: rgba(255, 255, 255, 0.6);
-    color: #344561;
-    font-size: 0.78rem;
-    box-shadow: 6px 6px 14px rgba(148, 166, 188, 0.12), -6px -6px 14px rgba(255,255,255,0.7);
-}
-
-.mini-calendar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 8px;
-    background: rgba(60, 120, 255, 0.08);
-    color: #2d5de3;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
-}
-
-.stat-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(228,236,247,0.82));
-    border: 1px solid rgba(168, 180, 197, 0.25);
-    border-radius: 20px;
-    padding: 1.1rem 1.1rem 1rem;
-    box-shadow: 10px 10px 24px rgba(173, 187, 207, 0.22), -8px -8px 18px rgba(255,255,255,0.7);
-}
-
-.stat-head {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.8rem;
-}
-
-.stat-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    color: white;
-}
-
-.stat-icon.primary { background: linear-gradient(135deg, #3c78ff, #2d5ee2); }
-.stat-icon.purple { background: linear-gradient(135deg, #7b81ff, #5d6eff); }
-.stat-icon.blue { background: linear-gradient(135deg, #5ec3ff, #3fa4ff); }
-.stat-icon.amber { background: linear-gradient(135deg, #fdc45f, #f7b348); }
-
-.stat-label {
-    font-size: 0.86rem;
-    color: #2c3d59;
-    font-weight: 700;
-}
-
-.stat-value {
-    font-size: clamp(1.4rem, 2vw, 2.1rem);
-    font-weight: 800;
-    letter-spacing: -0.05em;
-    color: #1a2a44;
-    margin-bottom: 0.4rem;
-}
-
-.stat-trend {
-    font-size: 0.72rem;
-    color: #2d6a47;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-.stat-trend span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: rgba(25, 165, 103, 0.12);
-}
-
-.stat-trend.up { color: #2d6a47; }
-.stat-trend.down { color: #b13d53; }
-.stat-trend.down span { background: rgba(177, 61, 83, 0.12); }
-
-.content-grid {
-    display: grid;
-    gap: 1.25rem;
-}
-
-.top-grid {
-    grid-template-columns: 1.8fr 1fr;
-}
-
-.secondary-grid {
-    grid-template-columns: 1.1fr 1.2fr 1fr;
-}
-
-.bottom-grid {
-    grid-template-columns: 1.7fr 0.8fr;
-}
-
-.panel {
-    background: linear-gradient(180deg, rgba(245,248,252,0.92), rgba(233,239,247,0.9));
-    border: 1px solid rgba(171,182,198,0.25);
-    border-radius: 20px;
-    padding: 1rem 1.1rem;
-    box-shadow: 10px 10px 24px rgba(172, 185, 206, 0.18), -8px -8px 16px rgba(255,255,255,0.8);
-}
-
-.panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.85rem;
-}
-
-.panel-title {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-}
-
-.panel-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-    color: #2340a8;
-    background: rgba(60, 120, 255, 0.08);
-}
-
-.panel-icon.purple {
-    color: #5b5ff4;
-    background: rgba(120, 105, 255, 0.1);
-}
-
-.panel-title h3 {
-    margin: 0;
-    font-size: 1.05rem;
-    color: #1a2a44;
-    font-weight: 800;
-}
-
-.panel-header a,
-.panel-header button {
-    font-size: 0.72rem;
-    color: #3556ab;
-    text-decoration: none;
-    font-weight: 700;
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-}
-
-.range-tabs {
-    display: inline-flex;
-    gap: 0.4rem;
-    background: rgba(255,255,255,0.4);
-    border: 1px solid rgba(151,164,186,0.35);
-    border-radius: 999px;
-    padding: 0.25rem;
-}
-
-.range-tabs button {
-    border: 0;
-    background: transparent;
-    color: #5c7088;
-    border-radius: 999px;
-    padding: 0.45rem 0.8rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.range-tabs .active {
-    background: linear-gradient(135deg, #4d79ff, #2d5ee2);
-    color: white;
-    box-shadow: 0 8px 16px rgba(61, 112, 255, 0.28);
-}
-
-.chart-summary {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin: 0.7rem 0 0.2rem;
-}
-
-.chart-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.55rem 0.8rem;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #233d6b, #1b2d4e);
-    color: white;
-    font-size: 0.9rem;
-    font-weight: 800;
-    box-shadow: 10px 10px 18px rgba(26,42,68,0.15);
-}
-
-.chart-summary small {
-    color: #5c7088;
-    font-size: 0.72rem;
-    font-weight: 700;
-    margin-top: 0.7rem;
-}
-
-.line-chart {
-    width: 100%;
-    height: 250px;
-    display: block;
-    margin-top: 0.5rem;
-}
-
-.grid-lines line {
-    stroke: rgba(108, 124, 145, 0.18);
-    stroke-width: 1;
-}
-
-.chart-points circle {
-    fill: #3c78ff;
-}
-
-.chart-labels {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 0.3rem;
-    margin-top: 0.4rem;
-    color: #72839d;
-    font-size: 0.72rem;
-    text-align: center;
-}
-
-.rank-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.8rem;
-}
-
-.rank-list li {
-    display: grid;
-    gap: 0.55rem;
-    padding-bottom: 0.4rem;
-}
-
-.rank-meta {
-    display: grid;
-    align-items: center;
-    grid-template-columns: auto auto 1fr;
-    gap: 0.55rem;
-    font-size: 0.8rem;
-    color: #2b3a53;
-    font-weight: 700;
-}
-
-.rank-index {
-    width: 20px;
-    height: 20px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(143, 153, 173, 0.15);
-    font-size: 0.62rem;
-    color: #42536d;
-}
-
-.mini-box {
-    display: inline-block;
-    width: 22px;
-    height: 24px;
-    border-radius: 6px;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
-}
-
-.mini-box.blue { background: linear-gradient(180deg, #dfe9ff, #afc5ff); }
-.mini-box.purple { background: linear-gradient(180deg, #e2d7ff, #c8bcff); }
-.mini-box.mint { background: linear-gradient(180deg, #dff8f0, #bfece0); }
-.mini-box.peach { background: linear-gradient(180deg, #ffe3cf, #ffc7b1); }
-.mini-box.green { background: linear-gradient(180deg, #d8f7d8, #bde7bb); }
-
-.rank-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.rank-stats {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    color: #5d6d84;
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    border-radius: 999px;
-    background: rgba(144, 158, 182, 0.18);
-    overflow: hidden;
-}
-
-.progress-bar span {
-    display: block;
-    height: 100%;
-    background: linear-gradient(90deg, #4d7dff, #7a9cff);
-    border-radius: inherit;
-}
-
-.stock-layout {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 0.8rem;
-    align-items: center;
-}
-
-.donut-chart {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: conic-gradient(#3c78ff 0 24%, #6dd3ff 24% 44%, #7ee0a5 44% 62%, #f6d56a 62% 77%, #d9c5ff 77% 100%);
-    position: relative;
-    margin: 0 auto;
-    display: grid;
-    place-items: center;
-    box-shadow: inset 0 0 0 10px rgba(255,255,255,0.4);
-}
-
-.donut-chart::before {
-    content: "";
-    position: absolute;
-    inset: 18px;
-    background: rgba(245,248,252,0.96);
-    border-radius: 50%;
-}
-
-.donut-chart span,
-.donut-chart small {
-    position: relative;
-    z-index: 1;
-    display: block;
-    text-align: center;
-}
-
-.donut-chart span {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: #1c2f4d;
-}
-
-.donut-chart small {
-    color: #6e7f99;
-    font-size: 0.68rem;
-}
-
-.stock-breakdown {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.6rem;
-    font-size: 0.77rem;
-    color: #40506f;
-}
-
-.stock-breakdown li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-}
-
-.dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 0.45rem;
-}
-
-.dot.blue { background: #3c78ff; }
-.dot.cyan { background: #6dd3ff; }
-.dot.green { background: #7ee0a5; }
-.dot.yellow { background: #f6d56a; }
-.dot.lavender { background: #d9c5ff; }
-
-.operation-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.7rem;
-    margin-top: 0.35rem;
-}
-
-.mini-operation {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 0.8rem 0.7rem;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.35);
-    border: 1px solid rgba(166,181,205,0.2);
-}
-
-.mini-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    color: white;
-}
-
-.purchase .mini-badge { background: linear-gradient(135deg, #6cc9ab, #59b694); }
-.return .mini-badge { background: linear-gradient(135deg, #f7a0b8, #ee7aa7); }
-.transfer .mini-badge { background: linear-gradient(135deg, #8f92ff, #6e74ff); }
-
-.mini-operation h4 {
-    margin: 0;
-    color: #495d7a;
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-
-.mini-operation strong {
-    display: block;
-    margin-top: 0.15rem;
-    color: #1e2d47;
-    font-size: 0.96rem;
-    font-weight: 800;
-}
-
-.mini-operation small {
-    color: #2a8d5b;
-    font-weight: 700;
-}
-
-.ghost-btn {
-    background: rgba(52, 87, 172, 0.08);
-    color: #2346a6;
-    border: 1px solid rgba(52,87,172,0.12);
-    border-radius: 12px;
-    padding: 0.55rem 0.8rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-}
-
-.exchange-values {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.7rem;
-    margin-top: 0.5rem;
-}
-
-.exchange-box {
-    background: rgba(255,255,255,0.34);
-    border: 1px solid rgba(172,182,201,0.18);
-    border-radius: 14px;
-    padding: 0.75rem 0.7rem;
-}
-
-.currency-label {
-    display: block;
-    font-size: 0.68rem;
-    color: #5b6f8d;
-    font-weight: 700;
-    margin-bottom: 0.4rem;
-}
-
-.exchange-box strong {
-    display: block;
-    color: #1d2d4a;
-    font-size: 1.15rem;
-    font-weight: 800;
-}
-
-.exchange-box small {
-    color: #2a875e;
-    font-weight: 700;
-}
-
-.mini-chart {
-    width: 100%;
-    height: 84px;
-    display: block;
-    margin-top: 0.6rem;
-}
-
-.sales-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.78rem;
-}
-
-.sales-table th,
-.sales-table td {
-    padding: 0.75rem 0.65rem;
-    text-align: left;
-    border-bottom: 1px solid rgba(153,170,189,0.2);
-}
-
-.sales-table th {
-    color: #6b7d96;
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 800;
-}
-
-.sales-table td {
-    color: #2d405f;
-    font-weight: 600;
-}
-
-.status-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 96px;
-    padding: 0.38rem 0.65rem;
-    border-radius: 999px;
-    background: rgba(24, 120, 96, 0.12);
-    color: #1c7d5d;
-    border: 1px solid rgba(24,120,96,0.18);
-    font-weight: 800;
-    font-size: 0.67rem;
-}
-
-.status-pill.pending {
-    background: rgba(194, 140, 45, 0.12);
-    color: #b57d24;
-    border-color: rgba(194, 140, 45, 0.18);
-}
-
-.promo-panel {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 230px;
-    background: linear-gradient(135deg, #1d2d57, #2f4b87 52%, #3d64b2);
-    color: white;
-    overflow: hidden;
-}
-
-.promo-panel h3 {
-    margin: 0.5rem 0 0.25rem;
-    font-size: 1.4rem;
-    letter-spacing: -0.04em;
-    line-height: 1.25;
-}
-
-.promo-panel p {
-    margin: 0;
-    opacity: 0.82;
-    font-size: 0.82rem;
-}
-
-.promo-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.12);
-    color: white;
-    border: 1px solid rgba(255,255,255,0.12);
-}
-
-.promo-illustration {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 170px;
-    height: 120px;
-}
-
-.notebook,
-.cup,
-.pencil {
-    position: absolute;
-}
-
-.notebook {
-    right: 30px;
-    bottom: 10px;
-    width: 100px;
-    height: 80px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #f9f3d6, #dfe8ff);
-    box-shadow: 0 18px 30px rgba(12,25,49,0.18);
-    transform: rotate(10deg);
-}
-
-.notebook::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    background: linear-gradient(90deg, rgba(102,128,200,0.15) 0 10%, transparent 10% 100%);
-}
-
-.cup {
-    right: 20px;
-    bottom: 0;
-    width: 56px;
-    height: 56px;
-    border-radius: 16px 16px 18px 18px;
-    background: linear-gradient(180deg, #d8ebff, #9ec5ff);
-    box-shadow: 0 14px 20px rgba(11,26,51,0.2);
-}
-
-.cup::before {
-    content: "";
-    position: absolute;
-    width: 48px;
-    height: 10px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.7);
-    left: 4px;
-    top: 8px;
-}
-
-.pencil {
-    left: 18px;
-    bottom: 18px;
-    width: 110px;
-    height: 12px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #ffd25b, #f5ad2f, #ffdb7c);
-    transform: rotate(-28deg);
-    box-shadow: 0 10px 18px rgba(11,26,51,0.12);
-}
-
-.pencil::before {
-    content: "";
-    position: absolute;
-    right: -6px;
-    top: -2px;
-    width: 14px;
-    height: 16px;
-    background: linear-gradient(180deg, #4a7dff, #315dcc);
-    border-radius: 0 6px 6px 0;
-}
-
-@media (max-width: 1180px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .top-grid,
-    .secondary-grid,
-    .bottom-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .welcome-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .stock-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .sales-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-}
-
-.shell {
-    animation: dashboard-enter 0.28s ease;
-}
-
-@keyframes dashboard-enter {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-</style>
 @endsection
+
+
+@extends('layouts.app')
+@section('title', 'Dashboard &mdash; ' . config('business.name', 'LA FRENTONA MAS FRENTONA'))
+@section('breadcrumb', 'Dashboard Principal')
+
+@section('content')
+@php
+    $user = auth()->user();
+    $userName = trim((string) ($user->nombre_completo ?? $user->username ?? 'Usuario'));
+    $firstName = explode(' ', $userName)[0] ?? 'Usuario';
+    $cards = $summary['cards'] ?? [];
+    $chartPoints = collect($summary['sales_series'] ?? [])->values();
+    $chartMax = max($chartPoints->pluck('value')->all() ?: [1]);
+    
+    // Preparar datos para Chart.js
+    $chartLabels = $chartPoints->pluck('label')->toArray();
+    $chartValues = $chartPoints->pluck('value')->toArray();
+    $topProducts = $summary['top_products'] ?? [];
+    $inventoryAlerts = $summary['inventory_alerts'] ?? [];
+    $latestSales = $summary['latest_sales'] ?? [];
+    $operations = $summary['operations'] ?? [];
+@endphp
+
+<!-- ==============================================================
+     VIEW 1: DASHBOARD PRINCIPAL
+     ============================================================== -->
+<div class="space-y-6">
+    
+    <!-- GREETING & DATE RANGE PICKER -->
+    <div class="neo-card rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-blue-500/10 text-blue-600 dark:bg-amber-500/10 dark:text-amber-400 border border-blue-500/20 dark:border-amber-500/20 mb-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-amber-400 animate-pulse"></span>
+                Sistema en tiempo real • Conectado a Base de Datos
+            </div>
+            <h1 class="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
+                ¡Hola, {{ $firstName }}!
+            </h1>
+            <p class="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+                Aquí tienes un resumen actualizado de tu negocio.
+            </p>
+        </div>
+
+        <!-- Date Filter and Update button -->
+        <form class="flex flex-wrap items-center gap-3" method="GET" action="{{ route('home') }}">
+            <div class="neo-inset px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-bold uppercase text-[var(--text-muted)]">Desde:</span>
+                    <input type="date" name="desde" value="{{ $summary['since'] ?? request('desde') }}" class="bg-transparent font-mono text-[var(--text-primary)] focus:outline-none cursor-pointer">
+                </div>
+                <span class="text-[var(--text-muted)]">→</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-bold uppercase text-[var(--text-muted)]">Hasta:</span>
+                    <input type="date" name="hasta" value="{{ $summary['until'] ?? request('hasta') }}" class="bg-transparent font-mono text-[var(--text-primary)] focus:outline-none cursor-pointer">
+                </div>
+            </div>
+            <button type="submit" class="neo-btn-primary h-10 px-5 rounded-xl font-display font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                <span>Actualizar</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- 4 KPI CARDS -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        @foreach($cards as $index => $card)
+        @php
+            $trendValue = (float) ($card['trend'] ?? 0);
+            $trendDirection = $trendValue >= 0 ? 'up' : 'down';
+            $trendText = ($trendValue >= 0 ? '+' : '') . number_format($trendValue, 1, ',', '.') . '%';
+            $iconColors = ['text-blue-600 dark:text-amber-400', 'text-emerald-600', 'text-purple-600', 'text-amber-500'];
+            $icons = ['dollar-sign', 'package', 'users', 'trending-up'];
+            $currentIcon = $card['icon'] ?? ($icons[$index] ?? 'dollar-sign');
+            $currentColor = $iconColors[$index] ?? 'text-blue-600 dark:text-amber-400';
+        @endphp
+        <div class="neo-card rounded-2xl p-5 flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">{{ $card['label'] }}</p>
+                    <p class="font-mono text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] mt-1.5">{{ $card['value'] }}</p>
+                </div>
+                <div class="neo-card-sm w-11 h-11 rounded-xl flex items-center justify-center {{ $currentColor }}">
+                    <i data-lucide="{{ $currentIcon }}" class="w-5 h-5"></i>
+                </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-[var(--border-hairline)] flex items-center justify-between text-[11px]">
+                <span class="text-[var(--text-muted)]">Vs. periodo previo</span>
+                <span class="font-mono font-bold {{ $trendValue >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
+                    {{ $trendText }}
+                </span>
+            </div>
+        </div>
+        @endforeach
+    </section>
+
+    <!-- CHART.JS SECTION (3 CHARTS: Sales Trend, Payment Methods, Top Products) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Resumen de ventas (Line Chart) -->
+        <div class="neo-card rounded-3xl p-6 lg:col-span-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-display font-bold text-base text-[var(--text-primary)]">Resumen de ventas</h3>
+                    <p class="text-xs text-[var(--text-muted)]">Tendencia diaria de ingresos en soles (S/)</p>
+                </div>
+                <span class="font-mono text-xs font-bold px-3 py-1 rounded-xl bg-blue-500/10 text-blue-600 dark:text-amber-400 border border-blue-500/20">
+                    {{ $summary['period_label'] ?? now()->format('d/m/Y') }}
+                </span>
+            </div>
+            <div class="h-72 w-full">
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Métodos de pago (Doughnut Chart) -->
+        <div class="neo-card rounded-3xl p-6 flex flex-col justify-between">
+            <div class="mb-4">
+                <h3 class="font-display font-bold text-base text-[var(--text-primary)]">Métodos de pago</h3>
+                <p class="text-xs text-[var(--text-muted)]">Distribución por canal de cobro</p>
+            </div>
+            <div class="h-56 w-full flex items-center justify-center">
+                <canvas id="paymentMethodsChart"></canvas>
+            </div>
+            <div class="mt-4 pt-3 border-t border-[var(--border-hairline)] grid grid-cols-3 gap-2 text-center text-[11px]">
+                <div>
+                    <span class="block text-[var(--text-muted)]">Yape</span>
+                    <strong class="font-mono text-emerald-600">55%</strong>
+                </div>
+                <div>
+                    <span class="block text-[var(--text-muted)]">Efectivo</span>
+                    <strong class="font-mono text-blue-600">30%</strong>
+                </div>
+                <div>
+                    <span class="block text-[var(--text-muted)]">Tarjeta</span>
+                    <strong class="font-mono text-amber-500">15%</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOP PRODUCTS BAR CHART & INVENTORY ALERTS -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Productos más vendidos (Bar Chart) -->
+        <div class="neo-card rounded-3xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-display font-bold text-base text-[var(--text-primary)]">Productos más vendidos</h3>
+                    <p class="text-xs text-[var(--text-muted)]">Top 5 por unidades despachadas</p>
+                </div>
+                <a href="{{ route('products.index') }}" class="text-xs font-bold text-blue-600 dark:text-amber-400 hover:underline">Ver inventario &rarr;</a>
+            </div>
+            <div class="h-64 w-full">
+                <canvas id="topProductsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Alertas de Inventario & Operaciones del Mes -->
+        <div class="space-y-6">
+            <div class="neo-card rounded-3xl p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-display font-bold text-base text-[var(--text-primary)] flex items-center gap-2">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-500"></i>
+                        <span>Alertas de inventario</span>
+                    </h3>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/15 text-rose-600">
+                        {{ count($inventoryAlerts) }} ítems
+                    </span>
+                </div>
+                <div class="space-y-2.5 max-h-64 overflow-y-auto custom-scroll">
+                    @forelse($inventoryAlerts as $alert)
+                    <div class="neo-card-sm p-3 rounded-2xl flex items-center justify-between text-xs">
+                        <div>
+                            <p class="font-bold text-[var(--text-primary)]">{{ $alert->nombre }}</p>
+                            <p class="text-[11px] text-[var(--text-muted)] mt-0.5">Stock actual: {{ number_format((int) $alert->stock) }} • Mínimo: {{ number_format((int) $alert->stock_minimo) }}</p>
+                        </div>
+                        <a href="{{ route('products.ledger', $alert->id_producto) }}" class="neo-btn px-3 py-1.5 rounded-xl font-bold text-rose-600">Revisar</a>
+                    </div>
+                    @empty
+                    <div class="neo-card-sm p-4 rounded-2xl flex items-center justify-center text-xs text-[var(--text-muted)]">
+                        <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-emerald-500"></i>
+                        <span>Todo en orden. No hay productos por debajo del stock mínimo.</span>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <div class="neo-card rounded-3xl p-6">
+                <h3 class="font-display font-bold text-base text-[var(--text-primary)] mb-3 flex items-center gap-2">
+                    <i data-lucide="activity" class="w-5 h-5 text-blue-600 dark:text-amber-400"></i>
+                    <span>Operaciones del mes</span>
+                </h3>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="neo-inset p-3 rounded-2xl">
+                        <span class="text-[10px] uppercase font-bold text-[var(--text-muted)]">Compras</span>
+                        <p class="font-mono font-extrabold text-sm text-[var(--text-primary)] mt-1">S/ {{ number_format((float) ($operations['compras'] ?? 0), 2, ',', '.') }}</p>
+                    </div>
+                    <div class="neo-inset p-3 rounded-2xl">
+                        <span class="text-[10px] uppercase font-bold text-[var(--text-muted)]">Devoluciones</span>
+                        <p class="font-mono font-extrabold text-sm text-[var(--text-primary)] mt-1">S/ {{ number_format((float) ($operations['devoluciones'] ?? 0), 2, ',', '.') }}</p>
+                    </div>
+                    <div class="neo-inset p-3 rounded-2xl">
+                        <span class="text-[10px] uppercase font-bold text-[var(--text-muted)]">Transferencias</span>
+                        <p class="font-mono font-extrabold text-sm text-[var(--text-primary)] mt-1">{{ (int) ($operations['transferencias'] ?? 0) }} movs.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ULTIMAS VENTAS TABLE -->
+    <div class="neo-card rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-display font-bold text-base text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="receipt" class="w-5 h-5 text-blue-600 dark:text-amber-400"></i>
+                <span>Últimas ventas registradas en BD</span>
+            </h3>
+            <a href="{{ route('sales.history') }}" class="text-xs font-bold text-blue-600 dark:text-amber-400 hover:underline">Ver todas &rarr;</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                    <tr class="border-b border-[var(--border-hairline)] text-[11px] font-display font-bold uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface-alt)]/60">
+                        <th class="py-3.5 px-4">Comprobante #</th>
+                        <th class="py-3.5 px-4">Fecha y hora</th>
+                        <th class="py-3.5 px-4">Cliente</th>
+                        <th class="py-3.5 px-4">Total</th>
+                        <th class="py-3.5 px-4">Estado</th>
+                        <th class="py-3.5 px-4 text-right">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="text-xs font-medium">
+                    @forelse($latestSales as $sale)
+                    <tr class="border-b border-[var(--border-hairline)] hover:bg-white/40 dark:hover:bg-white/[0.03] transition-colors">
+                        <td class="py-3.5 px-4 font-mono font-bold text-blue-600 dark:text-amber-400">{{ $sale->id_venta }}</td>
+                        <td class="py-3.5 px-4 text-[var(--text-muted)]">{{ \Illuminate\Support\Carbon::parse($sale->fecha_venta)->format('d/m/Y H:i') }}</td>
+                        <td class="py-3.5 px-4">{{ $sale->cliente ?? 'Venta sin cliente' }}</td>
+                        <td class="py-3.5 px-4 font-mono font-bold text-[var(--text-primary)]">S/ {{ number_format((float) ($sale->total_venta ?? 0), 2, ',', '.') }}</td>
+                        <td class="py-3.5 px-4">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $sale->estado === 'completada' ? 'bg-emerald-500/15 text-emerald-600' : 'bg-amber-500/15 text-amber-600' }}">
+                                {{ $sale->estado === 'completada' ? 'Completada' : ucfirst($sale->estado) }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <a href="{{ route('sales.ticket', $sale->id_venta) }}" class="neo-btn px-3 py-1 rounded-xl text-xs font-bold inline-flex items-center gap-1">
+                                <i data-lucide="printer" class="w-3 h-3"></i> Imprimir
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-[var(--text-muted)] text-xs">
+                            No hay ventas registradas en este periodo.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+@endsection
+
+@push('scripts')
+<script>
+    // Datos inyectados desde Laravel
+    const chartLabels = @json($chartLabels);
+    const chartValues = @json($chartValues);
+    const topProductsNames = @json(collect($topProducts)->take(5)->pluck('nombre')->toArray());
+    const topProductsUnits = @json(collect($topProducts)->take(5)->pluck('unidades')->toArray());
+
+    let salesChartInstance = null;
+    let paymentChartInstance = null;
+    let topProductsChartInstance = null;
+
+    function initCharts() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#cbd5e1' : '#475569';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(148, 163, 184, 0.15)';
+        const primaryColor = isDark ? '#fbbf24' : '#2563eb';
+
+        // 1. Sales Trend Line Chart
+        const ctxSales = document.getElementById('salesTrendChart').getContext('2d');
+        const gradient = ctxSales.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, isDark ? 'rgba(245, 158, 11, 0.35)' : 'rgba(37, 99, 235, 0.35)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        if (salesChartInstance) salesChartInstance.destroy();
+        salesChartInstance = new Chart(ctxSales, {
+            type: 'line',
+            data: {
+                labels: chartLabels.length > 0 ? chartLabels : ['Sin datos'],
+                datasets: [{
+                    label: 'Ingresos (S/)',
+                    data: chartValues.length > 0 ? chartValues : [0],
+                    borderColor: primaryColor,
+                    borderWidth: 3,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.35,
+                    pointBackgroundColor: primaryColor,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: gridColor }, ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 11 } } },
+                    y: { grid: { color: gridColor }, ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 11 }, callback: v => 'S/ ' + v } }
+                }
+            }
+        });
+
+        // 2. Payment Methods Doughnut Chart
+        const ctxPayment = document.getElementById('paymentMethodsChart').getContext('2d');
+        if (paymentChartInstance) paymentChartInstance.destroy();
+        paymentChartInstance = new Chart(ctxPayment, {
+            type: 'doughnut',
+            data: {
+                labels: ['Yape', 'Efectivo', 'Tarjeta'],
+                datasets: [{
+                    data: [55, 30, 15],
+                    backgroundColor: ['#10b981', '#2563eb', '#f59e0b'],
+                    borderWidth: 0,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                cutout: '72%'
+            }
+        });
+
+        // 3. Top Products Bar Chart
+        const ctxTop = document.getElementById('topProductsChart').getContext('2d');
+        if (topProductsChartInstance) topProductsChartInstance.destroy();
+        topProductsChartInstance = new Chart(ctxTop, {
+            type: 'bar',
+            data: {
+                labels: topProductsNames.length > 0 ? topProductsNames : ['Sin datos'],
+                datasets: [{
+                    label: 'Unidades Vendidas',
+                    data: topProductsUnits.length > 0 ? topProductsUnits : [0],
+                    backgroundColor: isDark ? '#60a5fa' : '#3b82f6',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
+                    y: { grid: { color: gridColor }, ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 11 } } }
+                }
+            }
+        });
+    }
+
+    // Inicializar gráficos al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initCharts, 100);
+    });
+
+    // Escuchar cambios de tema para actualizar colores de gráficos
+    window.addEventListener('themeChanged', function(e) {
+        setTimeout(initCharts, 50);
+    });
+</script>
+@endpush
