@@ -16,11 +16,24 @@ use Illuminate\Support\Facades\Gate;
 
 final class CategoriaController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         Gate::authorize('viewAny', Categoria::class);
 
-        return view('categorias.index', ['categorias' => Categoria::query()->orderBy('nombre')->paginate(config('business.pagination'))]);
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'estado' => ['nullable', 'in:active,inactive'],
+        ]);
+        $search = trim($filters['search'] ?? '');
+        $estado = $filters['estado'] ?? '';
+        $total = Categoria::query()->count();
+        $active = Categoria::query()->where('activo', true)->count();
+        $categorias = Categoria::query()
+            ->when($search !== '', fn ($query) => $query->where('nombre', 'like', '%'.$search.'%'))
+            ->when($estado !== '', fn ($query) => $query->where('activo', $estado === 'active'))
+            ->orderBy('nombre')->paginate(config('business.pagination'))->withQueryString();
+
+        return view('categorias.index', compact('categorias', 'total', 'active', 'search', 'estado'));
     }
 
     public function store(SaveCategoriaRequest $request, CategoryWriter $categories): RedirectResponse

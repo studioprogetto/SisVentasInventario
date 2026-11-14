@@ -32,6 +32,10 @@ final class BusinessSettingsController extends Controller
             'return_policy_days' => ['nullable', 'integer', 'min:1', 'max:365'],
         ]);
 
+        if (! Schema::hasTable('empresa_configuraciones')) {
+            return back()->withInput()->withErrors(['name' => 'No se puede guardar: el almacenamiento de configuración no está disponible.']);
+        }
+
        $payload = [
            'name' => $data['name'],
            'ruc' => $data['ruc'] ?? config('business.ruc'),
