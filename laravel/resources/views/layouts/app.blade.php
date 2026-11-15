@@ -214,7 +214,7 @@
             <div class="neo-card p-4 mb-4" role="alert" tabindex="-1"><strong>Revisa los datos</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
         @endif
         @yield('content')
-        <footer class="workspace-footer"><div><x-icon name="box"/> <strong>{{ config('business.name', 'Studio & Progetto') }}</strong><small>Gestión de ventas e inventario</small></div><a href="{{ route('profile.index') }}">Gestionar mi perfil →</a></footer>
+       
     </main>
 </div>
 @stack('scripts')
