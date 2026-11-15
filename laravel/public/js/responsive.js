@@ -40,6 +40,7 @@
         prepareTables();
         compact.addEventListener('change',prepareTables);
         document.addEventListener('inventory:updated',prepareTables);
+        document.addEventListener('search:updated',prepareTables);
     });
     const cart = document.querySelector('#checkout-sheet');
     if (!cart) return;

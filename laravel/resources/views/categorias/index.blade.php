@@ -47,7 +47,8 @@
                     <div><input id="cat-search" name="search" value="{{ $search }}" maxlength="100" placeholder="Buscar categoría…"><button type="submit" class="btn btn-secondary"><x-icon name="search" />Buscar</button><a class="btn btn-secondary" href="{{ route('categorias.index', ['estado' => $estado ?: null]) }}">Limpiar</a></div>
                 </form>
             </div>
-            <div class="cat-table-scroll">
+            <div data-search-results>
+<div class="cat-table-scroll">
                 <table class="cat-table"><thead><tr><th>Nombre</th><th>Estado / publicación</th><th>Acciones</th></tr></thead><tbody>
                 @forelse($categorias as $categoria)
                     <tr>
@@ -82,6 +83,7 @@
             </div>
             <div class="cat-summary">Mostrando {{ $categorias->count() }} de {{ $categorias->total() }} resultados · {{ $total }} categorías registradas</div>
             <div class="cat-pagination">{{ $categorias->links('vendor.pagination.tailwind') }}</div>
+</div>
         </section>
     </div>
     <dialog id="cat-edit-dialog" aria-labelledby="cat-dialog-title"><div class="cat-dialog-heading"><strong id="cat-dialog-title">Editar categoría</strong><button type="button" class="btn btn-secondary" id="cat-close-dialog">Cerrar</button></div><div id="cat-dialog-body"></div></dialog>

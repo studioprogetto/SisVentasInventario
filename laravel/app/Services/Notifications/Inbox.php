@@ -16,7 +16,7 @@ class Inbox
     {
         $this->mine($user)->where('eliminado','<=',now()->subDays(30))->delete();
         foreach (app(NotificationFeed::class)->forUser($user) as $item) {
-            $this->send($user->getKey(), hash('sha256', $item['title'].$item['message'].today()->format('Y-m')), $item['title'], $item['message'], $item['url']);
+            $this->send($user->getKey(), $item['key'] ?? hash('sha256', $item['title'].$item['message'].today()->format('Y-m')), $item['title'], $item['message'], $item['url']);
         }
     }
 

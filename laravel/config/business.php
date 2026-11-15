@@ -14,6 +14,7 @@ return [
     ],
     'return_policy_days' => 4,
     'pagination' => 12,
+    'ticket_public_url' => env('TICKET_PUBLIC_URL'),
     'display_currency' => 'S/',
     'payment_methods' => ['efectivo', 'yape', 'plin', 'agora', 'transferencia', 'saldo', 'mixto'],
 ];

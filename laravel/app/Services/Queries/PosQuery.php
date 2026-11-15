@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Queries;
 
+use App\Support\SearchTerms;
 use App\Services\Currency\CurrencyQuote;
 use App\Services\Sales\Loyalty;
 use App\Support\Money;
@@ -13,8 +14,7 @@ final class PosQuery
 {
     public function lookups(): array
     {
-        return ['warehouses' => DB::table('almacenes')->where('activo', 1)->orderBy('nombre')->get(['id', 'nombre']),
-            'currencies' => DB::table('tipo_moneda')->where('activo', 1)->orderByDesc('principal')->get(['id', 'descripcion', 'codigo', 'principal'])];
+        return ['currencies' => DB::table('tipo_moneda')->where('activo', 1)->orderByDesc('principal')->get(['id', 'descripcion', 'codigo', 'principal'])];
     }
 
     public function items(array $filters): array
@@ -23,11 +23,11 @@ final class PosQuery
         $quote = app(CurrencyQuote::class)->snapshot(isset($filters['id_moneda']) ? (int) $filters['id_moneda'] : null);
         $products = DB::table('productos as p')->join('existencias as e', 'e.id_producto', '=', 'p.id_producto')
             ->join('almacenes as a', 'a.id', '=', 'e.id_almacen')->where('p.activo', 1)->where('a.activo', 1)
-            ->when($term !== '', fn ($q) => $q->where(fn ($q) => $q->where('p.nombre', 'like', '%'.$term.'%')->orWhere('p.codigo_barra', $term)))
+            ->when($term !== '', fn ($q) => $q->where(SearchTerms::matching($term, ['p.nombre','p.codigo_barra'])))
             ->when($filters['almacen'] ?? null, fn ($q, $id) => $q->where('a.id', $id))
             ->selectRaw("p.id_producto as id, p.nombre, p.precio_venta, e.stock, a.id as id_almacen, a.nombre as almacen, 'producto' as tipo");
         $services = DB::table('servicios')->where('activo', 1)
-            ->when($term !== '', fn ($q) => $q->where('nombre', 'like', '%'.$term.'%'))
+            ->when($term !== '', fn ($q) => $q->where(SearchTerms::matching($term, ['nombre'])))
             ->selectRaw("id_servicio as id, nombre, precio_venta, NULL as stock, NULL as id_almacen, 'Servicio' as almacen, 'servicio' as tipo");
         $query = match ($filters['tipo'] ?? '') {
             'servicio' => $services,

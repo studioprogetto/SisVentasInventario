@@ -18,7 +18,11 @@ final class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $scriptSources = $request->routeIs('login') ? "script-src 'self' https://cdnjs.cloudflare.com" : "script-src 'self'";
         $response->headers->set('Content-Security-Policy', "default-src 'self'; img-src 'self' data: https: http:; style-src 'self' 'unsafe-inline'; {$scriptSources}; object-src 'none'; base-uri 'self'; form-action 'self'");
-        if ($request->user()) {
+        if ($request->routeIs('tickets.*')) {
+            $response->headers->set('Referrer-Policy', 'no-referrer');
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
+        if ($request->user() || $request->routeIs('tickets.*')) {
             $response->headers->set('Cache-Control', 'no-store,private');
         }
 

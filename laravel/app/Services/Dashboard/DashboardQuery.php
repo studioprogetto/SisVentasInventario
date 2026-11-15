@@ -38,10 +38,6 @@ final class DashboardQuery
         $profitRows = $reports->build('rentabilidad', $since, $until)->get();
         $documented = $profitRows->whereNotNull('ganancia_base_documentada');
         $grossProfit = $documented->isEmpty() ? null : (float) $documented->sum('ganancia_base_documentada');
-        $stockTotals = DB::table('existencias')->select('id_producto')->selectRaw('SUM(stock) as stock')->groupBy('id_producto');
-        $inventory = DB::table('productos as p')->leftJoinSub($stockTotals, 'i', 'i.id_producto', '=', 'p.id_producto')->where('p.activo', true);
-        $lowStock = (clone $inventory)->whereRaw('COALESCE(i.stock, 0) <= p.stock_minimo');
-        $inventoryHealth = (clone $inventory)->selectRaw('COUNT(*) as total, SUM(CASE WHEN COALESCE(i.stock, 0) <= 0 THEN 1 ELSE 0 END) as agotados, SUM(CASE WHEN COALESCE(i.stock, 0) > 0 AND COALESCE(i.stock, 0) <= p.stock_minimo THEN 1 ELSE 0 END) as reposicion, SUM(CASE WHEN COALESCE(i.stock, 0) > p.stock_minimo THEN 1 ELSE 0 END) as suficiente')->first();
         $payments = (clone $currentSales)->groupBy('moneda_codigo', 'metodo_pago')->select('moneda_codigo', 'metodo_pago')->selectRaw('COUNT(*) as operaciones, SUM(cobro_base) as cobro_base')->get();
 
         $topProducts = DB::table('detalle_ventas as d')
@@ -74,20 +70,6 @@ final class DashboardQuery
             ->groupByRaw('DATE(v.fecha_venta)')
             ->orderBy('dia')
             ->get();
-
-        $latestSales = DB::table('ventas as v')
-            ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-            ->leftJoin('usuarios as u', 'u.id_usuario', '=', 'v.id_usuario')
-            ->whereBetween('v.fecha_venta', [$start, $end])
-            ->select('v.id_venta as id_venta', 'v.fecha_venta as fecha_venta', DB::raw('COALESCE(c.nombre_cliente, "Venta sin cliente") as cliente'), 'v.total_venta as total_venta', 'v.estado', 'v.moneda_codigo', 'v.id_usuario', 'u.nombre_completo as usuario')
-            ->orderByDesc('v.fecha_venta')->orderByDesc('v.id_venta')
-            ->paginate(config('business.pagination'), ['*'], 'ventas')->withQueryString();
-
-        $operations = [
-            'compras' => (float) DB::table('compras')->where('estado', 'recibida')->whereBetween('fecha_compra', [$start, $end])->sum('total_compra'),
-            'devoluciones' => (float) DB::table('cambios_ventas')->whereBetween('fecha_cambio', [$start, $end])->sum('monto_saldo'),
-            'transferencias' => DB::table('movimientos_inventario')->whereBetween('fecha', [$start, $end])->where('tipo_movimiento', 'transferencia_salida')->count() + DB::table('movimientos_inventario')->whereBetween('fecha', [$start, $end])->where('tipo_movimiento', 'transferencia_entrada')->count(),
-        ];
 
         $exchangeRates = DB::table('tipo_cambio as tc')
             ->join('tipo_moneda as tm', 'tm.id', '=', 'tc.id_moneda')
@@ -153,16 +135,10 @@ final class DashboardQuery
             'gross_profit' => $grossProfit,
             'profit_missing' => $profitRows->count() - $documented->count(),
             'payments' => $payments,
-            'inventory_health' => $inventoryHealth,
-            'low_stock' => (clone $lowStock)->count(),
-            'out_of_stock' => (int) ($inventoryHealth->agotados ?? 0),
-            'inventory_alerts' => (clone $lowStock)->select('p.id_producto', 'p.nombre', 'p.stock_minimo')->selectRaw('COALESCE(i.stock, 0) as stock')->orderBy('stock')->limit(5)->get(),
             'top_products' => $topProducts,
             'stock_by_warehouse' => $warehouseStocks,
             'sales_series' => $chartPoints,
             'legacy_series' => $this->normalizeSeries($undocumented, $since, $until),
-            'latest_sales' => $latestSales,
-            'operations' => $operations,
             'rates' => $exchangeRates,
             'cards' => $cards,
             'period_label' => Carbon::parse($since)->format('d/m/Y').' — '.Carbon::parse($until)->format('d/m/Y'),

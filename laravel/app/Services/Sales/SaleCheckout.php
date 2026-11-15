@@ -44,7 +44,10 @@ final class SaleCheckout
             if (isset($data['accepted_total']) && Money::cents($data['accepted_total']) !== $total) {
                 throw ValidationException::withMessages(['total' => 'El total cambió. Vuelva a calcular antes de confirmar.']);
             }
-            $usedCredit = 0;
+            $usedCredit = Money::cents($data['abono_cambio_anonimo'] ?? '0');
+            if ($usedCredit > $total) {
+                throw ValidationException::withMessages(['id_cliente'=>'El reemplazo cuesta menos. Registra o selecciona al cliente para conservar la diferencia a su favor.']);
+            }
             if (($data['metodo_pago'] ?? '') === 'saldo' || ($data['usar_saldo'] ?? false)) {
                 if (! $client) {
                     throw ValidationException::withMessages(['id_cliente' => 'Seleccione el cliente titular del saldo.']);
@@ -60,7 +63,7 @@ final class SaleCheckout
                 }
                 $change = $received - ($total - $usedCredit);
             }
-            $saleData = $quote + ['id_cliente' => $client?->id_cliente, 'id_usuario' => $user, 'id_turno' => $turn->id_turno,
+            $saleData = $quote + ['fecha_venta'=>now(), 'id_cliente' => $client?->id_cliente, 'id_usuario' => $user, 'id_turno' => $turn->id_turno,
                 'total_venta' => Money::decimal($total), 'total_base' => bcadd(bcmul(Money::decimal($total), $quote['tipo_cambio_aplicado'], 4), '0.005', 2),
                 'saldo_utilizado' => Money::decimal($usedCredit), 'cobro_base' => bcadd(bcmul(Money::decimal($total - $usedCredit), $quote['tipo_cambio_aplicado'], 4), '0.005', 2),
                 'descuento_manual' => Money::decimal($manual), 'descuento_sellos' => bcdiv((string) $percent, '100', 2),

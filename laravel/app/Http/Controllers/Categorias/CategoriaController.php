@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Categorias;
 
+use App\Support\SearchTerms;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Categorias\SaveCategoriaRequest;
 use App\Models\Categoria;
@@ -29,7 +30,7 @@ final class CategoriaController extends Controller
         $total = Categoria::query()->count();
         $active = Categoria::query()->where('activo', true)->count();
         $categorias = Categoria::query()
-            ->when($search !== '', fn ($query) => $query->where('nombre', 'like', '%'.$search.'%'))
+            ->when($search !== '', fn ($query) => $query->where(SearchTerms::matching($search, ['nombre'])))
             ->when($estado !== '', fn ($query) => $query->where('activo', $estado === 'active'))
             ->orderBy('nombre')->paginate(config('business.pagination'))->withQueryString();
 

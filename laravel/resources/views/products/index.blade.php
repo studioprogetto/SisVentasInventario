@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/products-index.css') }}?v=2">
+<link rel="stylesheet" href="{{ asset('css/products-index.css') }}?v={{ filemtime(public_path('css/products-index.css')) }}">
 @endpush
 
 @section('title', 'Inventario — '.config('business.name'))
@@ -172,5 +172,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/products-index.js') }}?v=2" defer></script>
+<script src="{{ asset('js/products-index.js') }}?v={{ filemtime(public_path('js/products-index.js')) }}" defer></script>
 @endpush

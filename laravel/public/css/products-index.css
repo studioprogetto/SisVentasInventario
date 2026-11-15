@@ -1064,3 +1064,27 @@
         text-align: right;
     }
 }
+
+/* La cuadrícula responde al ancho útil del panel, también con la navegación abierta. */
+.inventory-page { grid-template-columns: minmax(0, 1fr); }
+.inventory-filter-panel { container-type: inline-size; min-width: 0; }
+.inventory-filter-panel .inventory-filter-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    align-items: end;
+}
+.inventory-filter-panel .inventory-filter-form > * { grid-column: auto; min-width: 0; }
+.inventory-filter-panel .inventory-filter { font-weight: 600; text-transform: none; letter-spacing: normal; }
+.inventory-filter-panel .inventory-control { box-sizing: border-box; min-height: 46px; width: 100%; font-size: 1rem; }
+.inventory-filter-panel .inventory-control:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.inventory-filter-panel .voice-entry { height: 100%; }
+.inventory-filter-panel .inventory-filter-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.inventory-filter-panel .inventory-filter-actions > * { flex: 1 1 6rem; min-height: 44px; }
+@container (min-width: 32rem) {
+    .inventory-filter-panel .inventory-filter-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@container (min-width: 54rem) {
+    .inventory-filter-panel .inventory-filter-form { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .inventory-filter-panel .inventory-filter-actions { grid-column: 3 / -1; justify-self: end; }
+}

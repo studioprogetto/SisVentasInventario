@@ -1,0 +1,40 @@
+.voice-entry { display:inline-flex;position:relative;align-items:center;min-width:0;width:100%;flex:1; }
+.voice-entry > input { width:100%;min-width:0; }
+body .voice-entry > input {padding-inline-end:3rem!important;}
+body .voice-entry > button.voice-trigger {position:absolute;inset-inline-end:2px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:40px;height:40px;min-height:0;padding:0;color:var(--muted);background:transparent;border:0;box-shadow:none;}
+.voice-trigger[aria-pressed=true] {color:var(--accent)!important;}
+.voice-status:not(:empty) {position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);width:max-content;max-width:90vw;z-index:200;background:var(--raised);color:var(--text);padding:.7rem 1rem;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);}
+body.admin-app .topbar .neo-search input {width:100%;flex:1;height:42px;}
+body.admin-app .topbar .neo-search label {height:44px;}
+@media(min-width:1024px){
+    body.admin-app .workspace,body.admin-app.sidebar-collapsed .workspace {margin-left:124px;}
+    body.admin-app:not(.sidebar-collapsed) .sidebar {z-index:60;box-shadow:var(--shadow);}
+    body.admin-app:not(.sidebar-collapsed) .topbar {margin-inline-start:164px;}
+}
+@media(max-width:1023px){
+    body.admin-app .workspace {margin-left:0;}
+    body.admin-app .topbar {display:grid;grid-template-columns:auto minmax(0,1fr);height:auto;gap:.6rem;}
+    body.admin-app .topbar .topbar-context,body.admin-app .topbar #nav-toggle {display:flex;visibility:visible;align-items:center;}
+    body.admin-app .topbar .topbar-actions {justify-self:end;gap:clamp(4px,2vw,12px);}
+    body.admin-app .topbar .neo-search {grid-column:1/-1;grid-row:2;width:100%;max-width:none;}
+    body.admin-app .topbar .user-meta {display:none;}
+}
+
+body.admin-app .workspace > .topbar {position:relative;top:auto;z-index:20;border-radius:24px}
+@media(min-width:1024px){body.admin-app .workspace {padding-top:clamp(24px,4vh,44px)}}
+.incident-details summary {cursor:pointer;color:var(--accent);font-weight:600;padding-block:.4rem}
+.operational-reports {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:1rem;margin-block:1rem}
+.operational-reports .panel {min-width:0;padding:1rem}
+.operational-reports .report-sales {grid-column:1/-1}
+.operational-reports small,.operational-reports .executive-alerts small {display:block}
+.operational-reports .executive-flow {display:flex;gap:.75rem;flex-wrap:wrap}
+@media(min-width:1200px) and (min-height:650px){
+    body.admin-app .workspace:has(.studio-dashboard) {height:100dvh;box-sizing:border-box;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+    .workspace:has(.studio-dashboard) #content {min-height:0;overflow:auto;padding-block:.75rem}
+    .workspace:has(.studio-dashboard) .studio-dashboard {height:100%;box-sizing:border-box;grid-template-rows:auto auto minmax(0,1fr)}
+    .workspace:has(.studio-dashboard) .executive-grid {min-height:0;align-items:stretch}
+    .workspace:has(.studio-dashboard) .executive-grid > section {min-height:0;overflow:auto}
+    .workspace:has(.studio-dashboard) .workspace-footer {margin-top:0}
+}
+body.admin-app > .nav-backdrop {position:fixed;inset:0;width:100%;height:100%;z-index:30}
+body.admin-app > .nav-backdrop[aria-hidden="true"] {display:none}

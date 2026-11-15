@@ -24,3 +24,4 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
 Route::middleware(['auth', 'active'])->group(__DIR__.'/modules.php');
 require __DIR__.'/catalog.php';
+require __DIR__.'/tickets.php';

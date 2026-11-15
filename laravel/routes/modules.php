@@ -22,6 +22,7 @@ Route::middleware(['can:ventas_crear', 'throttle:120,1'])->group(function (): vo
 Route::get('pos/imagenes/{id}', [PosController::class, 'image'])->whereNumber('id')->middleware('can:ventas_crear')->name('pos.image');
 Route::post('venta/cotizar', [\App\Http\Controllers\Operations\SaleController::class, 'quote'])->middleware('can:ventas_crear')->name('sales.quote');
 Route::get('venta/historial', [PageController::class, 'history'])->middleware('can:ventas_ver_listado')->name('sales.history');
+Route::get('venta/cambios', [PageController::class, 'exchanges'])->name('sales.exchanges');
 Route::get('venta/ticket/{id}', [PageController::class, 'sale'])->whereNumber('id')->name('sales.ticket');
 Route::get('venta/buscar', [PageController::class, 'search'])->middleware(['can:ventas_crear', 'throttle:120,1'])->name('sales.search');
 Route::get('compra', [PageController::class, 'purchases'])->middleware('can:compras_ver_lista')->name('purchases.index');

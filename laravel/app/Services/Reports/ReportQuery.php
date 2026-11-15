@@ -20,6 +20,35 @@ final class ReportQuery
         'devoluciones' => ['Cambios y devoluciones', 'ventas_ver_listado'],
     ];
 
+    public function operationalSummary(string $since, string $until): array
+    {
+        $start = $since.' 00:00:00';
+        $end = $until.' 23:59:59';
+        $stockTotals = DB::table('existencias')->select('id_producto')->selectRaw('SUM(stock) as stock')->groupBy('id_producto');
+        $inventory = DB::table('productos as p')->leftJoinSub($stockTotals, 'i', 'i.id_producto', '=', 'p.id_producto')->where('p.activo', true);
+        $lowStock = (clone $inventory)->whereRaw('COALESCE(i.stock, 0) <= p.stock_minimo');
+        $inventoryHealth = (clone $inventory)->selectRaw('COUNT(*) as total, SUM(CASE WHEN COALESCE(i.stock, 0) <= 0 THEN 1 ELSE 0 END) as agotados, SUM(CASE WHEN COALESCE(i.stock, 0) > 0 AND COALESCE(i.stock, 0) <= p.stock_minimo THEN 1 ELSE 0 END) as reposicion, SUM(CASE WHEN COALESCE(i.stock, 0) > p.stock_minimo THEN 1 ELSE 0 END) as suficiente')->first();
+        $latestSales = DB::table('ventas as v')
+            ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
+            ->leftJoin('usuarios as u', 'u.id_usuario', '=', 'v.id_usuario')
+            ->whereBetween('v.fecha_venta', [$start, $end])
+            ->select('v.id_venta as id_venta', 'v.fecha_venta as fecha_venta', DB::raw('COALESCE(c.nombre_cliente, "Venta sin cliente") as cliente'), 'v.total_venta as total_venta', 'v.estado', 'v.moneda_codigo', 'v.id_usuario', 'u.nombre_completo as usuario')
+            ->orderByDesc('v.fecha_venta')->orderByDesc('v.id_venta')
+            ->paginate(config('business.pagination'), ['*'], 'ventas')->withQueryString();
+
+        $operations = [
+            'transferencias' => DB::table('movimientos_inventario')->whereBetween('fecha', [$start, $end])->where('tipo_movimiento', 'transferencia_salida')->count() + DB::table('movimientos_inventario')->whereBetween('fecha', [$start, $end])->where('tipo_movimiento', 'transferencia_entrada')->count(),
+        ];
+
+        return [
+            'inventory_health' => $inventoryHealth,
+            'low_stock' => (clone $lowStock)->count(),
+            'inventory_alerts' => (clone $lowStock)->select('p.id_producto', 'p.nombre', 'p.stock_minimo')->selectRaw('COALESCE(i.stock, 0) as stock')->orderBy('stock')->limit(5)->get(),
+            'latest_sales' => $latestSales,
+            'operations' => $operations,
+        ];
+    }
+
     public function build(string $type, string $since, string $until): Builder
     {
         $start = $since.' 00:00:00';

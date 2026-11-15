@@ -4,13 +4,12 @@ document.addEventListener('alpine:init', () => {
             const search = document.querySelector('[data-module-search]');
             const results = document.querySelector('[data-module-results]');
             function filterModules() {
-                const normalize = value => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-                const query = normalize(search.value);
+                const query = search.value.trim();
                 results.replaceChildren();
                 results.hidden = !query;
                 if (!query) return;
                 for (const item of document.querySelectorAll('#main-nav .nav-link')) {
-                    if (!normalize(item.textContent).includes(query)) continue;
+                    if (!SearchUI.matches(item.textContent, query)) continue;
                     const link = document.createElement('a');
                     link.href = item.href;
                     link.textContent = item.textContent.trim();
@@ -18,10 +17,11 @@ document.addEventListener('alpine:init', () => {
                 }
                 if (!results.children.length) results.textContent = 'No se encontraron módulos.';
             }
-            search.addEventListener('input', filterModules);
+            let timer;
+            search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(filterModules, 300); });
             search.addEventListener('focus', filterModules);
-            search.parentElement.parentElement.addEventListener('focusout', event => {
-                if (!event.currentTarget.contains(event.relatedTarget)) results.hidden = true;
+            search.closest('.neo-search').addEventListener('focusout', event => {
+                if (!event.currentTarget.contains(event.relatedTarget)) { clearTimeout(timer); results.hidden = true; }
             });
             search.addEventListener('keydown', event => {
                 if (event.key === 'Escape') results.hidden = true;

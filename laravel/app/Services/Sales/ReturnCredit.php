@@ -16,9 +16,9 @@ final class ReturnCredit
 {
     public function __construct(private Idempotency $requests, private StockLedger $stock, private AuditTrail $audit, private CashSession $cash) {}
 
-    public function refund(int $user, array $data): array
+    public function refund(int $user, array $data, bool $immediateExchange = false): array
     {
-        return $this->requests->execute($user, 'devolucion', $data['idempotency_key'], $data, function () use ($user, $data): array {
+        return $this->requests->execute($user, 'devolucion', $data['idempotency_key'], $data, function () use ($user, $data, $immediateExchange): array {
             if (!in_array($data['destino'] ?? 'saldo', ['saldo','cambio'], true)) {
                 throw ValidationException::withMessages(['destino'=>'Solo se admite cambio de producto o saldo a favor.']);
             }
@@ -31,10 +31,10 @@ final class ReturnCredit
             }
             $originalClient = $sale->id_cliente;
             $clientId = $originalClient ?: ($data['id_cliente'] ?? null);
-            if (!$clientId || !DB::table('clientes')->where(['id_cliente'=>$clientId,'activo'=>1])->exists()) {
+            if ((!$clientId && !$immediateExchange) || ($clientId && !DB::table('clientes')->where(['id_cliente'=>$clientId,'activo'=>1])->exists())) {
                 throw ValidationException::withMessages(['id_cliente'=>'Registra y selecciona al cliente titular.']);
             }
-            if (!$originalClient) {
+            if (!$originalClient && $clientId) {
                 DB::table('ventas')->where('id_venta',$sale->id_venta)->update(['id_cliente'=>$clientId]);
                 $sale->id_cliente = $clientId;
             }
@@ -67,7 +67,7 @@ final class ReturnCredit
                 }
             }
             DB::table('cambios_ventas')->where('id_cambio', $change)->update(['monto_saldo' => Money::decimal($amount)]);
-            if ($amount > 0) {
+            if ($amount > 0 && $sale->id_cliente) {
                 DB::table('saldos_clientes')->insert(['id_cliente' => $sale->id_cliente, 'id_moneda' => $sale->id_moneda, 'saldo' => Money::decimal($amount), 'estado' => 'pendiente']);
             }
             $totalQuantity = (int) $details->sum('cantidad');

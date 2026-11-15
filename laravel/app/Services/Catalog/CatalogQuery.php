@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Catalog;
 
+use App\Support\SearchTerms;
 use App\Models\Categoria;
 use App\Models\Producto;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,7 +28,7 @@ final class CatalogQuery
             'precio_asc' => ['precio_venta', 'asc'], 'precio_desc' => ['precio_venta', 'desc'], default => ['nombre', 'asc']
         };
 
-        return $this->published()->when($filters['q'] ?? '', fn ($query, $term) => $query->where(fn ($q) => $q->where('nombre', 'like', '%'.$term.'%')->orWhere('descripcion', 'like', '%'.$term.'%')))
+        return $this->published()->when($filters['q'] ?? '', fn ($query, $term) => $query->where(SearchTerms::matching($term, ['nombre','descripcion','codigo_barra'])))
             ->when($filters['categoria'] ?? null, fn ($query, $id) => $query->where('id_categoria', $id))
             ->when(isset($filters['minimo']), fn ($query) => $query->where('precio_venta', '>=', $filters['minimo']))
             ->when(isset($filters['maximo']), fn ($query) => $query->where('precio_venta', '<=', $filters['maximo']))

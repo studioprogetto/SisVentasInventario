@@ -35,7 +35,7 @@ final class OperationRequest extends FormRequest
             'id_cliente' => ['nullable','integer','exists:clientes,id_cliente'],
             'condicion' => ['sometimes', Rule::in(['defectuoso','conforme'])],
             'reemplazo' => ['required_if:destino,cambio','nullable','integer','exists:productos,id_producto'],
-            'metodo_pago' => ['sometimes',Rule::in(config('business.payment_methods'))],
+            'metodo_pago' => ['required_if:destino,cambio',Rule::in(config('business.payment_methods'))],
         ];
         return match ($this->route()->getName()) {
             'sales.store' => $key + $sale,

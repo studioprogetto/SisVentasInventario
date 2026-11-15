@@ -5,7 +5,6 @@
     const points = JSON.parse(root.getAttribute('data-sales_series'));
     const sparks = JSON.parse(root.getAttribute('data-spark_series'));
     const payments = JSON.parse(root.getAttribute('data-payments'));
-    const health = JSON.parse(root.getAttribute('data-inventory_health'));
     const colors = ['#10b981', '#f59e0b', '#fb7185', '#fef3c7', '#38bdf8', '#a78bfa'];
     const animation = matchMedia('(prefers-reduced-motion: reduce)').matches ? false : {duration: 500};
     const basic = {responsive: true, maintainAspectRatio: false, animation, plugins: {legend: {display: false}}};
@@ -42,9 +41,5 @@
     }));
     new Chart(root.querySelector('#executive-payments'), {
         type: 'doughnut', data: {labels: payments.map(p => p.metodo_pago + ' / ' + (p.moneda_codigo || 'Sin documentar')), datasets: [{data: payments.map(p => Number(p.operaciones)), backgroundColor: payments.map((_, i) => colors[i % colors.length]), borderColor: '#0f172a', borderWidth: 3}]}, options: {...basic, cutout: '74%'}
-    });
-    new Chart(root.querySelector('#executive-health'), {
-        type: 'bar', data: {labels: ['Sobre mínimo', 'Por reponer', 'Cero / negativo'], datasets: [{data: [Number(health.suficiente || 0), Number(health.reposicion || 0), Number(health.agotados || 0)], backgroundColor: ['#10b981', '#f59e0b', '#fb7185'], borderRadius: 5, barThickness: 12}]},
-        options: {...basic, indexAxis: 'y', scales: {x: {display: false, beginAtZero: true}, y: {grid: {display: false}, ticks: {color: '#94a3b8', font: {size: 10}}}}}
     });
 })();

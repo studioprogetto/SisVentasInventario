@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Masters;
 
+use App\Support\SearchTerms;
 use App\Services\Operations\AuditTrail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,22 @@ final class MasterData
         $model = $this->model($module);
         $field = array_key_first($this->definition($module)['fields']);
 
-        return $model->newQuery()->where('activo', $state !== 'inactivos')->when($term !== '', fn ($query) => $query->where($field, 'like', '%'.$term.'%'))->orderBy($field)->paginate(config('business.pagination'))->withQueryString();
+        $rows = $model->newQuery()->where('activo', $state !== 'inactivos')->when($term !== '', fn ($query) => $query->where(SearchTerms::matching($term, [$field])))->orderBy($field)->paginate(config('business.pagination'))->withQueryString();
+        if ($module === 'cliente') {
+            $balances = DB::table('saldos_clientes as s')
+                ->leftJoin('tipo_moneda as m', 'm.id', '=', 's.id_moneda')
+                ->whereIn('s.id_cliente', $rows->getCollection()->modelKeys())
+                ->where('s.estado', 'pendiente')
+                ->groupBy('s.id_cliente', 's.id_moneda', 'm.codigo')
+                ->orderBy('m.codigo')
+                ->select('s.id_cliente', 'm.codigo')
+                ->selectRaw('SUM(CASE WHEN saldo > 0 THEN saldo ELSE 0 END) AS favor, SUM(CASE WHEN saldo < 0 THEN -saldo ELSE 0 END) AS deuda')
+                ->get()->groupBy('id_cliente');
+            foreach ($rows as $row) {
+                $row->setRelation('balances', $balances->get($row->getKey(), collect()));
+            }
+        }
+        return $rows;
     }
 
     public function save(string $module, int $user, array $values, ?int $id): int

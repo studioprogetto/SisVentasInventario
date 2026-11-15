@@ -9,7 +9,7 @@
 <div class="pos-layout">
 <section class="pos-catalog panel"><div class="pos-panel-title"><x-icon name="cart"/><h2>Punto de venta</h2><span class="pos-live">Catálogo en vivo</span></div>
 <div class="pos-catalog-controls"><label for="pos-search">Buscar producto o servicio</label><div class="pos-search-row"><input id="pos-search" type="search" maxlength="100" autocomplete="off" placeholder="Nombre o código de barras…" data-pos-search><button type="button" data-pos-search-now aria-label="Buscar productos"><x-icon name="arrow"/></button></div><p class="pos-search-hint">Se actualiza 300 ms después de escribir. Enter busca al instante.</p>
-<div class="warehouse-tabs" aria-label="Filtrar por almacén"><button type="button" class="warehouse-tab is-active" data-pos-warehouse="" aria-pressed="true">Todos</button>@foreach($warehouses as $warehouse)<button type="button" class="warehouse-tab" data-pos-warehouse="{{ $warehouse->id }}" aria-pressed="false"><x-icon name="box"/>{{ $warehouse->nombre }}</button>@endforeach<button type="button" class="warehouse-tab" data-pos-services aria-pressed="false">Servicios</button></div></div>
+</div>
 <p class="pos-results-status" data-pos-status role="status" aria-live="polite">{{ $catalog['total'] }} resultados · precios en {{ $catalog['currency'] }}</p><div class="pos-products" data-pos-products aria-label="Resultados de productos">
 @forelse($catalog['data'] as $item)
     <article class="pos-product"><div class="pos-product-image">@if($item['imagen'])<img src="{{ $item['imagen'] }}" alt="" loading="lazy">@else<span>✦</span>@endif</div>

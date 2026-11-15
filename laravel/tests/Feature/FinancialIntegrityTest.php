@@ -75,6 +75,35 @@ final class FinancialIntegrityTest extends CommercialTestCase
         $this->postJson(route('sales.return'), $claim + ['destino'=>'saldo'])->assertUnprocessable();
     }
 
+    public function test_guest_can_exchange_without_a_credit_account(): void
+    {
+        app(CashSession::class)->open($this->operator->getKey(), '0');
+        $sale = app(SaleCheckout::class)->checkout($this->operator->getKey(), $this->cart(['id_cliente'=>null]));
+        $line = DB::table('detalle_ventas')->value('id_detalle_venta');
+        $result = app(\App\Services\Sales\ProductExchange::class)->exchange($this->operator->getKey(), [
+            'idempotency_key'=>(string) Str::uuid(), 'id_venta_original'=>$sale['id_venta'],
+            'productos'=>[['id_detalle_venta'=>$line,'cantidad'=>1]], 'condicion'=>'defectuoso',
+            'destino'=>'cambio', 'reemplazo'=>$this->product, 'metodo_pago'=>'efectivo',
+        ]);
+        $this->assertDatabaseHas('ventas',['id_venta'=>$result['id_venta'],'id_cliente'=>null,'cobro_base'=>0]);
+        $this->assertDatabaseCount('saldos_clientes',0);
+    }
+
+    public function test_pos_distinguishes_debt_from_spendable_credit(): void
+    {
+        $admin = $this->userWithPermissions(['admin_gestionar_roles']);
+        foreach (['deuda'=>'30.00','favor'=>'10.00'] as $type=>$amount) {
+            $this->actingAs($admin)->post(route('clients.balance',$this->client),[
+                'idempotency_key'=>(string) Str::uuid(),'tipo'=>$type,'monto'=>$amount,'motivo'=>'Saldo inicial documentado',
+            ])->assertSessionHasNoErrors();
+        }
+        $summary = app(\App\Services\Queries\PosQuery::class)->client($this->client,$this->currency);
+        $this->assertSame('30.00',$summary['deuda_pendiente']);
+        $this->assertSame('10.00',$summary['saldo_disponible']);
+        $quote = app(SaleQuote::class)->quote($this->cart(['usar_saldo'=>true]));
+        $this->assertSame('40.00',$quote['por_cobrar']);
+    }
+
     public function test_quote_is_read_only_and_confirmed_total_is_rechecked(): void
     {
         DB::table('clientes')->where('id_cliente', $this->client)->update(['sellos' => 5]);

@@ -18,3 +18,13 @@ body.admin-app #content .ticket-paper :is(.ticket-meta,.ticket-method,.ticket-ho
     body.admin-app #content .ticket-paper table {display:table!important;min-width:0!important;width:100%;}
     body.admin-app #content .ticket-table td,body.admin-app #content .ticket-table th {padding:3px;font-size:10pt;}
 }
+
+.exchange-page { display:grid; gap:1rem; max-width:64rem; margin-inline:auto; min-width:0; }
+.exchange-page :is(.exchange-lookup,.exchange-line) { padding:clamp(1rem, 2vw, 1.5rem); }
+.exchange-lookup { display:flex; align-items:end; flex-wrap:wrap; gap:1rem; }
+.exchange-lookup label { flex:1 1 14rem; }
+.exchange-page label { display:grid; gap:.4rem; min-width:0; }
+.exchange-line summary { cursor:pointer; font-weight:600; overflow-wrap:anywhere; }
+.exchange-line .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin-top:1rem; align-items:end; }
+.exchange-page :is(input,select,textarea) { width:100%; max-width:100%; min-width:0; }
+@media(max-width:767px) { .exchange-line .form-grid { grid-template-columns:minmax(0,1fr); } }

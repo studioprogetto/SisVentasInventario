@@ -20,7 +20,9 @@
 @endforeach
 @if($requests instanceof \Illuminate\Pagination\LengthAwarePaginator){{ $requests->links('vendor.pagination.tailwind') }}@endif
 @forelse($items as $item)
-<article class="neo-card activity-card"><div><small>{{ $item->created_at }} · {{ $item->leido ? 'Leída' : 'Sin leer' }}</small><h2>{{ $item->titulo }}</h2><p>{{ $item->mensaje }}</p></div>
+<article class="neo-card activity-card"><div><small>{{ $item->created_at }} · {{ $item->leido ? 'Leída' : 'Sin leer' }}</small><h2>{{ $item->titulo }}</h2>@if($item->titulo === \App\Services\Notifications\IncidentCause::TITLE)
+<details class="incident-details"><summary>¿Por qué ocurrió este error?</summary><p>{{ $item->mensaje }}</p></details>
+@else<p>{{ $item->mensaje }}</p>@endif</div>
 <form method="POST" action="{{ route('notifications.update',$item->id) }}">@csrf @method('PATCH')
 @if($trash)<button class="btn btn-secondary" name="accion" value="restaurar">Restaurar</button>
 @else @if($item->url)<a class="btn btn-success" href="{{ $item->url }}">Ver detalle</a>@endif

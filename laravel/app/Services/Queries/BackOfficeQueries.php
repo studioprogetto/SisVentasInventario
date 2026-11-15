@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Queries;
 
+use App\Support\SearchTerms;
 use App\Models\Almacen;
 use App\Models\Categoria;
 use App\Models\Cliente;
@@ -39,7 +40,7 @@ final class BackOfficeQueries
         }
 
         return $products->where('activo', ($filters['estado'] ?? '') !== 'inactivos')
-            ->when($filters['q'] ?? '', fn ($query, $term) => $query->where(fn ($q) => $q->where('nombre', 'like', '%'.$term.'%')->orWhere('descripcion', 'like', '%'.$term.'%')->orWhere('codigo_barra', 'like', '%'.$term.'%')))
+            ->when($filters['q'] ?? '', fn ($query, $term) => $query->where(SearchTerms::matching($term, ['nombre','descripcion','codigo_barra'])))
             ->when($filters['id_categoria'] ?? null, fn ($query, $id) => $query->where('id_categoria', $id))
             ->when($filters['bajo'] ?? false, fn ($query) => $query->lowStock($warehouseId))
             ->orderBy($sortColumn, $direction)->paginate(config('business.pagination'))->withQueryString();
@@ -60,17 +61,17 @@ final class BackOfficeQueries
         if (mb_strlen($term) < 2) {
             return [];
         }
-        $products = DB::table('productos')->where('activo', 1)->where(fn ($q) => $q->where('nombre', 'like', '%'.$term.'%')->orWhere('codigo_barra', $term))
+        $products = DB::table('productos')->where('activo', 1)->where(SearchTerms::matching($term, ['nombre','codigo_barra']))
             ->when($category, fn ($query) => $query->where('id_categoria', $category))
             ->limit(20)->get(['id_producto as id', 'nombre', 'precio_venta', 'stock', 'id_almacen'])->map(fn ($row) => (array) $row + ['tipo' => 'producto'])->all();
-        $services = DB::table('servicios')->where('activo', 1)->where('nombre', 'like', '%'.$term.'%')->limit(10)->get(['id_servicio as id', 'nombre', 'precio_venta'])->map(fn ($row) => (array) $row + ['tipo' => 'servicio'])->all();
+        $services = DB::table('servicios')->where('activo', 1)->where(SearchTerms::matching($term, ['nombre']))->limit(10)->get(['id_servicio as id', 'nombre', 'precio_venta'])->map(fn ($row) => (array) $row + ['tipo' => 'servicio'])->all();
 
         return $category ? $products : array_merge($products, $services);
     }
 
     public function clients(string $term): mixed
     {
-        return Cliente::query()->where('activo', 1)->where(fn ($q) => $q->where('nombre_cliente', 'like', '%'.$term.'%')->orWhere('documento_identidad', 'like', $term.'%'))
+        return Cliente::query()->where('activo', 1)->where(SearchTerms::matching($term, ['nombre_cliente','documento_identidad']))
             ->orderBy('nombre_cliente')->limit(30)->get(['id_cliente', 'nombre_cliente', 'documento_identidad']);
     }
 
@@ -81,8 +82,8 @@ final class BackOfficeQueries
             ->when($filters['id'] ?? null, fn ($query, $id) => $query->where('id_venta', $id))
             ->when($filters['id_cliente'] ?? null, fn ($query, $id) => $query->where('id_cliente', $id))
             ->when($filters['id_usuario'] ?? null, fn ($query, $id) => $query->where('id_usuario', $id))
-            ->when($filters['cliente'] ?? null, fn ($query, $name) => $query->whereHas('cliente', fn ($q) => $q->where('nombre_cliente', 'like', '%'.$name.'%')))
-            ->when($filters['usuario'] ?? null, fn ($query, $name) => $query->whereHas('usuario', fn ($q) => $q->where('nombre_completo', 'like', '%'.$name.'%')))
+            ->when($filters['cliente'] ?? null, fn ($query, $name) => $query->whereHas('cliente', fn ($q) => $q->where(SearchTerms::matching($name, ['nombre_cliente']))))
+            ->when($filters['usuario'] ?? null, fn ($query, $name) => $query->whereHas('usuario', fn ($q) => $q->where(SearchTerms::matching($name, ['nombre_completo']))))
             ->when($filters['id_moneda'] ?? null, fn ($query, $id) => $query->where('id_moneda', $id))
             ->when($filters['metodo_pago'] ?? null, fn ($query, $method) => $query->where('metodo_pago', $method))
             ->when($filters['estado'] ?? null, fn ($query, $state) => $query->where('estado', $state))->orderByDesc('id_venta')->paginate(config('business.pagination'))->withQueryString();

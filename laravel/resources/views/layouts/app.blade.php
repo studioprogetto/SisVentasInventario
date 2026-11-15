@@ -9,16 +9,17 @@
     {{-- Aplica el tema guardado antes de pintar la página. --}}
     <script src="{{ asset('js/theme.js') }}?v=2"></script>
     <script defer src="{{ asset('js/vendor/vanilla-tilt.min.js') }}"></script>
-    <script defer src="{{ asset('js/workspace.js') }}"></script>
-    <script defer src="{{ asset('js/responsive.js') }}"></script>
+    <script defer src="{{ asset('js/search.js') }}"></script>
+    <script defer src="{{ asset('js/workspace.js') }}?v={{ filemtime(public_path('js/workspace.js')) }}"></script>
+    <script defer src="{{ asset('js/responsive.js') }}?v={{ filemtime(public_path('js/responsive.js')) }}"></script>
     <script defer src="{{ asset('js/vendor/alpine-csp.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/tailwind-utilities.css') }}">
-    <link rel="preconnect"  href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    
+    
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=9">
-    <link rel="stylesheet" href="{{ asset('css/scrollbars.css') }}?v=1">
-    <script src="{{ asset('js/app.js') }}?v=6" defer></script>
+    
+    <script src="{{ asset('js/app.js') }}?v={{ filemtime(public_path('js/app.js')) }}" defer></script>
     @stack('styles')
     <style>
         /* Tokens compartidos: las páginas heredan el tema del documento. */
@@ -158,8 +159,10 @@
 <link rel="stylesheet" href="{{ asset('css/responsive.css') }}?v={{ filemtime(public_path('css/responsive.css')) }}">
 
 <link rel="stylesheet" href="{{ asset('css/lectura.css') }}?v={{ filemtime(public_path('css/lectura.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/search.css') }}?v={{ filemtime(public_path('css/search.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/scrollbars.css') }}?v={{ filemtime(public_path('css/scrollbars.css')) }}">
 </head>
-<body class="admin-app">
+<body class="admin-app sidebar-collapsed">
 <a class="skip-link" href="#content">Saltar al contenido</a>
 {{-- Conserva los módulos, rutas y permisos de la aplicación. --}}
 @include('layouts.sidebar')
@@ -201,6 +204,7 @@
                 </div>
                 <div class="sale-toast__content"><strong>Ticket #{{ session('operation.id_venta') }}</strong><p>Total: {{ session('operation.total') }}</p></div>
                 <div class="sale-toast__actions">
+                    <a class="btn btn-secondary" href="{{ route('sales.history',['id'=>session('operation.id_venta')]) }}">Entregar desde historial</a>
                     <button type="button" data-open-ticket>Ver ticket</button>
                     <button type="button" class="button-secondary" data-close-sale-toast>Cerrar</button>
                 </div>

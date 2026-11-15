@@ -1,0 +1,27 @@
+.ticket-shell{display:flex;justify-content:center;padding:18px 0 32px}
+    .ticket-paper{width:min(100%, 440px);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 25px 60px rgba(17,24,39,.12);padding:18px 16px 12px}
+    .ticket-logo{display:flex;justify-content:center;margin:6px auto 12px;width:100%}
+    .ticket-logo-mark{width:64px;height:64px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:var(--raised);border:1px solid var(--line);box-shadow:0 12px 26px rgba(15,23,42,.08)}
+    .ticket-logo-mark img{display:block;width:100%;height:100%;object-fit:contain;padding:8px;background:#fff}
+    .ticket-brand{text-align:center;margin-bottom:10px;font-family:'Poppins','Segoe UI',sans-serif}
+    .ticket-brand h2{font-size:1.12rem;margin:0 0 4px;color:var(--text);letter-spacing:.02em}
+    .ticket-brand p{margin:2px 0;color:var(--muted);font-size:.72rem}
+    .ticket-divider{border-top:1px dashed #aab4bf;margin:10px 0 12px}
+    .ticket-meta{text-align:center;line-height:1.6;color:var(--text);font-size:.74rem}
+    .ticket-meta strong{font-size:.8rem}
+    .ticket-table{width:100%;border-collapse:collapse;margin-top:8px}
+    .ticket-table th,.ticket-table td{padding:4px 0;font-size:.72rem;vertical-align:top;color:var(--text)}
+    .ticket-table th{text-align:left;font-weight:700}
+    .ticket-table td:nth-child(2),.ticket-table td:nth-child(3),.ticket-table td:nth-child(4){text-align:right}
+    .ticket-totals{margin-top:12px;padding-top:8px;border-top:1px dashed #aab4bf}
+    .ticket-total-line{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--text);padding:2px 0}
+    .ticket-total-line strong{font-size:1.1rem;letter-spacing:-.02em}
+    .ticket-method{text-align:center;color:var(--muted);font-size:.72rem;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+    .ticket-hours{font-size:.7rem;color:var(--muted);text-align:center;line-height:1.6;margin-top:16px}
+    .ticket-footer{margin-top:14px;padding-top:10px;border-top:1px dashed #aab4bf;text-align:center}
+    .ticket-footer p{margin:0;color:var(--muted);font-size:.7rem;line-height:1.5}
+    .ticket-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
+    .ticket-actions button{min-height:42px;border-radius:10px;padding:0 10px;font-size:.72rem}
+    .ticket-actions .btn-primary{background:#1c7fdb}.ticket-actions .btn-success{background:#1c8c67}.ticket-actions .btn-warning{background:#d98a0e}.ticket-actions .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--line)}
+    @media (max-width: 560px){.ticket-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.ticket-paper{padding-left:12px;padding-right:12px}}
+    @media print{.ticket-paper{background:#fff;border-color:#d7dfe9;color:#1f2937}.ticket-brand h2,.ticket-meta,.ticket-table th,.ticket-table td,.ticket-total-line{color:#1f2937}.ticket-brand p,.ticket-method,.ticket-hours,.ticket-footer p{color:#4a5568}}

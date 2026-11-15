@@ -1,12 +1,17 @@
 (() => {
   'use strict';
 
+  const header = document.querySelector('.workspace > .topbar');
+  if (header) {
+    const measure = () => document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
+    measure();
+    new ResizeObserver(measure).observe(header);
+  }
   const toggle = document.getElementById('nav-toggle');
   const sidebar = document.getElementById('main-nav');
   const backdrop = document.querySelector('[data-close-nav]');
   const mobile = window.matchMedia('(max-width: 1023px)');
-  const desktop = window.matchMedia('(min-width: 1024px)');
-  const collapsedStorageKey = 'studio-sidebar-collapsed';
+
 
   const closeMobileNav = () => {
     sidebar?.classList.remove('is-open');
@@ -34,7 +39,7 @@
     document.body.classList.toggle('sidebar-collapsed', collapsed);
     toggle?.setAttribute('aria-expanded', String(!collapsed));
     toggle?.setAttribute('aria-label', collapsed ? 'Expandir menú' : 'Contraer menú');
-    try { localStorage.setItem(collapsedStorageKey, String(collapsed)); } catch (_) {}
+
   };
 
   const syncResponsiveLayout = () => {
@@ -45,13 +50,18 @@
       return;
     }
 
-    const savedState = localStorage.getItem(collapsedStorageKey) === 'true';
-    setDesktopCollapsed(savedState);
+    sidebar?.classList.remove('is-open');
+    document.body.classList.remove('nav-open');
+    if (sidebar) sidebar.inert = false;
+    setDesktopCollapsed(true);
     if (backdrop) backdrop.setAttribute('aria-hidden', 'true');
   };
 
   mobile.addEventListener('change', syncResponsiveLayout);
-  desktop.addEventListener('change', syncResponsiveLayout);
+  syncResponsiveLayout();
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) syncResponsiveLayout();
+  });
 
   toggle?.addEventListener('click', () => {
     if (mobile.matches) {
@@ -178,7 +188,7 @@
         }
         line.querySelector('[data-price]').textContent = select.options.length > 1 ? 'Selecciona el producto encontrado.' : 'No hay coincidencias.';
       } catch (error) { line.querySelector('[data-price]').textContent = error.message; }
-    }, 250));
+    }, 300));
   });
   document.querySelectorAll('[data-client-search]').forEach(input=>input.addEventListener('input',()=>{
     clearTimeout(timers.get(input));const term=input.value.trim();if(term.length<2)return;
@@ -187,7 +197,7 @@
       try{const response=await fetch(url,{headers:{Accept:'application/json'}});if(!response.ok)return;const rows=await response.json();if(input.value.trim()!==term)return;const select=input.form.querySelector('[name=id_cliente]');select.replaceChildren(new Option('Venta sin cliente',''));rows.forEach(row=>select.add(new Option(row.nombre_cliente,row.id_cliente)));}
       catch{input.setCustomValidity('No se pudo buscar el cliente. Intenta nuevamente.');return;}
       input.setCustomValidity('');
-    },250));
+    },300));
   }));
   document.addEventListener('change', event => {
     const select = event.target.closest('[data-item-result]');
@@ -219,6 +229,6 @@
     }
   });
   document.querySelectorAll('form').forEach(form => form.addEventListener('submit', () => {
-    if (form.checkValidity()) form.querySelectorAll('button[type=submit],button:not([type])').forEach(button => { button.disabled = true; });
+    if (form.checkValidity()) form.querySelectorAll('button[type=submit],button:not([type])').forEach(button => { if (!button.name) button.disabled = true; });
   }));
 })();

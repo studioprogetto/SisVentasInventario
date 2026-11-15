@@ -13,7 +13,7 @@
     const element = node('button', className, text); element.type = 'button';
     element.addEventListener('click', action); return element;
   };
-  let page = 1, lastPage = 1, warehouse = '', services = false;
+  let page = 1, lastPage = 1;
   let revision = 0, quoteTimer, searchTimer, clientTimer;
   let searchController, clientController, quoteController, clientRevision = 0;
   let currency = 'S/', selectedClient = null, cart = [];
@@ -147,8 +147,6 @@
     const url = new URL(form.dataset.itemsUrl);
     url.searchParams.set('term',$('[data-pos-search]').value.trim()); url.searchParams.set('page',page);
     url.searchParams.set('id_moneda',$('[name=id_moneda]').value);
-    if (warehouse) url.searchParams.set('almacen',warehouse);
-    if (services) url.searchParams.set('tipo','servicio');
     $('[data-pos-status]').textContent = 'Buscando productos…'; $('[data-pos-products]').setAttribute('aria-busy','true');
     form.querySelectorAll('.pos-add').forEach(button => { button.disabled = true; });
     try {
@@ -189,10 +187,6 @@
   $('[data-pos-search-now]').addEventListener('click',resetPage);
   $('[name=metodo_pago]')?.addEventListener('change', syncPaymentState);
   $('[name=monto_recibido]')?.addEventListener('input', syncPaymentState);
-  form.querySelectorAll('[data-pos-warehouse],[data-pos-services]').forEach(tab=>tab.addEventListener('click',()=>{
-    warehouse=tab.dataset.posWarehouse || ''; services=tab.hasAttribute('data-pos-services');
-    form.querySelectorAll('.warehouse-tab').forEach(button=>{const active=button===tab;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));}); resetPage();
-  }));
   $('[data-pos-prev]').addEventListener('click',()=>{if(page>1){page--;loadItems();}});
   $('[data-pos-next]').addEventListener('click',()=>{if(page<lastPage){page++;loadItems();}});
 
@@ -217,9 +211,12 @@
       $('[data-client-sales]').textContent=data.ventas_completadas;
       const toast = document.querySelector('[data-client-notice]');
       toast.textContent = data.nombre_cliente + ' · A favor: ' + data.moneda_codigo + ' ' + data.saldo_disponible + ' · Por pagar: ' + data.moneda_codigo + ' ' + data.deuda_pendiente;
+      const sheet = document.querySelector('.cart-sheet[open]');
+      (sheet || document.body).append(toast);
       toast.hidden = false;
       clearTimeout(toast.hideTimer); toast.hideTimer = setTimeout(() => toast.hidden = true, 7000);
       $('[name=usar_saldo]').checked = Number(data.saldo_disponible) > 0;
+      $('[data-client-debt]').textContent = data.moneda_codigo + ' ' + data.deuda_pendiente;
       $('[data-client-credit]').textContent=`${data.moneda_codigo} ${data.saldo_disponible}`;
       const stamps=Math.max(0,Math.min(11,Number(data.sellos)));
       $('[data-client-stamps]').textContent=`${stamps} / 12 sellos`;
@@ -249,7 +246,7 @@
     }catch(error){if(error.name!=='AbortError')$('[data-pos-client-status]').textContent=error.message;}
   }
   $('[data-pos-client-search]').addEventListener('input',()=>{
-    if(selectedClient || pendingClient){clientRevision++;pendingClient=false;selectedClient=null;$('[name=id_cliente]').value='';$('[data-pos-client-card]').hidden=true;invalidate();}
+    if(selectedClient || pendingClient){$('[name=usar_saldo]').checked=false;clientRevision++;pendingClient=false;selectedClient=null;$('[name=id_cliente]').value='';$('[data-pos-client-card]').hidden=true;invalidate();}
     clearTimeout(clientTimer);clientController?.abort();$('[data-pos-client-results]').replaceChildren();
     clientTimer=setTimeout(searchClients,300);
   });

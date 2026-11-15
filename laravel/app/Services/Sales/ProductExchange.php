@@ -17,11 +17,11 @@ final class ProductExchange
             if (isset($data['reemplazo'])) {
                 $data['carrito'] = [['id'=>(int)$data['reemplazo'],'tipo'=>'producto','cantidad'=>(int)$data['productos'][0]['cantidad']]];
             }
-            $credit = $this->returns->refund($user, array_replace($data, ['idempotency_key' => hash('sha256', $data['idempotency_key'].':return')]));
+            $credit = $this->returns->refund($user, array_replace($data, ['idempotency_key' => hash('sha256', $data['idempotency_key'].':return')]), true);
             $replacement = $this->sales->checkout($user, [
                 'idempotency_key' => hash('sha256', $data['idempotency_key'].':sale'), 'id_cliente' => $credit['id_cliente'], 'id_moneda' => $credit['id_moneda'],
-                'es_cambio' => true,
-                'carrito' => $data['carrito'], 'metodo_pago' => $data['metodo_pago'], 'usar_saldo' => true, 'observacion' => $data['observacion'] ?? '', 'descuento_manual' => '0',
+                'es_cambio' => true, 'abono_cambio_anonimo' => $credit['id_cliente'] ? null : $credit['saldo_generado'],
+                'carrito' => $data['carrito'], 'metodo_pago' => $data['metodo_pago'], 'usar_saldo' => (bool) $credit['id_cliente'], 'observacion' => $data['observacion'] ?? '', 'descuento_manual' => '0',
             ]);
             DB::table('cambios_ventas')->where('id_cambio', $credit['id_cambio'])->update(['tipo' => 'cambio', 'id_venta_nueva' => $replacement['id_venta']]);
             DB::table('auditoria_cambios')->where('id_cambio', $credit['id_cambio'])->update(['tipo_operacion' => 'cambio', 'id_venta_nueva' => $replacement['id_venta'], 'monto_nuevo' => $replacement['total']]);

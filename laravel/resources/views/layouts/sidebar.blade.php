@@ -5,6 +5,7 @@
         @can('dashboard_ver')<x-nav-link :href="route('home')" :active="request()->routeIs('home')">Dashboard</x-nav-link>@endcan
         @can('ventas_crear')<x-nav-link :href="route('sales.pos')" :active="request()->routeIs('sales.pos')" icon="cart">Punto de venta</x-nav-link>@endcan
         @can('ventas_ver_listado')<x-nav-link :href="route('sales.history')" :active="request()->routeIs('sales.history','sales.ticket')" icon="clock">Historial de ventas</x-nav-link>@endcan
+        @can('ventas_crear')<x-nav-link :href="route('tickets.center')" :active="request()->routeIs('tickets.*')" icon="box">Centro de tickets</x-nav-link>@endcan
         @can('productos_ver_lista')<x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')" icon="box">Inventario</x-nav-link>@endcan
         @can('viewAny', App\Models\Categoria::class)<x-nav-link :href="route('categorias.index')" :active="request()->routeIs('categorias.*')" icon="tag">Categorías</x-nav-link>@endcan
         <p class="nav-group">OPERACIONES Y RECURSOS</p>
@@ -20,6 +21,9 @@
         @can('usuarios_ver_lista')<x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" icon="users">Usuarios</x-nav-link>@endcan
         @can('backups_gestionar')<x-nav-link :href="route('backups.index')" :active="request()->routeIs('backups.*')" icon="shield">Copias de seguridad</x-nav-link>@endcan
         @can('admin_gestionar_roles')<x-nav-link :href="route('settings.business')" :active="request()->routeIs('settings.*')" icon="settings">Configuración</x-nav-link>@endcan
+        @canany(['ventas_devolver','solicitar_devolucion'])
+            <x-nav-link :href="route('sales.exchanges')" :active="request()->routeIs('sales.exchanges')" icon="swap">Cambio de producto</x-nav-link>
+        @endcanany
     </nav>
     <form method="POST" action="{{ route('logout') }}" class="sidebar-exit">@csrf<button type="submit" class="btn-secondary" aria-label="Salir"><x-icon name="logout"/><span class="nav-label">Salir</span></button></form>
 </aside>

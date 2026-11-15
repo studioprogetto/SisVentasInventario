@@ -27,11 +27,9 @@
             dialog.showModal();
             body.querySelector('input[name="nombre"]').focus();
         };
-        page.querySelectorAll('.cat-edit').forEach(details => {
-            details.querySelector('summary').addEventListener('click', event => {
-                event.preventDefault();
-                open(details);
-            });
+        page.addEventListener('click', event => {
+            const summary = event.target.closest('.cat-edit > summary');
+            if (summary) { event.preventDefault(); open(summary.parentElement); }
         });
         dialog.addEventListener('close', () => {
             if (source) source.append(body.firstElementChild);
@@ -42,10 +40,10 @@
         const invalidEdit = page.querySelector('.cat-edit[open]');
         if (invalidEdit) open(invalidEdit);
     }
-    page.querySelectorAll('.cat-state-form').forEach(form => {
-        form.addEventListener('submit', event => {
-            const action = form.querySelector('input[name="activo"]').value === '0' ? 'Desactivar' : 'Activar';
-            if (!window.confirm(action + ' categoría "' + form.dataset.categoryName + '"? La publicación no se modifica.')) event.preventDefault();
-        });
+    page.addEventListener('submit', event => {
+        const form = event.target;
+        if (!form.matches('.cat-state-form')) return;
+        const action = form.querySelector('[name="activo"]').value === '0' ? 'Desactivar' : 'Activar';
+        if (!window.confirm(action + ' categoría "' + form.dataset.categoryName + '"?')) event.preventDefault();
     });
 })();

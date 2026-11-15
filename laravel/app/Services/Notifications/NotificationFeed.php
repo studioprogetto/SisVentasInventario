@@ -43,8 +43,8 @@ class NotificationFeed
         if ($user->can('backups_gestionar') && DB::table('auditoria_operaciones')->whereIn('accion',['backup_fallido','backup_cierre','crear_backup'])->orderByDesc('id')->value('accion') === 'backup_fallido') {
             $add('Falló la copia de seguridad', 'Verifica las copias recientes.', route('backups.index'));
         }
-        if ($user->can('admin_gestionar_roles') && ($time = Cache::store('file')->get('server-incident'))) {
-            $add('Error reciente del servidor', 'Último incidente registrado el '.$time.'. Revisa el registro de Laravel.');
+        if ($user->isAdministrator() && is_array($notice = Cache::store('file')->get('server-incident'))) {
+            $items[] = ['key'=>$notice['key'], 'title'=>IncidentCause::TITLE, 'message'=>$notice['message'], 'url'=>null];
         }
         return $items;
     }

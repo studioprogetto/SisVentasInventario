@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!event.target.matches('#inventory-search')) return;
         pending?.abort();
         clearTimeout(timer);
-        timer = setTimeout(() => load(formUrl(event.target.form)), 350);
+        timer = setTimeout(() => load(formUrl(event.target.form)), 300);
     });
     document.addEventListener('change', event => {
         if (event.target.matches('.inventory-filter-form select, .inventory-filter-form input[type=checkbox]')) load(formUrl(event.target.form));

@@ -27,6 +27,7 @@
         @endcan
     @endforeach
     </div><p id="report-empty" hidden>No hay reportes que coincidan con la búsqueda.</p>
+    @include('reports.operations')
 </section>
 @can('caja_gestionar')<a class="btn btn-success" href="{{ route('reports.my-cash') }}">Reporte de caja · Mis turnos y movimientos</a>@endcan
 @endsection
@@ -36,21 +37,5 @@
 </style>
 @endpush
 @push('scripts')
-<script>
-(() => {
-    const root = document.querySelector('.report-center');
-    const search = root.querySelector('#report-search');
-    const area = root.querySelector('#report-area');
-    const filter = () => {
-        let visible = 0;
-        root.querySelectorAll('.rc-card').forEach(card => {
-            card.hidden = !(area.value === 'all' || card.dataset.area === area.value) || !card.dataset.name.toLocaleLowerCase('es').includes(search.value.toLocaleLowerCase('es'));
-            if (!card.hidden) visible++;
-        });
-        root.querySelector('#report-empty').hidden = visible > 0;
-    };
-    search.addEventListener('input', filter);
-    area.addEventListener('change', filter);
-})();
-</script>
+<script defer src="{{ asset('js/report-search.js') }}"></script>
 @endpush

@@ -32,8 +32,33 @@ final class PageController extends Controller
         $sale = $queries->sale($id);
         abort_unless($request->user()->can('ventas_ver_listado') || ($request->user()->can('ventas_crear') && (int) $sale->id_usuario === (int) $request->user()->getKey()), 403);
 
-        return $request->expectsJson() ? response()->json($sale) : view('sales.ticket', ['sale' => $sale, 'replacementProducts' => \App\Models\Producto::where('activo',true)->orderBy('nombre')->get(['id_producto','nombre']),
-            'holders' => $sale->id_cliente ? [] : \App\Models\Cliente::where('activo',true)->orderBy('nombre_cliente')->get(['id_cliente','nombre_cliente'])] + $queries->lookups());
+        return $request->expectsJson() ? response()->json($sale) : view('sales.ticket', compact('sale'));
+    }
+
+    public function exchanges(Request $request, BackOfficeQueries $queries): mixed
+    {
+        abort_unless(Gate::any(['ventas_devolver', 'solicitar_devolucion']), 403);
+        $ticket = $request->validate(['ticket' => ['nullable', 'integer', 'min:1']])['ticket'] ?? null;
+        $sale = null;
+        $lines = collect();
+        if ($ticket && \App\Models\Venta::whereKey($ticket)->exists()) {
+            $sale = $queries->sale((int) $ticket);
+            abort_unless($request->user()->can('ventas_ver_listado') || (int) $sale->id_usuario === (int) $request->user()->getKey(), 403);
+            if (in_array($sale->estado, ['completada','parcialmente_devuelta'], true)
+                && now()->lte(\Illuminate\Support\Carbon::parse($sale->fecha_venta)->addDays(2))) {
+                $returned = $sale->cambios->where('estado', 'completado')->flatMap->detalles
+                    ->where('tipo', 'devolucion')->groupBy('id_detalle_venta');
+                $lines = $sale->detalles->filter(function ($line) use ($returned) {
+                    $line->disponibles = $line->cantidad - ($returned->get($line->id_detalle_venta)?->sum('cantidad') ?? 0);
+                    return $line->id_producto && $line->id_almacen && $line->importe_neto !== null && $line->disponibles > 0;
+                });
+            }
+        }
+
+        return view('sales.exchanges', compact('sale', 'lines') + [
+            'replacementProducts' => $lines->isEmpty() ? [] : \App\Models\Producto::where('activo', true)->orderBy('nombre')->get(['id_producto','nombre']),
+            'holders' => $lines->isEmpty() || $sale->id_cliente ? [] : \App\Models\Cliente::where('activo', true)->orderBy('nombre_cliente')->get(['id_cliente','nombre_cliente']),
+        ]);
     }
 
     public function search(Request $request, BackOfficeQueries $queries): mixed

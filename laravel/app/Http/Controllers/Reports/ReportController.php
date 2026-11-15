@@ -14,10 +14,13 @@ use Illuminate\Support\Facades\Gate;
 
 final class ReportController extends Controller
 {
-    public function index(): mixed
+    public function index(Request $request, ReportQuery $reports): mixed
     {
         abort_if(auth()->user()->isMultifunctional(), 403);
-        return view('reports.index', ['types' => ReportQuery::TYPES]);
+        $filters = $request->validate(['desde'=>'nullable|date_format:Y-m-d','hasta'=>'nullable|date_format:Y-m-d|after_or_equal:desde']);
+        $dates = ['desde'=>$filters['desde'] ?? today()->startOfMonth()->toDateString(),'hasta'=>$filters['hasta'] ?? today()->toDateString()];
+        return view('reports.index', ['types'=>ReportQuery::TYPES, 'reportDates'=>$dates,
+            'summary'=>$reports->operationalSummary($dates['desde'],$dates['hasta'])]);
     }
 
     public function show(Request $request, ReportQuery $reports, TabularExport $excel, PdfReport $pdf, string $type): mixed

@@ -9,6 +9,7 @@
     <label>Orden<select name="orden"><option value="nombre">Nombre</option><option value="precio_asc" @selected(request('orden') === 'precio_asc')>Menor precio</option><option value="precio_desc" @selected(request('orden') === 'precio_desc')>Mayor precio</option></select></label>
     <button>Buscar</button>
 </form>
+<div data-search-results>
 <p>{{ $products->total() }} productos encontrados.</p>
 <div class="cards">
     @forelse($products as $product)
@@ -24,4 +25,5 @@
     @endforelse
 </div>
 {{ $products->links('vendor.pagination.tailwind') }}
+</div>
 @endsection

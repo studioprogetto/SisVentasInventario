@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
     <script src="{{ asset('js/login-scene.js') }}?v=2" defer></script>
     <script src="{{ asset('js/login.js') }}?v=1" defer></script>
+<link rel="stylesheet" href="{{ asset('css/scrollbars.css') }}?v={{ filemtime(public_path('css/scrollbars.css')) }}">
 </head>
 <body class="login-page">
 <div class="login-layout">

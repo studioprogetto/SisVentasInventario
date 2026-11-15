@@ -37,7 +37,7 @@ final class UpgradeExistingSchema extends Command
         $this->info('Consistent private backup created and hashed: '.$backup);
         $this->laravel->instance(SchemaUpgradePermit::class, new SchemaUpgradePermit($connection->getName(), $name));
         try {
-            return $this->call('migrate', ['--force' => true, '--path' => ['database/migrations/2026_11_13_100000_operational_foundation.php', 'database/migrations/2026_11_13_110000_public_catalog_views.php', 'database/migrations/2026_11_13_120000_documented_cash_returns.php', 'database/migrations/2026_11_14_230000_add_profile_to_usuarios.php', 'database/migrations/2026_11_14_235000_inbox_and_currency.php']]);
+            return $this->call('migrate', ['--force' => true, '--path' => ['database/migrations/2026_11_13_100000_operational_foundation.php', 'database/migrations/2026_11_13_110000_public_catalog_views.php', 'database/migrations/2026_11_13_120000_documented_cash_returns.php', 'database/migrations/2026_11_14_230000_add_profile_to_usuarios.php', 'database/migrations/2026_11_14_235000_inbox_and_currency.php', 'database/migrations/2026_11_15_000000_ticket_delivery.php', 'database/migrations/2026_11_15_000100_ticket_documents.php']]);
         } finally {
             $this->laravel->forgetInstance(SchemaUpgradePermit::class);
         }

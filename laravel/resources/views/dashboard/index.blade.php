@@ -5,7 +5,7 @@
     $reportDates = ['desde' => $summary['since'], 'hasta' => $summary['until']];
     $topMax = max(1, $summary['top_products']->max('unidades') ?? 0);
 @endphp
-<div class="studio-dashboard" data-legacy="{{ json_encode($summary['legacy_series']) }}" data-sales_series="{{ json_encode($summary['sales_series']) }}" data-spark_series="{{ json_encode($summary['spark_series']) }}" data-payments="{{ json_encode($summary['payments']) }}" data-inventory_health="{{ json_encode($summary['inventory_health']) }}">
+<div class="studio-dashboard" data-legacy="{{ json_encode($summary['legacy_series']) }}" data-sales_series="{{ json_encode($summary['sales_series']) }}" data-spark_series="{{ json_encode($summary['spark_series']) }}" data-payments="{{ json_encode($summary['payments']) }}">
     <div class="executive-command">
         <div><h1>¡Hola, {{ explode(' ', auth()->user()->nombre_completo)[0] }}!</h1><p>Resumen ejecutivo · {{ $summary['period_label'] }}</p></div>
         <form method="GET" action="{{ route('home') }}" class="executive-filter">
@@ -59,26 +59,7 @@
                 @forelse($summary['payments'] as $payment)<tr><td>{{ $payment->metodo_pago }} / {{ $payment->moneda_codigo ?: 'Sin documentar' }}</td><td>{{ $payment->operaciones }}</td><td>{{ $payment->cobro_base === null ? 'Sin base' : 'S/ '.number_format((float) $payment->cobro_base, 2, ',', '.') }}</td></tr>@empty<tr><td colspan="3">Sin operaciones completadas.</td></tr>@endforelse
             </tbody></table></div>
         </section>
-        <section class="executive-card health-panel">
-            <div class="executive-heading"><h2><x-icon name="shield" /> Salud de inventario</h2><span>{{ $summary['inventory_health']->total ?? 0 }} ítems</span></div>
-            <p class="data-note">Existencias actuales de productos activos, no snapshot del periodo.</p>
-            <div class="health-chart"><canvas id="executive-health" role="img" aria-label="Estado actual del inventario"></canvas></div>
-            <dl class="health-values"><dt>Sobre mínimo</dt><dd>{{ $summary['inventory_health']->suficiente ?? 0 }}</dd><dt>Positivo por reponer</dt><dd>{{ $summary['inventory_health']->reposicion ?? 0 }}</dd><dt>Cero o negativo</dt><dd>{{ $summary['inventory_health']->agotados ?? 0 }}</dd></dl>
-            <div class="executive-flow">@can('compras_ver_lista')<a href="{{ route('purchases.index') }}">Compras</a>@endcan @can('transferencias_crear')<a href="{{ route('transfers.index') }}">{{ $summary['operations']['transferencias'] }} movimientos de transferencia</a>@endcan @can('reportes_ver_caja')<a href="{{ route('reports.show', ['type' => 'movimientos-caja'] + $reportDates) }}">Flujo de caja ↗</a>@endcan</div>
-        </section>
-        <section class="executive-card alerts-panel">
-            <div class="executive-heading"><h2><x-icon name="alert" /> Alertas de inventario <span class="alert-count">{{ $summary['low_stock'] }}</span></h2>@can('reportes_ver_stock_bajo')<a href="{{ route('reports.show', ['type' => 'stock-bajo']) }}">Ver todas</a>@endcan</div>
-            <ul class="executive-alerts">
-                @forelse($summary['inventory_alerts'] as $alert)<li><div><strong>{{ $alert->nombre }}</strong><small>Stock actual: {{ $alert->stock }} · Mínimo: {{ $alert->stock_minimo }}</small></div>@can('productos_ver_detalle')<a href="{{ route('products.ledger', $alert->id_producto) }}">Ver</a>@endcan</li>@empty<li>No hay productos con stock igual o inferior al mínimo.</li>@endforelse
-            </ul>
-        </section>
-        <section class="executive-card recent-panel">
-            <div class="executive-heading"><h2><x-icon name="file" /> Últimas ventas</h2>@can('ventas_ver_listado')<a href="{{ route('sales.history', $reportDates) }}">Historial</a>@endcan</div>
-            <div class="executive-scroll"><table><thead><tr><th># / Fecha</th><th>Total original</th><th>Estado</th><th>Doc.</th></tr></thead><tbody>
-                @forelse($summary['latest_sales'] as $sale)<tr><td><strong>{{ $sale->id_venta }}</strong><small>{{ \Carbon\Carbon::parse($sale->fecha_venta)->format('d/m H:i') }}</small></td><td>{{ $sale->moneda_codigo ?: 'Moneda no documentada' }} {{ number_format((float) $sale->total_venta, 2, ',', '.') }}</td><td><span class="sale-state {{ $sale->estado === 'completada' ? 'positive' : 'negative' }}">{{ ucfirst($sale->estado) }}</span></td><td>@if(auth()->user()->can('ventas_ver_listado') || (auth()->user()->can('ventas_crear') && (int) $sale->id_usuario === (int) auth()->id()))<a href="{{ route('sales.ticket', $sale->id_venta) }}">Ticket</a>@endif</td></tr>@empty<tr><td colspan="4">Sin ventas en el periodo.</td></tr>@endforelse
-            </tbody></table></div>
-            {{ $summary['latest_sales']->links('vendor.pagination.tailwind') }}
-        </section>
+
     </div>
 </div>
 @endsection

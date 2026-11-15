@@ -10,7 +10,14 @@
     @if($canEdit)<button type="button" class="btn btn-success" data-open-create="nuevo-registro">Nuevo registro</button><x-create-dialog id="nuevo-registro" title="Nuevo registro">
 <form method="POST" action="{{ route('masters.store', $module) }}" class="form-grid">@csrf @foreach($definition['fields'] as $name => $field)<label>{{ $field['label'] }}<input name="{{ $name }}" value="{{ old($name) }}" @required(str_contains($field['rules'], 'required'))></label>@endforeach<button class="btn btn-success" type="submit">Guardar registro</button></form>
 </x-create-dialog>@endif
-    <div class="cat-surface panel"><div class="panel-header"><div><h2>{{ $definition['title'] }} registrados</h2><p class="muted">Listado paginado con acciones y estado actual.</p></div></div><div class="cat-surface table-wrap"><table class="cat-table"><thead><tr>@foreach($definition['fields'] as $field)<th>{{ $field['label'] }}</th>@endforeach<th>Acciones</th></tr></thead><tbody>@forelse($rows as $row)<tr>@foreach($definition['fields'] as $name => $field)<td>{{ $row->getAttribute($name) }}</td>@endforeach<td class="table-actions">@if($module === 'cliente' && $row->activo)
+    <div data-search-results>
+<div class="cat-surface panel"><div class="panel-header"><div><h2>{{ $definition['title'] }} registrados</h2><p class="muted">Listado paginado con acciones y estado actual.</p></div></div><div class="cat-surface table-wrap"><table class="cat-table"><thead><tr>@foreach($definition['fields'] as $field)<th>{{ $field['label'] }}</th>@endforeach @if($module === 'cliente')<th>Saldo a favor</th><th>Deuda pendiente</th>@endif<th>Acciones</th></tr></thead><tbody>@forelse($rows as $row)<tr>@foreach($definition['fields'] as $name => $field)<td>{{ $row->getAttribute($name) }}</td>@endforeach
+@if($module === 'cliente')
+    @foreach(['favor','deuda'] as $balanceType)
+        <td>@forelse($row->balances as $balance)<div>{{ $balance->codigo }} {{ number_format($balance->$balanceType, 2) }}</div>@empty 0.00 @endforelse</td>
+    @endforeach
+@endif
+<td class="table-actions">@if($module === 'cliente' && $row->activo)
 @can('admin_gestionar_roles')
 <button type="button" class="btn btn-secondary" data-open-create="saldo-{{ $row->getKey() }}">Registrar saldo</button>
 <x-create-dialog id="saldo-{{ $row->getKey() }}" title="Registrar saldo">
@@ -20,7 +27,8 @@
 <label>Monto en soles<input name="monto" type="number" min=".01" step=".01" required></label>
 <label>Motivo<input name="motivo" maxlength="255" required></label><button class="btn btn-success">Guardar saldo</button></form></x-create-dialog>
 @endcan @endif
-@if($canEdit)<details><summary class="btn btn-success">Editar</summary><form method="POST" action="{{ route('masters.update', [$module, $row->getKey()]) }}" class="form-grid inline-detail">@csrf @method('PUT') @foreach($definition['fields'] as $name => $field)<label>{{ $field['label'] }}<input name="{{ $name }}" value="{{ $row->getAttribute($name) }}" @required(str_contains($field['rules'], 'required'))></label>@endforeach<button class="btn btn-success" type="submit">Guardar cambios</button></form></details>@endif @if($canState)<form method="POST" action="{{ route('masters.state', [$module, $row->getKey()]) }}" data-confirm="¿Cambiar el estado de este registro?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $row->activo ? 0 : 1 }}"><button class="btn {{ $row->activo ? 'btn-danger' : 'btn-success' }}" type="submit">{{ $row->activo ? 'Desactivar' : 'Activar' }}</button></form>@endif</td></tr>@empty<tr><td colspan="{{ count($definition['fields']) + 1 }}">No hay registros con estos filtros.</td></tr>@endforelse</tbody></table></div></div>
+@if($canEdit)<details><summary class="btn btn-success">Editar</summary><form method="POST" action="{{ route('masters.update', [$module, $row->getKey()]) }}" class="form-grid inline-detail">@csrf @method('PUT') @foreach($definition['fields'] as $name => $field)<label>{{ $field['label'] }}<input name="{{ $name }}" value="{{ $row->getAttribute($name) }}" @required(str_contains($field['rules'], 'required'))></label>@endforeach<button class="btn btn-success" type="submit">Guardar cambios</button></form></details>@endif @if($canState)<form method="POST" action="{{ route('masters.state', [$module, $row->getKey()]) }}" data-confirm="¿Cambiar el estado de este registro?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $row->activo ? 0 : 1 }}"><button class="btn {{ $row->activo ? 'btn-danger' : 'btn-success' }}" type="submit">{{ $row->activo ? 'Desactivar' : 'Activar' }}</button></form>@endif</td></tr>@empty<tr><td colspan="{{ count($definition['fields']) + ($module === 'cliente' ? 3 : 1) }}">No hay registros con estos filtros.</td></tr>@endforelse</tbody></table></div></div>
     {{ $rows->links('vendor.pagination.tailwind') }}
+</div>
 </section>
 @endsection
